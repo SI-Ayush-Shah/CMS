@@ -1,0 +1,12 @@
+---
+globs: /apps/showcase
+alwaysApply: false
+---
+
+- **Framework**: Use Next.js with the App Router. Prioritize React Server Components for fetching data and rendering static content. Use Client Components (`"use client"`) only when interactivity is required.
+- **Styling**: All styling must be done with Tailwind 4 utility classes. Define the design system tokens in `apps/showcase/app/theme.css` using the `@theme` directive, and import this file into the root layout (`apps/showcase/app/layout.js`).
+- **Routing**: Use the file-based routing system of the App Router. Create new pages by adding folders and `page.js` files within the `apps/showcase/app` directory.
+- **Data Fetching**: Prefer server-side data fetching within Server Components using `fetch`.
+- **Component Imports**: Import shared UI components from the `@repo/ui` package if it's set up, otherwise use local components.
+- **Dependencies**: Manage all packages using `pnpm` from the `apps/showcase` directory.
+- **Deployment**: The application is optimized for deployment on Vercel.
