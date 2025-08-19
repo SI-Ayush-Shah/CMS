@@ -8,6 +8,54 @@ import { env } from "../config/env";
 import { GeneratedContentRepository } from "../repositories/GeneratedContentRepository";
 import { type NewGeneratedContent } from "../db/schema";
 
+// Normalize Editor.js body data to ensure tables are single blocks with 2D content
+function normalizeEditorJsBody(body: any) {
+  if (!body || !Array.isArray(body.blocks)) return body;
+
+  const to2D = (content: any): any[] => {
+    if (!Array.isArray(content)) return [];
+    if (Array.isArray(content[0])) return content; // already 2D
+    return [content]; // wrap single row
+  };
+
+  const mergedBlocks: any[] = [];
+  let pendingTable: any | null = null;
+
+  for (const block of body.blocks) {
+    if (block?.type === "table") {
+      const content2D = to2D(block?.data?.content);
+      const withHeadings = !!block?.data?.withHeadings;
+
+      if (pendingTable) {
+        pendingTable.data = pendingTable.data || {};
+        const existing = to2D(pendingTable.data.content);
+        pendingTable.data.content = [...existing, ...content2D];
+        if (withHeadings) pendingTable.data.withHeadings = true;
+      } else {
+        pendingTable = {
+          ...block,
+          data: {
+            ...(block.data || {}),
+            content: content2D,
+          },
+        };
+        if (withHeadings) pendingTable.data.withHeadings = true;
+      }
+      continue;
+    }
+
+    if (pendingTable) {
+      mergedBlocks.push(pendingTable);
+      pendingTable = null;
+    }
+    mergedBlocks.push(block);
+  }
+
+  if (pendingTable) mergedBlocks.push(pendingTable);
+
+  return { ...body, blocks: mergedBlocks };
+}
+
 // Service interface using DTOs
 export interface GenerateContentService {
   generateContent(
@@ -106,6 +154,7 @@ export function createGenerateContentService({
        ["Header1", "Header2"],  
        ["Row1Col1", "Row1Col2"]  
      ]  
+   - Keep the entire comparison in a SINGLE "table" block. Do NOT split header and rows across multiple table blocks; put the header as the first row and set "withHeadings": true.  
    - End with a clear **Conclusion** section.  
 
 4. **Content Instructions:**  
@@ -195,19 +244,23 @@ export function createGenerateContentService({
         },
       ]);
 
+      // normalize body (merge any consecutive table blocks and enforce 2D arrays)
+      const normalizedBody = normalizeEditorJsBody(result.body);
+      const normalizedResult = { ...result, body: normalizedBody };
+
       // persist
       const toInsert: NewGeneratedContent = {
-        title: result.title,
-        summary: result.summary,
-        category: result.category,
-        tags: result.tags,
-        body: result.body as unknown as Record<string, unknown>,
+        title: normalizedResult.title,
+        summary: normalizedResult.summary,
+        category: normalizedResult.category,
+        tags: normalizedResult.tags,
+        body: normalizedResult.body as unknown as Record<string, unknown>,
       };
       const saved = await generatedContentRepository.create(toInsert);
 
       return {
         generatedContent: {
-          ...result,
+          ...normalizedResult,
           bannerUrl,
           images: imagesList,
         },
