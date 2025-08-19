@@ -48,9 +48,9 @@ export function Leftpanel() {
   };
 
   return (
-    <div className={`text-invert-high h-screen sticky top-0 flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
+    <div className={`text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out border border-core-prim-500  ${
       isExpanded ? 'w-56' : 'w-16'
-    }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.05) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
+    }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.4) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
       {/* Header Section */}
       <div className="flex items-center justify-between p-3 ">
         {/* Logo - Clickable to open panel */}
