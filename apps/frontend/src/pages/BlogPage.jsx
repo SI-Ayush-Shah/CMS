@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { contentApi } from "../services/contentApi";
+import Loader from "../components/Loader";
 
 // Using MagicBento for cards
 
@@ -67,7 +68,9 @@ const BlogPage = () => {
             >
               <div className="card-responsive grid gap-6">
                 {(isLoading || isFetching) && blogPosts.length === 0 && (
-                  <div className="text-invert-low">Loading posts...</div>
+                  <div className="w-full h-[40vh]">
+                    <Loader text="Loading posts..." />
+                  </div>
                 )}
                 {isError && (
                   <div className="text-error-400">Failed to load posts. Please try again.</div>
