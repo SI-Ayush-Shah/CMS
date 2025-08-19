@@ -1,6 +1,6 @@
 import { db } from '../db'
 import { rssFeedItems, type RssFeedItem, type NewRssFeedItem } from '../db/schema'
-import { count, eq, and, desc, asc } from 'drizzle-orm'
+import { count, eq, and, desc, asc, ilike, or, sql } from 'drizzle-orm'
 
 export interface RssFeedItemRepository {
   create(data: NewRssFeedItem): Promise<RssFeedItem>
@@ -8,6 +8,7 @@ export interface RssFeedItemRepository {
   getByGuid(feedId: string, guid: string): Promise<RssFeedItem | null>
   getByTitle(feedId: string, title: string): Promise<RssFeedItem | null>
   list(params: ListParams): Promise<ListResult>
+  listAll(params: ListAllParams): Promise<ListResult>
 }
 
 export interface ListParams {
@@ -15,6 +16,13 @@ export interface ListParams {
   page: number
   pageSize: number
   sort?: 'asc' | 'desc'
+}
+
+export interface ListAllParams {
+  page: number
+  pageSize: number
+  sort?: 'asc' | 'desc'
+  search?: string
 }
 
 export interface ListResult {
@@ -82,6 +90,37 @@ export function createRssFeedItemRepository({ db }: Dependencies): RssFeedItemRe
         .select()
         .from(rssFeedItems)
         .where(eq(rssFeedItems.feedId, feedId))
+        .orderBy(sort === 'asc' ? asc(rssFeedItems.publishedAt) : desc(rssFeedItems.publishedAt))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize)
+      
+      return { items, total: Number(total), page, pageSize }
+    },
+    
+    async listAll(params: ListAllParams): Promise<ListResult> {
+      const { page, pageSize, sort = 'desc', search } = params
+      
+      // Prepare search condition if search parameter is provided
+      let searchCondition = undefined
+      if (search) {
+        searchCondition = or(
+          ilike(rssFeedItems.title, `%${search}%`),
+          ilike(rssFeedItems.summary || '', `%${search}%`),
+          ilike(rssFeedItems.author || '', `%${search}%`)
+        )
+      }
+      
+      // Count total items
+      const [{ total }] = await db
+        .select({ total: count() })
+        .from(rssFeedItems)
+        .where(searchCondition ? searchCondition : sql`1=1`)
+      
+      // Fetch paginated items
+      const items = await db
+        .select()
+        .from(rssFeedItems)
+        .where(searchCondition ? searchCondition : sql`1=1`)
         .orderBy(sort === 'asc' ? asc(rssFeedItems.publishedAt) : desc(rssFeedItems.publishedAt))
         .limit(pageSize)
         .offset((page - 1) * pageSize)

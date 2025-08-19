@@ -9,8 +9,6 @@ import { env } from '../config/env'
 import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { type NewGeneratedContent } from '../db/schema'
 
-
-
 // Service interface using DTOs
 export interface GenerateContentService {
   generateContent(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto>
