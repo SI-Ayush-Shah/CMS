@@ -17,18 +17,43 @@ import { useErrorHandler } from '../components/ErrorBoundary'
  * Enhanced Content Wizard Page Component
  */
 export default function EnhancedContentWizardPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastSubmission, setLastSubmission] = useState(null)
+  const [submissionPhase, setSubmissionPhase] = useState('idle')
+  
+  // Enhanced error handling
+  const { error: pageError, handleError: handlePageError, clearError } = useErrorHandler()
+
+  // Set up global error handling
+  useEffect(() => {
+    const cleanup = setupGlobalErrorHandling((error) => {
+      handlePageError(error, { context: 'global', page: 'EnhancedContentWizardPage' })
+    })
+
+    return cleanup
+  }, [handlePageError])
 
   /**
-   * Handles form submission from the enhanced input
+   * Handles form submission from the enhanced input with comprehensive error handling
    */
   const handleSubmit = useCallback(async (formData) => {
-    setIsSubmitting(true)
+    clearError()
+    setSubmissionPhase('submitting')
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Simulate different phases of submission
+      setSubmissionPhase('uploading')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setSubmissionPhase('generating')
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      setSubmissionPhase('saving')
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // Simulate occasional failures for testing
+      if (Math.random() < 0.2) { // 20% chance of failure
+        throw new Error('Mock API failure for testing error handling')
+      }
       
       // Mock API response
       const mockResponse = {
@@ -44,21 +69,38 @@ export default function EnhancedContentWizardPage() {
         timestamp: new Date().toISOString()
       })
       
+      setSubmissionPhase('idle')
       console.log('Content generated successfully:', mockResponse)
       
     } catch (error) {
+      const enhancedError = enhanceError(error, {
+        type: 'submission',
+        context: 'content_wizard_submission',
+        formData: {
+          textLength: formData.text?.length || 0,
+          imageCount: formData.images?.length || 0
+        }
+      })
+      
       setLastSubmission({
         success: false,
-        error: error.message,
+        error: enhancedError,
         timestamp: new Date().toISOString()
       })
       
-      // Re-throw to let the component handle it
-      throw error
-    } finally {
-      setIsSubmitting(false)
+      setSubmissionPhase('idle')
+      handlePageError(enhancedError)
+      
+      // Log the error for debugging
+      logError(enhancedError, {
+        context: 'content_wizard_submission',
+        userAction: 'form_submit'
+      })
+      
+      // Re-throw to let the input component handle it
+      throw enhancedError
     }
-  }, [])
+  }, [clearError, handlePageError])
 
   /**
    * Handles validation error boundary errors
