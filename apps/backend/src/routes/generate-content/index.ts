@@ -96,6 +96,26 @@ const generateContentRoutes: FastifyPluginAsync = async (fastify) => {
     }
   })
 
+  // GET /generate-content/:id - Single article
+  server.route({
+    method: 'GET',
+    url: '/:id',
+    schema: {
+      params: Type.Object({ id: Type.String({ format: 'uuid' }) }),
+      response: {
+        200: Type.Object({ success: Type.Boolean(), data: Type.Any() }),
+        404: ErrorResponseSchema
+      }
+    },
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const { generatedContentRepository } = fastify.diContainer.cradle
+      const row = await generatedContentRepository.findById(id)
+      if (!row) return reply.code(404).send({ success: false, error: 'Not found' })
+      return reply.code(200).send({ success: true, data: row })
+    }
+  })
+
   // PATCH /generate-content/:id - Update selected fields
   server.route({
     method: 'PATCH',

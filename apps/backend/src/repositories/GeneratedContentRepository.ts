@@ -6,6 +6,7 @@ export interface GeneratedContentRepository {
   create(data: NewGeneratedContent): Promise<GeneratedContent>
   update(id: string, data: Partial<NewGeneratedContent>): Promise<GeneratedContent | null>
   list(params: ListParams): Promise<ListResult>
+  findById(id: string): Promise<GeneratedContent | null>
 }
 
 export interface ListParams {
@@ -73,6 +74,11 @@ export function createGeneratedContentRepository({ db }: Dependencies): Generate
         .offset((page - 1) * pageSize)
 
       return { items, total: Number(total), page, pageSize }
+    },
+    async findById(id: string): Promise<GeneratedContent | null> {
+      if (!id) return null
+      const rows = await db.select().from(generatedContents).where(eq(generatedContents.id, id)).limit(1)
+      return rows[0] ?? null
     }
   }
 }
