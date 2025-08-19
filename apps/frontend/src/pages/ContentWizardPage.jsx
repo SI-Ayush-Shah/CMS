@@ -1,76 +1,88 @@
 import { useState } from "react";
+import StarBorder from "../components/StarBorder";
 
-// Placeholder component for Navbar
+// Navbar component - pixel perfect from Figma
 const Navbar = ({ state = "Default" }) => {
   if (state === "Collapsed") {
     return (
-      <div className="bg-gradient-to-r from-[#4a31660d] to-[#7e4cab0d] border border-[rgba(97,63,130,0.25)] box-border content-stretch flex flex-col items-start justify-between px-3 py-4 relative rounded-xl size-full">
-        {/* Header with logo */}
-        <div className="box-border content-stretch flex flex-col gap-12 items-start justify-start p-0 relative shrink-0 w-full">
-          <div className="box-border content-stretch flex items-center justify-between p-0 relative shrink-0 size-10">
-            <div className="box-border content-stretch flex gap-2.5 items-center justify-center overflow-clip p-[22px] relative rounded-[500px] shadow-[0px_0px_10px_0px_rgba(100,30,167,0.5)] shrink-0 size-10 bg-gradient-to-r from-purple-600 to-purple-800">
-              <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-[500px] shrink-0 size-8 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">✨</span>
-              </div>
+      <div className="w-full h-full flex flex-col justify-between px-3 py-4">
+        {/* Header with logo and navigation */}
+        <div className="flex flex-col gap-12 w-full">
+          {/* Logo/Header */}
+          <div className="flex items-center justify-between p-0 relative shrink-0 size-10">
+            <div className="flex gap-2.5 items-center justify-center overflow-clip p-[22px] relative rounded-[500px] shadow-[0px_0px_10px_0px_rgba(100,30,167,0.5)] shrink-0 size-10">
+              <div
+                className="bg-center bg-no-repeat rounded-[500px] shrink-0 size-8"
+                style={{
+                  backgroundSize: "133.33%",
+                  background: "linear-gradient(45deg, #641ea7, #8c53c3)",
+                }}
+              ></div>
             </div>
           </div>
 
           {/* Navigation items */}
-          <div className="box-border content-stretch flex flex-col gap-1 items-start justify-start p-0 relative shrink-0 w-full">
+          <div className="flex flex-col gap-1 w-full">
             {/* Active item - Magic Wand */}
-            <div className="bg-[rgba(100,30,167,0.15)] border border-[rgba(97,63,130,0.25)] box-border content-stretch flex gap-3 items-center justify-start p-[8px] relative rounded-[10px] shrink-0 w-10">
-              <div className="relative shrink-0 size-6 flex items-center justify-center">
+            <div
+              className="bg-[rgba(100,30,167,0.15)] border-[0.5px] border-[rgba(97,63,130,0.25)] flex items-center justify-start rounded-[10px]"
+              style={{ width: "40px", height: "40px", padding: "8px" }}
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-white"
                   fill="currentColor"
-                  viewBox="0 0 20 20"
+                  viewBox="0 0 24 24"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a.5.5 0 00-.707-.707L9 12l-4-4a.5.5 0 00-.707.707L9 13.414l5.707-5.707z"
-                  />
+                  <path d="M7.5 5.6L10 7L8.6 4.5C8.2 3.8 8.5 3 9.2 3C9.9 3 10.2 3.8 9.8 4.5L8.4 7L10.8 8.4C11.5 8.8 11.5 9.7 10.8 10.1L8.4 11.5L9.8 14C10.2 14.7 9.9 15.5 9.2 15.5C8.5 15.5 8.2 14.7 8.6 14L7.2 11.5L4.8 10.1C4.1 9.7 4.1 8.8 4.8 8.4L7.2 7L8.6 4.5M19.5 18.4L17 17L18.4 19.5C18.8 20.2 18.5 21 17.8 21C17.1 21 16.8 20.2 17.2 19.5L18.6 17L16.2 15.6C15.5 15.2 15.5 14.3 16.2 13.9L18.6 12.5L17.2 10C16.8 9.3 17.1 8.5 17.8 8.5C18.5 8.5 18.8 9.3 18.4 10L19.8 12.5L22.2 13.9C22.9 14.3 22.9 15.2 22.2 15.6L19.8 17L18.4 19.5Z" />
                 </svg>
               </div>
             </div>
 
             {/* Note Pencil */}
-            <div className="box-border content-stretch flex gap-3 items-center justify-start p-[8px] relative shrink-0 size-10">
-              <div className="relative shrink-0 size-6 flex items-center justify-center">
+            <div
+              className="flex items-center justify-start"
+              style={{ width: "40px", height: "40px", padding: "8px" }}
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-gray-400"
                   fill="currentColor"
-                  viewBox="0 0 20 20"
+                  viewBox="0 0 24 24"
                 >
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                 </svg>
               </div>
             </div>
 
             {/* Briefcase */}
-            <div className="box-border content-stretch flex gap-3 items-center justify-start p-[8px] relative shrink-0 size-10">
-              <div className="relative shrink-0 size-6 flex items-center justify-center">
+            <div
+              className="flex items-center justify-start"
+              style={{ width: "40px", height: "40px", padding: "8px" }}
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-gray-400"
                   fill="currentColor"
-                  viewBox="0 0 20 20"
+                  viewBox="0 0 24 24"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zm4-3a1 1 0 00-1 1v1h2V4a1 1 0 00-1-1z"
-                  />
+                  <path d="M10,2H14A2,2 0 0,1 16,4V6H20A2,2 0 0,1 22,8V19A2,2 0 0,1 20,21H4C2.89,21 2,20.1 2,19V8C2,6.89 2.89,6 4,6H8V4C8,2.89 8.89,2 10,2M14,6V4H10V6H14Z" />
                 </svg>
               </div>
             </div>
 
             {/* Chart */}
-            <div className="box-border content-stretch flex gap-3 items-center justify-start p-[8px] relative shrink-0 size-10">
-              <div className="relative shrink-0 size-6 flex items-center justify-center">
+            <div
+              className="flex items-center justify-start"
+              style={{ width: "40px", height: "40px", padding: "8px" }}
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-gray-400"
                   fill="currentColor"
-                  viewBox="0 0 20 20"
+                  viewBox="0 0 24 24"
                 >
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                  <path d="M16,11V3H21V11H16M10,16V10H15V16H10M4,21V14H9V21H4M3,8V3H8V8H3Z" />
                 </svg>
               </div>
             </div>
@@ -78,10 +90,22 @@ const Navbar = ({ state = "Default" }) => {
         </div>
 
         {/* Profile at bottom */}
-        <div className="box-border content-stretch flex gap-3 items-center justify-start p-[8px] relative rounded-lg shrink-0 w-10">
-          <div className="box-border content-stretch flex items-center justify-center p-0 relative rounded-lg shrink-0">
-            <div className="overflow-clip relative rounded-[80px] shrink-0 size-6 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">A</span>
+        <div
+          className="flex items-center justify-start rounded-lg"
+          style={{ width: "40px", height: "40px", padding: "8px" }}
+        >
+          <div className="flex items-center justify-center">
+            <div
+              className="rounded-full overflow-hidden bg-center bg-cover"
+              style={{
+                width: "24px",
+                height: "24px",
+                background: "linear-gradient(45deg, #3b82f6, #8b5cf6)",
+              }}
+            >
+              <div className="w-full h-full flex items-center justify-center text-white text-xs font-semibold">
+                A
+              </div>
             </div>
           </div>
         </div>
@@ -96,28 +120,35 @@ const AiChatInput = ({ state = "Default" }) => {
   const [inputValue, setInputValue] = useState("");
 
   return (
-    <div className="backdrop-blur-[20px] backdrop-filter border border-[#5f2e9f] relative rounded-[15px] size-full bg-black/40">
-      <div className="box-border content-stretch flex flex-col items-start justify-between overflow-clip px-3 py-4 relative size-full">
+    <StarBorder
+      as="div"
+      className="w-full h-full"
+      color="#8b5cf6"
+      speed="6s"
+      thickness={0}
+    >
+      <div className="backdrop-blur-[20px] backdrop-filter bg-black/40 w-full h-full flex flex-col justify-between p-4 rounded-[15px] border-none">
         {/* Main input area */}
-        <div className="box-border content-start flex flex-wrap gap-2 items-start justify-between min-h-7 px-2 py-0 relative rounded-xl shrink-0 w-full">
-          <div className="basis-0 box-border content-stretch flex flex-col grow h-32 items-start justify-start min-h-px min-w-px p-2 relative rounded-xl shrink-0">
+        <div className="flex flex-wrap gap-2 items-start justify-between min-h-7 px-2 py-0 rounded-xl w-full">
+          <div className="basis-0 flex flex-col grow items-start justify-center min-h-px min-w-px p-0 rounded-xl shrink-0 h-5">
             <textarea
-              className="font-['Montserrat'] font-normal text-[#747474] text-[14px] w-full h-full bg-transparent border-none outline-none resize-none placeholder-[#747474]"
+              className="font-['Montserrat'] font-normal text-[14px] text-[#747474] w-full h-full bg-transparent border-none outline-none resize-none placeholder-[#747474] min-h-[80px]"
               placeholder="Your blog crafting experience starts here..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              style={{ lineHeight: "normal" }}
             />
           </div>
         </div>
 
         {/* Bottom buttons */}
-        <div className="box-border content-center flex flex-wrap gap-2 items-center justify-between min-h-7 p-0 relative rounded-xl shrink-0 w-full">
+        <div className="flex flex-wrap gap-2 items-center justify-between min-h-7 p-0 rounded-xl w-full">
           {/* Cover Image button */}
-          <div className="box-border content-stretch flex gap-2 items-center justify-center min-h-7 min-w-7 p-[4px] relative rounded-2xl shrink-0">
-            <div className="box-border content-stretch flex items-center justify-center p-0 relative rounded-lg shrink-0">
-              <div className="relative shrink-0 size-4 flex items-center justify-center">
+          <div className="flex gap-2 items-center justify-center min-h-7 min-w-7 p-[4px] rounded-2xl shrink-0">
+            <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
+              <div className="relative shrink-0 size-4">
                 <svg
-                  className="w-3 h-3 text-white"
+                  className="w-full h-full text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -128,67 +159,88 @@ const AiChatInput = ({ state = "Default" }) => {
                 </svg>
               </div>
             </div>
-            <div className="font-['Montserrat'] font-normal text-[#ffffff] text-[12px] text-nowrap">
+            <div className="font-['Montserrat'] font-normal text-[#ffffff] text-[12px] whitespace-nowrap">
               Cover Image
             </div>
           </div>
 
           {/* Generate button */}
-          <div className="bg-neutral-900 box-border content-stretch flex gap-1 items-center justify-center px-2 py-1 relative rounded-2xl shrink-0 hover:bg-neutral-800 transition-colors cursor-pointer">
-            <div className="box-border content-stretch flex items-center justify-center p-0 relative rounded-lg shrink-0">
-              <div className="relative shrink-0 size-4 flex items-center justify-center">
-                <svg
-                  className="w-3 h-3 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L14 10.202a1 1 0 000-1.664l-4.445-2.37z"
-                  />
-                </svg>
+          <div className="bg-neutral-900 flex gap-1 items-center justify-center px-2 py-1 rounded-2xl shrink-0 hover:bg-neutral-800 transition-colors cursor-pointer">
+            <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
+              <div className="relative shrink-0 size-4">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
               </div>
             </div>
-            <div className="font-['Inter'] font-normal text-[#ffffff] text-[14px] leading-[20px]">
-              Generate
+            <div className="flex flex-col items-start justify-center p-0 rounded-xl shrink-0">
+              <div className="font-['Inter'] font-normal text-[#2e2e2e] text-[14px] text-center w-full">
+                <p className="block leading-[20px]"></p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </StarBorder>
   );
 };
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
   return (
-    <div className="bg-black relative size-full min-h-screen overflow-hidden">
-      {/* Background gradient/pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-purple-900/10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent" />
+    <div className="bg-[#000000] relative w-full h-screen overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-black to-purple-900/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent" />
       </div>
 
       {/* Collapsed Navbar */}
-      <div className="absolute left-4 top-4 h-[868px] w-16 z-10">
+      <div
+        className="absolute bg-gradient-to-r from-[#4a31660d] to-[#7e4cab0d] border border-[rgba(97,63,130,0.25)] rounded-xl left-4 top-4 w-16 z-10"
+        style={{ height: "868px" }}
+      >
         <Navbar state="Collapsed" />
       </div>
 
-      {/* Main content area */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 ml-20">
-        {/* Title */}
-        <div className="text-center mb-8 z-10">
-          <h1 className="font-['Montserrat'] font-semibold text-[36px] text-white leading-tight mb-4">
-            What's on your mind today?
-          </h1>
-          <p className="font-['Montserrat'] font-normal text-[14px] text-[#a2a2a2]">
-            Type it. Dream it. Watch it appear!
-          </p>
-        </div>
+      {/* Title - positioned exactly as in Figma */}
+      <div
+        className="absolute font-['Montserrat'] font-semibold text-[#ffffff] text-[36px] text-center whitespace-nowrap"
+        style={{
+          top: "290px",
+          left: "calc(50% + 40px)",
+          transform: "translate(-50%, -50%)",
+          lineHeight: "20px",
+        }}
+      >
+        What's on your mind today?
+      </div>
 
-        {/* AI Chat Input */}
-        <div className="w-[600px] h-[175px] z-10">
-          <AiChatInput />
-        </div>
+      {/* Subtitle - positioned exactly as in Figma */}
+      <div
+        className="absolute font-['Montserrat'] font-normal text-[#a2a2a2] text-[14px] text-center whitespace-nowrap"
+        style={{
+          top: "324px",
+          left: "calc(50% + 40.5px)",
+          transform: "translateX(-50%)",
+          lineHeight: "normal",
+        }}
+      >
+        Type it. Dream it. Watch it appear!
+      </div>
+
+      {/* AI Chat Input - positioned exactly as in Figma */}
+      <div
+        className="absolute backdrop-blur-[20px] backdrop-filter bg-[#000000] rounded-[15px]"
+        style={{
+          width: "600px",
+          height: "175px",
+          top: "377px",
+          left: "calc(50% + 41px)",
+          transform: "translateX(-50%)",
+        }}
+      >
+        <AiChatInput />
       </div>
     </div>
   );
