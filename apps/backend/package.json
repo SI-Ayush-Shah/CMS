@@ -29,6 +29,7 @@
     "@neondatabase/serverless": "^1.0.1",
     "@sinclair/typebox": "^0.34.40",
     "awilix": "^10.0.2",
+    "axios": "^1.11.0",
     "bullmq": "^5.34.0",
     "cloudinary": "^1.41.3",
     "dotenv": "^16.4.5",
