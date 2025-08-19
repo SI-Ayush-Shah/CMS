@@ -1,86 +1,78 @@
-export interface User {
-  id: string
-  email: string
-  name: string
-  createdAt: Date
-}
+import { db } from '../db'
+import { users, type User, type NewUser, type UpdateUser } from '../db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 export interface UserRepository {
   findAll(): Promise<User[]>
   findById(id: string): Promise<User | null>
   findByEmail(email: string): Promise<User | null>
-  create(userData: Omit<User, 'id' | 'createdAt'>): Promise<User>
-  update(id: string, userData: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null>
+  create(userData: NewUser): Promise<User>
+  update(id: string, userData: UpdateUser): Promise<User | null>
   delete(id: string): Promise<boolean>
 }
 
-// In-memory data store
-let users: User[] = [
-  {
-    id: '1',
-    email: 'john@example.com',
-    name: 'John Doe',
-    createdAt: new Date('2024-01-01')
-  },
-  {
-    id: '2',
-    email: 'jane@example.com',
-    name: 'Jane Smith',
-    createdAt: new Date('2024-01-02')
-  }
-]
+interface Dependencies {
+  db: typeof db
+}
 
-export function createUserRepository(): UserRepository {
+export function createUserRepository({ db }: Dependencies): UserRepository {
+  if (!db) {
+    throw new Error('db is required for userRepository')
+  }
+
+
   return {
     async findAll(): Promise<User[]> {
-      return Promise.resolve([...users])
+
+
+      return await db.select().from(users).orderBy(desc(users.createdAt))
     },
 
     async findById(id: string): Promise<User | null> {
-      const user = users.find(u => u.id === id)
-      return Promise.resolve(user || null)
+      if (!id) return null
+      
+      const result = await db.select().from(users).where(eq(users.id, id)).limit(1)
+      return result[0] || null
     },
 
     async findByEmail(email: string): Promise<User | null> {
-      const user = users.find(u => u.email === email)
-      return Promise.resolve(user || null)
+      if (!email) return null
+      
+      const result = await db.select().from(users).where(eq(users.email, email)).limit(1)
+      return result[0] || null
     },
 
-    async create(userData: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-      const newUser: User = {
-        id: (users.length + 1).toString(),
-        ...userData,
-        createdAt: new Date()
+    async create(userData: NewUser): Promise<User> {
+      const result = await db.insert(users).values(userData).returning()
+      
+      if (result.length === 0) {
+        throw new Error('Failed to create user')
       }
       
-      users.push(newUser)
-      return Promise.resolve(newUser)
+      return result[0]
     },
 
-    async update(id: string, userData: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
-      const userIndex = users.findIndex(u => u.id === id)
+    async update(id: string, userData: UpdateUser): Promise<User | null> {
+      if (!id) return null
       
-      if (userIndex === -1) {
-        return Promise.resolve(null)
+      if (!userData.email && !userData.name) {
+        // No fields to update, return existing user
+        return this.findById(id)
       }
-
-      users[userIndex] = {
-        ...users[userIndex],
-        ...userData
-      }
-
-      return Promise.resolve(users[userIndex])
+      
+      const result = await db.update(users)
+        .set(userData)
+        .where(eq(users.id, id))
+        .returning()
+      
+      return result[0] || null
     },
 
     async delete(id: string): Promise<boolean> {
-      const userIndex = users.findIndex(u => u.id === id)
+      if (!id) return false
       
-      if (userIndex === -1) {
-        return Promise.resolve(false)
-      }
-
-      users.splice(userIndex, 1)
-      return Promise.resolve(true)
+      const result = await db.delete(users).where(eq(users.id, id)).returning()
+      return result.length > 0
     }
   }
 }

@@ -1,4 +1,5 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
+import { isDevelopment } from '../../config/env'
 
 export interface ApiError extends Error {
   statusCode?: number
@@ -21,7 +22,7 @@ export function handleApiError(error: FastifyError, request: FastifyRequest, rep
   reply.status(statusCode).send({
     success: false,
     error: message,
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(isDevelopment && { stack: error.stack })
   })
 }
 

@@ -38,7 +38,9 @@ const start = async (): Promise<void> => {
       options: {}
     })
     // Start server
-    await fastify.listen({ port: 3001, host: '0.0.0.0' })
+    const { env } = require('./config/env')
+    await fastify.listen({ port: env.PORT, host: '0.0.0.0' })
+    console.log(`🚀 Server listening on http://0.0.0.0:${env.PORT}`)
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)

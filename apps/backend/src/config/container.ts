@@ -1,11 +1,20 @@
-import { asFunction, createContainer, InjectionMode } from 'awilix'
+import { asFunction, asValue, createContainer, InjectionMode } from 'awilix'
 import * as glob from 'glob'
 import path from 'path'
+import { db } from '../db/connection'
+import { users } from '../db'
 
 export function setupContainerWithAutoDiscovery() {
   const container = createContainer({
     injectionMode: InjectionMode.PROXY
   })
+
+  // Manual registration for database (handle null case)
+  container.register({
+    db: asValue(db || null)
+  })
+
+  // Do not execute queries during container setup; repositories/services will run queries per-request
 
   // TRUE FILESYSTEM AUTODISCOVERY
   autodiscoverAndRegister(container)
@@ -16,7 +25,7 @@ export function setupContainerWithAutoDiscovery() {
 function autodiscoverAndRegister(container: any) {
   const srcPath = path.resolve(__dirname, '..')
 
-  // Scan for all factory files
+  // Scan for all factory files (exclude db directory - manually registered)
   const patterns = [
     'repositories/**/*.ts',
     'services/**/*.ts', 
@@ -27,8 +36,8 @@ function autodiscoverAndRegister(container: any) {
     const files = glob.sync(pattern, { cwd: srcPath })
 
     for (const file of files) {
-      // Skip ExampleService
-      if (file.includes('ExampleService')) continue
+      // Skip ExampleService and database connection (manually registered)
+      if (file.includes('ExampleService') || file.includes('connection.ts')) continue
 
       try {
         const modulePath = path.resolve(srcPath, file)
@@ -54,5 +63,6 @@ function autodiscoverAndRegister(container: any) {
 
 // Manual registration fallback (if needed)
 export const manualDependencies = {
+  db: asValue(db),
   // Add manual overrides here if autodiscovery fails for specific dependencies
 }

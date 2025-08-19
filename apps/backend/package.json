@@ -4,9 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "nodemon --exec 'tsx src --env-file=.env | pino-pretty' ",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "setup-db": "tsx src/scripts/setup-database.ts",
+    "db:migrate-run": "tsx src/db/migrate.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +28,8 @@
     "@neondatabase/serverless": "^1.0.1",
     "@sinclair/typebox": "^0.34.40",
     "awilix": "^10.0.2",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.4",
     "env-schema": "^6.0.1",
     "fastify": "^5.5.0",
     "fastify-plugin": "^5.0.1",
@@ -34,6 +42,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.30.6",
+    "nodemon": "^3.1.10",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   }

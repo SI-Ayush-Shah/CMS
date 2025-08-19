@@ -4,7 +4,8 @@ import {
   GenerateContentResponseDto
 } from '../types/dtos'
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { z } from "zod"; // if you want TypeBox we can swap later
+import { z } from "zod"; // For LangChain structured output
+import { env } from '../config/env'
 
 
 
@@ -17,7 +18,7 @@ export function createGenerateContentService(): GenerateContentService {
   return {
     async generateContent(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto> {
 
-        // Comprehensive Editor.js block schema supporting all block types
+        // Comprehensive Editor.js block schema supporting all block types (Zod for LangChain)
         const editorJsBlockSchema = z.object({
           id: z.string(),
           type: z.enum([
@@ -52,7 +53,7 @@ export function createGenerateContentService(): GenerateContentService {
         });
 
       const model = new ChatGoogleGenerativeAI({
-        apiKey: 'AIzaSyCSGQT9UEMI3wgv8h2LD5vXxtI7dYWboHY',
+        apiKey: env.GOOGLE_API_KEY,
         model: "gemini-2.5-flash", 
         temperature: 0.7,
       });

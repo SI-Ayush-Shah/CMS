@@ -1,4 +1,5 @@
-import { UserRepository, User } from '../repositories/UserRepository'
+import { UserRepository } from '../repositories/UserRepository'
+import { type User, type NewUser, type UpdateUser } from '../db/schema'
 
 export interface CreateUserRequest {
   email: string
@@ -60,7 +61,12 @@ export function createUserService({ userRepository }: Dependencies): UserService
         throw new Error('User with this email already exists')
       }
 
-      return await userRepository.create(userData)
+      const newUser: NewUser = {
+        email: userData.email,
+        name: userData.name,
+      }
+
+      return await userRepository.create(newUser)
     },
 
     async updateUser(id: string, userData: UpdateUserRequest): Promise<User | null> {
@@ -81,7 +87,12 @@ export function createUserService({ userRepository }: Dependencies): UserService
         }
       }
 
-      return await userRepository.update(id, userData)
+      const updateUser: UpdateUser = {
+        email: userData.email,
+        name: userData.name,
+      }
+
+      return await userRepository.update(id, updateUser)
     },
 
     async deleteUser(id: string): Promise<boolean> {
