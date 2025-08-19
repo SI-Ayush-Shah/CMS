@@ -15,10 +15,10 @@ interface UpdateUserBody extends UpdateUserRequest {}
 
 export interface UserController {
   getAllUsers(request: FastifyRequest, reply: FastifyReply): Promise<void>
-  getUserById(request: FastifyRequest<{ Params: GetUserParams }>, reply: FastifyReply): Promise<void>
-  createUser(request: FastifyRequest<{ Body: CreateUserBody }>, reply: FastifyReply): Promise<void>
-  updateUser(request: FastifyRequest<{ Params: UpdateUserParams; Body: UpdateUserBody }>, reply: FastifyReply): Promise<void>
-  deleteUser(request: FastifyRequest<{ Params: GetUserParams }>, reply: FastifyReply): Promise<void>
+  getUserById(request: FastifyRequest, reply: FastifyReply): Promise<void>
+  createUser(request: FastifyRequest, reply: FastifyReply): Promise<void>
+  updateUser(request: FastifyRequest, reply: FastifyReply): Promise<void>
+  deleteUser(request: FastifyRequest, reply: FastifyReply): Promise<void>
 }
 
 interface Dependencies {
@@ -47,11 +47,11 @@ export function createUserController({ userService }: Dependencies): UserControl
     },
 
     async getUserById(
-      request: FastifyRequest<{ Params: GetUserParams }>, 
+      request: FastifyRequest, 
       reply: FastifyReply
     ): Promise<void> {
       try {
-        const { id } = request.params
+        const { id } = request.params as GetUserParams
         const user = await userService.getUserById(id)
         
         if (!user) {
@@ -75,11 +75,11 @@ export function createUserController({ userService }: Dependencies): UserControl
     },
 
     async createUser(
-      request: FastifyRequest<{ Body: CreateUserBody }>, 
+      request: FastifyRequest, 
       reply: FastifyReply
     ): Promise<void> {
       try {
-        const userData = request.body
+        const userData = request.body as CreateUserBody
         const user = await userService.createUser(userData)
         
         reply.code(201).send({
@@ -95,12 +95,12 @@ export function createUserController({ userService }: Dependencies): UserControl
     },
 
     async updateUser(
-      request: FastifyRequest<{ Params: UpdateUserParams; Body: UpdateUserBody }>, 
+      request: FastifyRequest, 
       reply: FastifyReply
     ): Promise<void> {
       try {
-        const { id } = request.params
-        const userData = request.body
+        const { id } = request.params as UpdateUserParams
+        const userData = request.body as UpdateUserBody
         const user = await userService.updateUser(id, userData)
         
         if (!user) {
@@ -124,11 +124,11 @@ export function createUserController({ userService }: Dependencies): UserControl
     },
 
     async deleteUser(
-      request: FastifyRequest<{ Params: GetUserParams }>, 
+      request: FastifyRequest, 
       reply: FastifyReply
     ): Promise<void> {
       try {
-        const { id } = request.params
+        const { id } = request.params as GetUserParams
         const deleted = await userService.deleteUser(id)
         
         if (!deleted) {
