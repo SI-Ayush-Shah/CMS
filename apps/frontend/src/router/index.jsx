@@ -9,6 +9,7 @@ const HomePage = lazy(() => import("../pages/HomePage"));
 const ComponentsPage = lazy(() => import("../pages/ComponentsPage"));
 const AboutPage = lazy(() => import("../pages/AboutPage"));
 const ContentWizardPage = lazy(() => import("../pages/ContentWizardPage"));
+const BlogPage = lazy(() => import("../pages/BlogPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 
@@ -45,6 +46,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyPageWrapper>
             <AboutPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "blog",
+        element: (
+          <LazyPageWrapper>
+            <BlogPage />
           </LazyPageWrapper>
         ),
       },

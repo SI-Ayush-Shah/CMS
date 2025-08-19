@@ -18,6 +18,7 @@ const Navigation = () => {
       href: "/wizard",
       current: location.pathname === "/wizard",
     },
+    { name: "Blog", href: "/blog", current: location.pathname === "/blog" },
     { name: "About", href: "/about", current: location.pathname === "/about" },
   ];
 
