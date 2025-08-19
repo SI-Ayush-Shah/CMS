@@ -29,6 +29,7 @@ export default function ContentEditorPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' | 'error'
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
 
   // Read-only dummy content for the editor preview (LHS)
   const dummyTitle = "Virat Kohli: A Career Unforgettable—and Unfulfilled";
@@ -104,7 +105,7 @@ export default function ContentEditorPage() {
   }, [validate, dummyTitle, dummyBody, showMessage]);
 
   return (
-    <div className="w-full h-full min-h-screen p-4 md:p-6 lg:p-8">
+    <div className="w-full h-full">
       {/* Message */}
       {message && (
         <div
@@ -187,12 +188,19 @@ export default function ContentEditorPage() {
         </section>
 
         {/* Assistant column */}
-        <aside className="lg:col-span-1">
-          <div className="lg:sticky lg:top-4 h-[calc(100vh-1rem)]">
-            <div className="flex flex-col h-full overflow-hidden">
-              {/* Scrollable info panel */}
-              <div className="rounded-2xl bg-core-neu-1000/40 border border-core-prim-300/20 p-4 flex-1 overflow-auto">
-                <p className="text-[12px] text-invert-low">
+        <div className=" w-[45%] bg-black h-screen sticky top-0 p-2">
+          <div className="flex flex-col h-full ">
+            <div className="flex-1 overflow-y-auto w-full h-[calc(100vh-110px)]">
+              <div className="h-full w-full flex flex-col items-end gap-2">
+              <div 
+                className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 ${
+                  isContentExpanded ? 'min-h-fit' : 'h-[164px]'
+                } overflow-hidden w-[80%]`}
+                onClick={() => setIsContentExpanded(!isContentExpanded)}
+              >
+                <p className={`text-[12px] text-invert-low ${
+                  !isContentExpanded ? 'line-clamp-8' : ''
+                }`}>
                   Write a 500–700 word professional sports news article on the
                   chosen topic. Include a strong headline, introduction, match
                   highlights, statistics, and realistic quotes (not fabricated)
@@ -200,25 +208,55 @@ export default function ContentEditorPage() {
                   of impact on team momentum and the ongoing tournament.
                   Structure with a clear beginning, middle, and conclusion.
                 </p>
+                
+                {!isContentExpanded && (
+                  <div className="text-[10px] text-invert-low mt-2 text-center">
+                    Click to expand
+                  </div>
+                )}
               </div>
-              {/* Bottom-aligned chat input */}
-              <div className="rounded-2xl bg-core-neu-1000/40 border border-core-prim-300/20 p-2 mt-4">
-                <EnhancedAiChatInput
-                  placeholder="Your blog crafting experience starts here..."
-                  maxLength={2000}
-                  maxImages={10}
-                  validationOptions={{
-                    text: { required: true, maxLength: 2000 },
-                    images: { required: false, maxImages: 10 },
-                  }}
-                  onSubmit={() => {
-                    /* keep local; authoring helper only */
-                  }}
-                />
+              <div 
+                className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 ${
+                  isContentExpanded ? 'min-h-fit' : 'h-[164px]'
+                } overflow-hidden w-[80%]`}
+                onClick={() => setIsContentExpanded(!isContentExpanded)}
+              >
+                <p className={`text-[12px] text-invert-low ${
+                  !isContentExpanded ? 'line-clamp-8' : ''
+                }`}>
+                  Write a 500–700 word professional sports news article on the
+                  chosen topic. Include a strong headline, introduction, match
+                  highlights, statistics, and realistic quotes (not fabricated)
+                  in an engaging yet objective tone. Provide contextual analysis
+                  of impact on team momentum and the ongoing tournament.
+                  Structure with a clear beginning, middle, and conclusion.
+                </p>
+                
+                {!isContentExpanded && (
+                  <div className="text-[10px] text-invert-low mt-2 text-center">
+                    Click to expand
+                  </div>
+                )}
+              </div>
               </div>
             </div>
+            {/* Bottom-aligned chat input */}
+            <div className="rounded-2xl bg-button-filled-main-default border h-[150px] w-full border-core-prim-300/20">
+              <EnhancedAiChatInput
+                placeholder="Your blog crafting experience starts here..."
+                maxLength={2000}
+                maxImages={10}
+                validationOptions={{
+                  text: { required: true, maxLength: 2000 },
+                  images: { required: false, maxImages: 10 },
+                }}
+                onSubmit={() => {
+                  /* keep local; authoring helper only */
+                }}
+              />
+            </div>
           </div>
-        </aside>
+        </div>
       </div>
     </div>
   );
