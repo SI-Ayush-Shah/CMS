@@ -2,6 +2,7 @@ import { AwilixContainer } from 'awilix'
 import { UserService } from '../services/UserService'
 import { GenerateContentService } from '../services/GenerateContentService'
 import { DatabaseConnection, db } from '../db'
+import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { UserRepository } from '../repositories/UserRepository'
 import { HealthController } from '../controllers/HealthController'
 import { UserController } from '../controllers/UserController'
@@ -15,6 +16,7 @@ export interface Dependencies {
   // Services
   userService: UserService
   generateContentService: GenerateContentService
+  generatedContentRepository: GeneratedContentRepository
   
   // Repositories
   userRepository: UserRepository

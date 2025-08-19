@@ -6,6 +6,8 @@ import {
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod"; // For LangChain structured output
 import { env } from '../config/env'
+import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
+import { type NewGeneratedContent } from '../db/schema'
 
 
 
@@ -14,7 +16,11 @@ export interface GenerateContentService {
   generateContent(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto>
 }
 
-export function createGenerateContentService(): GenerateContentService {
+interface Dependencies {
+  generatedContentRepository: GeneratedContentRepository
+}
+
+export function createGenerateContentService({ generatedContentRepository }: Dependencies): GenerateContentService {
   return {
     async generateContent(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto> {
 
@@ -124,10 +130,21 @@ Return JSON ONLY in Editor.js format, no extra explanation.`
         }
       ]);
 
+      // persist
+      const toInsert: NewGeneratedContent = {
+        title: result.title,
+        summary: result.summary,
+        category: result.category,
+        tags: result.tags,
+        body: result.body as unknown as Record<string, unknown>,
+      }
+      const saved = await generatedContentRepository.create(toInsert)
+
       return {
-        generatedContent: result, // Echo for now
+        generatedContent: result,
         originalContent: request.content,
-        timestamp: new Date().toISOString() // Convert to ISO string for schema compliance
+        timestamp: new Date().toISOString(),
+        // optional: echo db id in response via result augmentation if needed
       }
     }
   }
