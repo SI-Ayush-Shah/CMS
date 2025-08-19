@@ -30,6 +30,7 @@ interface Dependencies {
 export function createRssFeedRepository({ db }: Dependencies): RssFeedRepository {
   if (!db) throw new Error('db is required for rssFeedRepository')
 
+
   return {
     async create(data: NewRssFeed): Promise<RssFeed> {
       const [row] = await db.insert(rssFeeds).values(data).returning()

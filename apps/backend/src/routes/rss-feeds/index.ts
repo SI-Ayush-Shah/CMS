@@ -20,8 +20,8 @@ const rssFeedsRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const body = request.body as any
-      const { rssFeedRepository } = fastify.diContainer.cradle
-      const created = await rssFeedRepository.create(body)
+      const { rssFeedService } = fastify.diContainer.cradle
+      const created = await rssFeedService.create(body)
       return reply.code(201).send({ success: true, data: created })
     }
   })
@@ -51,8 +51,8 @@ const rssFeedsRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { page = 1, pageSize = 10, search, sort = 'desc' } = request.query as any
-      const { rssFeedRepository } = fastify.diContainer.cradle
-      const result = await rssFeedRepository.list({ page, pageSize, search, sort })
+      const { rssFeedService } = fastify.diContainer.cradle
+      const result = await rssFeedService.list({ page, pageSize, search, sort })
       return reply.code(200).send({ success: true, data: result })
     }
   })
@@ -73,8 +73,8 @@ const rssFeedsRoutes: FastifyPluginAsync = async (fastify) => {
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
       const body = request.body as any
-      const { rssFeedRepository } = fastify.diContainer.cradle
-      const updated = await rssFeedRepository.update(id, body)
+      const { rssFeedService } = fastify.diContainer.cradle
+      const updated = await rssFeedService.update(id, body)
       if (!updated) return reply.code(404).send({ success: false, error: 'Not found' })
       return reply.code(200).send({ success: true, data: updated })
     }
@@ -93,8 +93,8 @@ const rssFeedsRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
-      const { rssFeedRepository } = fastify.diContainer.cradle
-      const ok = await rssFeedRepository.delete(id)
+      const { rssFeedService } = fastify.diContainer.cradle
+      const ok = await rssFeedService.delete(id)
       if (!ok) return reply.code(404).send({ success: false, error: 'Not found' })
       return reply.code(200).send({ success: true, message: 'Deleted' })
     }

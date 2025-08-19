@@ -8,15 +8,21 @@ import { UserController } from '../controllers/UserController'
 import { GenerateContentController } from '../controllers/GenerateContentController'
 import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { RssFeedRepository } from '../repositories/RssFeedRepository'
+import type { AppRedisClient } from '../config/redis'
+import type { RssFeedService } from '../services/RssFeedService'
 
 export interface Dependencies {
   // Database
   db: typeof db
   databaseConnection: DatabaseConnection
   
+  // Infra
+  redis: AppRedisClient | null
+  
   // Services
   userService: UserService
   generateContentService: GenerateContentService
+  rssFeedService: RssFeedService
   
   // Repositories
   userRepository: UserRepository

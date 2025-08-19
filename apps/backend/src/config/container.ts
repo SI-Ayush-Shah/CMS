@@ -2,16 +2,18 @@ import { asFunction, asValue, createContainer, InjectionMode } from 'awilix'
 import * as glob from 'glob'
 import path from 'path'
 import { db } from '../db/connection'
-import { users } from '../db'
+import { createRedisClient } from '../config/redis'
 
-export function setupContainerWithAutoDiscovery() {
+export async function setupContainerWithAutoDiscovery() {
   const container = createContainer({
     injectionMode: InjectionMode.PROXY
   })
 
   // Manual registration for database (handle null case)
+  const redis = await createRedisClient()
   container.register({
-    db: asValue(db || null)
+    db: asValue(db || null),
+    redis: asValue(redis || null),
   })
 
   // Do not execute queries during container setup; repositories/services will run queries per-request

@@ -27,7 +27,7 @@ const start = async (): Promise<void> => {
     await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024, files: 10 } })
     
     // Setup container with autodiscovery
-    const container = setupContainerWithAutoDiscovery()
+    const container = await setupContainerWithAutoDiscovery()
     
     // Replace the default container with our autodiscovered one
     fastify.diContainer = container
