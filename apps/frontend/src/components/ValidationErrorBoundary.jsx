@@ -112,7 +112,7 @@ class ValidationErrorBoundary extends React.Component {
               </p>
 
               {/* Error details in development */}
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.VITE_NODE_ENV === 'development' && this.state.error && (
                 <details className="mb-3">
                   <summary className="text-error-500 text-xs cursor-pointer hover:text-error-600">
                     Error Details (Development)

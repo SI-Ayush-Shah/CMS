@@ -290,7 +290,7 @@ export const ValidationDemo = () => {
       </div>
 
       {/* Development Info */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.VITE_NODE_ENV === 'development' && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-invert-high">Development Info</h2>
           

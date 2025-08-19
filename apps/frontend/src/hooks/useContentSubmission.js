@@ -6,6 +6,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { contentApi } from '../services/contentApi'
 import { imageUploadApi } from '../services/imageUploadApi'
+import { enhanceError, ErrorRecoveryManager } from '../utils/errorHandling'
+import { useLoadingState, LoadingType } from './useLoadingState'
 
 /**
  * Custom hook for content submission functionality
@@ -24,11 +26,16 @@ export const useContentSubmission = (options = {}) => {
     uploadImagesFirst = true
   } = options
 
-  // Submission state
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  // Enhanced loading state management
+  const loadingState = useLoadingState({
+    defaultTimeout: 60000, // 60 seconds for content operations
+    onTimeout: (operationId) => {
+      console.warn(`Content submission operation ${operationId} timed out`)
+    },
+    onError: (operationId, error) => {
+      console.error(`Content submission operation ${operationId} failed:`, error)
+    }
+  })
 
   // Results and errors
   const [submissionResult, setSubmissionResult] = useState(null)
@@ -42,6 +49,23 @@ export const useContentSubmission = (options = {}) => {
 
   // Ref to track mounted state for cleanup
   const isMountedRef = useRef(true)
+
+  // Error recovery manager
+  const recoveryManager = useRef(new ErrorRecoveryManager({
+    onRetry: async (error, context) => {
+      if (context.lastSubmissionData) {
+        return submit(
+          context.lastSubmissionData.text,
+          context.lastSubmissionData.images,
+          context.lastSubmissionData.options
+        )
+      }
+    },
+    onReset: () => {
+      reset()
+    },
+    maxRetries: 3
+  })).current
 
   /**
    * Validates submission data before processing
@@ -198,16 +222,19 @@ export const useContentSubmission = (options = {}) => {
   }, [])
 
   /**
-   * Submits content for generation and processing
+   * Submits content for generation and processing with enhanced error handling
    * @param {string} text - Text content
    * @param {Array} images - Array of image objects
    * @param {Object} options - Submission options
    * @returns {Promise<Object>} Submission result
    */
   const submit = useCallback(async (text, images = [], submissionOptions = {}) => {
-    if (isSubmitting) {
+    if (loadingState.isLoading) {
       return { success: false, error: 'Submission already in progress' }
     }
+
+    // Store submission data for retry functionality
+    const submissionData = { text, images, options: submissionOptions }
 
     // Clear previous state
     setSubmissionError(null)
@@ -220,11 +247,11 @@ export const useContentSubmission = (options = {}) => {
     // Validate submission data
     const validation = validateSubmissionData(text, images)
     if (!validation.isValid) {
-      const error = {
+      const error = enhanceError(new Error('Validation failed'), {
         type: 'validation',
-        message: 'Validation failed',
         details: validation.errors
-      }
+      })
+      
       setSubmissionError(error)
       
       if (onError) {
@@ -234,13 +261,24 @@ export const useContentSubmission = (options = {}) => {
       return { success: false, error }
     }
 
-    setIsSubmitting(true)
+    // Start main submission operation
+    const mainOperation = loadingState.startOperation('submission', {
+      type: LoadingType.SUBMIT,
+      message: 'Submitting content...',
+      cancellable: true
+    })
 
     try {
       let imageResults = []
 
       // Step 1: Upload images if needed
       if (images && images.length > 0 && uploadImagesFirst) {
+        const uploadOperation = loadingState.startOperation('image-upload', {
+          type: LoadingType.UPLOAD,
+          message: 'Uploading images...',
+          cancellable: true
+        })
+
         try {
           imageResults = await uploadPendingImages(images)
           setUploadResults(imageResults)
@@ -248,27 +286,39 @@ export const useContentSubmission = (options = {}) => {
           // Check if any uploads failed
           const failedUploads = imageResults.filter(result => !result.uploadSuccess)
           if (failedUploads.length > 0) {
-            throw new Error(`${failedUploads.length} image(s) failed to upload`)
+            throw enhanceError(new Error(`${failedUploads.length} image(s) failed to upload`), {
+              type: 'upload',
+              failedCount: failedUploads.length,
+              totalCount: imageResults.length
+            })
           }
 
+          uploadOperation.complete(imageResults)
+
         } catch (uploadError) {
-          const error = {
+          uploadOperation.fail(uploadError)
+          const enhancedError = enhanceError(uploadError, {
             type: 'upload',
-            message: 'Image upload failed',
-            details: uploadError.message
-          }
-          setSubmissionError(error)
+            context: 'image_upload_phase'
+          })
+          
+          setSubmissionError(enhancedError)
           
           if (onError) {
-            onError(error)
+            onError(enhancedError)
           }
           
-          return { success: false, error }
+          return { success: false, error: enhancedError }
         }
       }
 
       // Step 2: Generate content
-      setIsGenerating(true)
+      const generationOperation = loadingState.startOperation('content-generation', {
+        type: LoadingType.PROCESS,
+        message: 'Generating content...',
+        cancellable: false
+      })
+
       let generationResult
 
       try {
@@ -277,28 +327,32 @@ export const useContentSubmission = (options = {}) => {
           .map(result => result.id)
 
         generationResult = await contentApi.generateContent(text, imageIds)
+        generationOperation.complete(generationResult)
 
       } catch (generationError) {
-        const error = {
-          type: 'generation',
-          message: 'Content generation failed',
-          details: generationError.message
-        }
-        setSubmissionError(error)
+        generationOperation.fail(generationError)
+        const enhancedError = enhanceError(generationError, {
+          type: 'processing',
+          context: 'content_generation_phase'
+        })
+        
+        setSubmissionError(enhancedError)
         
         if (onError) {
-          onError(error)
+          onError(enhancedError)
         }
         
-        return { success: false, error }
-      } finally {
-        setIsGenerating(false)
+        return { success: false, error: enhancedError }
       }
 
       // Step 3: Save content (optional)
       let saveResult = null
       if (submissionOptions.saveContent !== false) {
-        setIsSaving(true)
+        const saveOperation = loadingState.startOperation('content-save', {
+          type: LoadingType.SAVE,
+          message: 'Saving content...',
+          cancellable: false
+        })
         
         try {
           const contentToSave = {
@@ -315,12 +369,12 @@ export const useContentSubmission = (options = {}) => {
           }
 
           saveResult = await contentApi.saveContent(contentToSave)
+          saveOperation.complete(saveResult)
 
         } catch (saveError) {
           // Saving is optional, so we don't fail the entire submission
-          console.warn('Failed to save content:', saveError.message)
-        } finally {
-          setIsSaving(false)
+          console.warn('Failed to save content:', saveError)
+          saveOperation.fail(saveError)
         }
       }
 
@@ -336,6 +390,7 @@ export const useContentSubmission = (options = {}) => {
       setSubmissionResult(result)
       setIsSuccess(true)
       setSuccessMessage('Content submitted successfully!')
+      mainOperation.complete(result)
 
       if (onSuccess) {
         onSuccess(result)
@@ -344,25 +399,23 @@ export const useContentSubmission = (options = {}) => {
       return result
 
     } catch (error) {
-      const submissionError = {
+      const enhancedError = enhanceError(error, {
         type: 'submission',
-        message: 'Submission failed',
-        details: error.message
-      }
+        context: 'main_submission_flow',
+        submissionData
+      })
       
-      setSubmissionError(submissionError)
+      setSubmissionError(enhancedError)
+      mainOperation.fail(enhancedError)
       
       if (onError) {
-        onError(submissionError)
+        onError(enhancedError)
       }
       
-      return { success: false, error: submissionError }
-
-    } finally {
-      setIsSubmitting(false)
+      return { success: false, error: enhancedError }
     }
   }, [
-    isSubmitting,
+    loadingState,
     validateSubmissionData,
     uploadPendingImages,
     uploadImagesFirst,
@@ -371,7 +424,7 @@ export const useContentSubmission = (options = {}) => {
   ])
 
   /**
-   * Retries a failed submission
+   * Retries a failed submission with enhanced error recovery
    * @param {string} text - Text content
    * @param {Array} images - Array of image objects
    * @param {Object} options - Retry options
@@ -381,35 +434,58 @@ export const useContentSubmission = (options = {}) => {
     // Clear error state before retry
     setSubmissionError(null)
     
-    return submit(text, images, retryOptions)
+    try {
+      return await submit(text, images, retryOptions)
+    } catch (error) {
+      const enhancedError = enhanceError(error, {
+        type: 'retry',
+        context: 'submission_retry'
+      })
+      
+      setSubmissionError(enhancedError)
+      throw enhancedError
+    }
   }, [submit])
+
+  /**
+   * Executes error recovery action
+   * @param {string} action - Recovery action to execute
+   * @param {Object} context - Recovery context
+   * @returns {Promise<boolean>} Success status
+   */
+  const executeRecovery = useCallback(async (action, context = {}) => {
+    try {
+      return await recoveryManager.executeRecovery(submissionError, action, context)
+    } catch (error) {
+      console.error('Recovery action failed:', error)
+      return false
+    }
+  }, [recoveryManager, submissionError])
 
   /**
    * Resets all submission state
    */
   const reset = useCallback(() => {
-    setIsSubmitting(false)
-    setIsUploading(false)
-    setIsGenerating(false)
-    setIsSaving(false)
+    loadingState.cancelAll()
+    loadingState.clearCompleted()
     setSubmissionResult(null)
     setSubmissionError(null)
     setUploadResults([])
     setUploadProgress({})
     setIsSuccess(false)
     setSuccessMessage('')
-  }, [])
+  }, [loadingState])
 
   /**
-   * Cancels ongoing submission (if possible)
+   * Cancels ongoing submission operations
    */
   const cancel = useCallback(() => {
-    // Note: This is a basic implementation
-    // In a real app, you'd want to cancel ongoing HTTP requests
-    if (isSubmitting) {
-      reset()
-    }
-  }, [isSubmitting, reset])
+    loadingState.cancelAll()
+    setSubmissionError(enhanceError(new Error('Submission cancelled by user'), {
+      type: 'cancellation',
+      context: 'user_initiated'
+    }))
+  }, [loadingState])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -419,29 +495,40 @@ export const useContentSubmission = (options = {}) => {
   }, [])
 
   // Computed values
-  const isLoading = isSubmitting || isUploading || isGenerating || isSaving
+  const isLoading = loadingState.isLoading
   const canSubmit = !isLoading
   const hasError = submissionError !== null
   const hasResult = submissionResult !== null
 
-  const loadingState = {
-    isSubmitting,
-    isUploading,
-    isGenerating,
-    isSaving,
-    isLoading,
-    phase: isUploading ? 'uploading' : 
-           isGenerating ? 'generating' : 
-           isSaving ? 'saving' : 
-           isSubmitting ? 'submitting' : 'idle'
+  // Get current operation phase
+  const getCurrentPhase = () => {
+    const activeOps = loadingState.activeOperations
+    if (activeOps.length === 0) return 'idle'
+    
+    const currentOp = activeOps[activeOps.length - 1] // Get most recent operation
+    switch (currentOp.type) {
+      case LoadingType.UPLOAD: return 'uploading'
+      case LoadingType.PROCESS: return 'generating'
+      case LoadingType.SAVE: return 'saving'
+      case LoadingType.SUBMIT: return 'submitting'
+      default: return 'processing'
+    }
+  }
+
+  const enhancedLoadingState = {
+    ...loadingState,
+    phase: getCurrentPhase(),
+    canSubmit,
+    hasError,
+    hasResult
   }
 
   return {
     // State
-    isSubmitting,
-    isUploading,
-    isGenerating,
-    isSaving,
+    isSubmitting: loadingState.isOperationLoading('submission'),
+    isUploading: loadingState.isOperationLoading('image-upload'),
+    isGenerating: loadingState.isOperationLoading('content-generation'),
+    isSaving: loadingState.isOperationLoading('content-save'),
     isLoading,
     isSuccess,
     canSubmit,
@@ -455,17 +542,21 @@ export const useContentSubmission = (options = {}) => {
     uploadProgress,
     successMessage,
 
-    // Loading state details
-    loadingState,
+    // Enhanced loading state details
+    loadingState: enhancedLoadingState,
 
     // Actions
     submit,
     retry,
+    executeRecovery,
     reset,
     cancel,
 
     // Validation
-    validateSubmissionData
+    validateSubmissionData,
+
+    // Recovery manager
+    recoveryManager
   }
 }
 

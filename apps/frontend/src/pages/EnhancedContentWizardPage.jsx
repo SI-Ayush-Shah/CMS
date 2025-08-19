@@ -156,7 +156,7 @@ export default function EnhancedContentWizardPage() {
         </div>
 
         {/* Development info */}
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.VITE_NODE_ENV === 'development' && (
           <div className="w-full max-w-[600px] mx-auto mt-4">
             <details className="text-xs text-invert-low/60">
               <summary className="cursor-pointer hover:text-invert-low">
