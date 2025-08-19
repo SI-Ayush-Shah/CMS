@@ -4,7 +4,8 @@ import { useContentSubmission } from "../hooks/useContentSubmission";
 import ContentWizardErrorBoundary from "../components/ContentWizardErrorBoundary";
 import LoadingProgress from "../components/LoadingProgress";
 import { SubmissionLoadingIndicator } from "../components/LoadingIndicator";
-import ProcessingOverlay from "../components/ProcessingOverlay";
+import ProcessingView from "../components/ProcessingView";
+import { useProcessingStore } from "../store/processingStore";
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
@@ -64,6 +65,8 @@ export default function ContentWizardPage() {
     setFeedbackType("");
   }, []);
 
+  const { isProcessing, phase } = useProcessingStore();
+
   return (
     <ContentWizardErrorBoundary>
       <div className="relative w-full flex h-full items-center justify-center">
@@ -71,7 +74,7 @@ export default function ContentWizardPage() {
         <LoadingProgress
           isLoading={loadingState?.phase && loadingState.phase !== "idle"}
         />
-        <div className="flex flex-col w-full gap-4 h-full justify-center max-w-[600px] ">
+        <div className="flex flex-col w-full gap-4 h-full justify-center ">
           {/* Title - responsive design */}
           <div className="font-semibold text-invert-high text-2xl sm:text-3xl lg:text-[36px] text-center px-4">
             What's on your mind today?
@@ -85,7 +88,7 @@ export default function ContentWizardPage() {
           {/* Feedback message */}
           {feedbackMessage && (
             <div
-              className={`max-w-[600px] mx-auto p-3 rounded-lg text-center text-sm font-medium transition-all duration-300 mx-4 sm:mx-auto ${
+              className={`max-w-[600px] mx-auto  p-3 rounded-lg text-center text-sm font-medium transition-all duration-300 mx-4 sm:mx-auto ${
                 feedbackType === "success"
                   ? "bg-green-500/10 border border-green-500/20 text-green-400"
                   : "bg-error-500/10 border border-error-500/20 text-error-400"
@@ -141,32 +144,34 @@ export default function ContentWizardPage() {
             </div>
           )}
 
-          {/* Enhanced AI Chat Input - responsive design */}
-          <div className="w-full max-w-[600px] min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] mx-auto px-4 sm:px-0">
-            <EnhancedAiChatInput
-              onSubmit={handleContentSubmit}
-              placeholder="Your blog crafting experience starts here..."
-              maxLength={5000}
-              maxImages={10}
-              disabled={isLoading}
-              validationOptions={{
-                text: {
-                  required: true,
-                  maxLength: 2000,
-                },
-                images: {
-                  maxImages: 10,
-                  required: false,
-                },
-              }}
-            />
-          </div>
+          {/* Switch between normal and processing view */}
+          {isProcessing ? (
+            <ProcessingView phase={phase} />
+          ) : (
+            <div className="w-full max-w-[600px] min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] mx-auto px-4 sm:px-0">
+              <EnhancedAiChatInput
+                onSubmit={handleContentSubmit}
+                placeholder="Your blog crafting experience starts here..."
+                maxLength={5000}
+                maxImages={10}
+                disabled={isLoading}
+                validationOptions={{
+                  text: {
+                    required: true,
+                    maxLength: 2000,
+                  },
+                  images: {
+                    maxImages: 10,
+                    required: false,
+                  },
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Submission overlay matching Figma loading state */}
-        {loadingState?.phase && loadingState.phase !== "idle" && (
-          <ProcessingOverlay phase={loadingState.phase} />
-        )}
+        {/* Overlay removed – page switches to processing view above */}
       </div>
     </ContentWizardErrorBoundary>
   );

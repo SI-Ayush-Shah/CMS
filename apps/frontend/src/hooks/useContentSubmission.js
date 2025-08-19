@@ -8,6 +8,7 @@ import { contentApi } from "../services/contentApi";
 import { imageUploadApi } from "../services/imageUploadApi";
 import { enhanceError, ErrorRecoveryManager } from "../utils/errorHandling";
 import { useLoadingState, LoadingType } from "./useLoadingState";
+import { useProcessingStore } from "../store/processingStore";
 
 /**
  * Custom hook for content submission functionality
@@ -28,9 +29,10 @@ export const useContentSubmission = (options = {}) => {
 
   // Enhanced loading state management
   const loadingState = useLoadingState({
-    defaultTimeout: 60000, // 60 seconds for content operations
+    defaultTimeout: 120000, // 120 seconds for content operations
     onTimeout: (operationId) => {
       console.warn(`Content submission operation ${operationId} timed out`);
+      processingStore.fail("Request timed out. You can try again.");
     },
     onError: (operationId, error) => {
       console.error(
@@ -39,6 +41,8 @@ export const useContentSubmission = (options = {}) => {
       );
     },
   });
+
+  const processingStore = useProcessingStore();
 
   // Results and errors
   const [submissionResult, setSubmissionResult] = useState(null);
@@ -279,6 +283,7 @@ export const useContentSubmission = (options = {}) => {
         message: "Submitting content...",
         cancellable: true,
       });
+      processingStore.start("submitting", "Submitting content...");
 
       try {
         // Single step: send multipart/form-data per backend contract
@@ -290,6 +295,7 @@ export const useContentSubmission = (options = {}) => {
             cancellable: false,
           }
         );
+        processingStore.setPhase("generating", "Generating content...");
 
         let generationResult;
 
@@ -299,8 +305,10 @@ export const useContentSubmission = (options = {}) => {
             images
           );
           generationOperation.complete(generationResult);
+          processingStore.setPhase("saving", "Saving content...");
         } catch (generationError) {
           generationOperation.fail(generationError);
+          processingStore.fail(generationError.message);
           const enhancedError = enhanceError(generationError, {
             type: "processing",
             context: "content_generation_phase",
@@ -338,10 +346,12 @@ export const useContentSubmission = (options = {}) => {
 
             saveResult = await contentApi.saveContent(contentToSave);
             saveOperation.complete(saveResult);
+            processingStore.complete({ generationResult, saveResult });
           } catch (saveError) {
             // Saving is optional, so we don't fail the entire submission
             console.warn("Failed to save content:", saveError);
             saveOperation.fail(saveError);
+            processingStore.fail(saveError.message);
           }
         }
 
@@ -358,6 +368,7 @@ export const useContentSubmission = (options = {}) => {
         setIsSuccess(true);
         setSuccessMessage("Content submitted successfully!");
         mainOperation.complete(result);
+        processingStore.complete(result);
 
         if (onSuccess) {
           onSuccess(result);
@@ -373,6 +384,7 @@ export const useContentSubmission = (options = {}) => {
 
         setSubmissionError(enhancedError);
         mainOperation.fail(enhancedError);
+        processingStore.fail(enhancedError.message);
 
         if (onError) {
           onError(enhancedError);

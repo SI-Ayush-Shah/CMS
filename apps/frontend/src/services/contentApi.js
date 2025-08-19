@@ -28,7 +28,7 @@ export const generateContent = async (text, imageIds = []) => {
   // return response.data
 
   // Mock implementation
-  await mockDelay(1500); // Simulate processing time
+  await mockDelay(60000); // Simulate processing time
 
   if (shouldSimulateError()) {
     throw new Error("Content generation failed. Please try again.");
@@ -77,7 +77,7 @@ export const generateContentViaForm = async (text, images = []) => {
   });
 
   const response = await apiClient.post(
-    "http://localhost:3001/content-studio/api/generate-content",
+    "/content-studio/api/generate-content",
     formData,
     {
       headers: {
