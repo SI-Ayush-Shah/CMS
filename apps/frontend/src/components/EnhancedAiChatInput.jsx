@@ -17,6 +17,7 @@ import { useTextInput } from '../hooks/useTextInput'
 import { useImageUpload } from '../hooks/useImageUpload'
 import { useValidation } from '../hooks/useValidation'
 import { useAutoResize } from '../hooks/useAutoResize'
+import { useAccessibility } from '../hooks/useAccessibility'
 
 /**
  * Enhanced AI Chat Input Component
@@ -43,6 +44,17 @@ export const EnhancedAiChatInput = ({
   // State for UI interactions
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
+
+  // Accessibility hook
+  const { 
+    announce, 
+    createKeyboardHandler, 
+    createAriaAttributes,
+    manageFocusTo 
+  } = useAccessibility({
+    announceChanges: true,
+    manageFocus: true
+  })
 
   // Custom hooks
   const {
@@ -99,7 +111,9 @@ export const EnhancedAiChatInput = ({
   const handleValidationError = useCallback((category, error) => {
     // This will be handled by the validation hook
     console.log(`Validation error in ${category}:`, error)
-  }, [])
+    // Announce error to screen readers
+    announce(`Error in ${category}: ${error.message || error}`, 'assertive')
+  }, [announce])
 
   /**
    * Handles text change with real-time validation
@@ -122,14 +136,24 @@ export const EnhancedAiChatInput = ({
     if (errors.image.length > 0) {
       clearErrors('image')
     }
-  }, [errors.image, clearErrors])
+    
+    // Announce image changes to screen readers
+    if (newImages && newImages.length > 0) {
+      announce(`${newImages.length} image${newImages.length === 1 ? '' : 's'} selected`)
+    }
+  }, [errors.image, clearErrors, announce])
 
   /**
    * Toggles image upload zone visibility
    */
   const toggleImageUpload = useCallback(() => {
-    setShowImageUpload(prev => !prev)
-  }, [])
+    setShowImageUpload(prev => {
+      const newState = !prev
+      // Announce state change to screen readers
+      announce(`Image upload ${newState ? 'opened' : 'closed'}`)
+      return newState
+    })
+  }, [announce])
 
   /**
    * Handles form submission
@@ -179,10 +203,15 @@ export const EnhancedAiChatInput = ({
         clearErrors('all')
         clearWarnings('all')
         setShowImageUpload(false)
+        
+        // Announce successful submission
+        announce('Content submitted successfully')
       }
 
     } catch (error) {
       handleSubmissionError(error, 'form submission')
+      // Announce submission error
+      announce(`Submission failed: ${error.message}`, 'assertive')
     } finally {
       setIsSubmitting(false)
     }
@@ -206,15 +235,23 @@ export const EnhancedAiChatInput = ({
   ])
 
   /**
-   * Handles key press events
+   * Handles key press events using accessibility hook
    */
-  const handleKeyPress = useCallback((event) => {
-    // Submit on Ctrl/Cmd + Enter
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-      event.preventDefault()
-      handleSubmit()
+  const handleKeyPress = createKeyboardHandler({
+    custom: (event, key, modifiers) => {
+      // Submit on Ctrl/Cmd + Enter
+      if ((modifiers.ctrlKey || modifiers.metaKey) && key === 'Enter') {
+        event.preventDefault()
+        handleSubmit()
+      }
+      
+      // Toggle image upload with Alt + I
+      if (modifiers.altKey && key.toLowerCase() === 'i') {
+        event.preventDefault()
+        toggleImageUpload()
+      }
     }
-  }, [handleSubmit])
+  })
 
   /**
    * Dismisses validation messages
@@ -248,7 +285,13 @@ export const EnhancedAiChatInput = ({
       speed="6s"
       thickness={0}
     >
-      <div className="backdrop-blur-[20px] backdrop-filter bg-core-neu-1000/40 w-full h-full flex flex-col justify-between p-4 rounded-[15px] border-none">
+      <div 
+        className="backdrop-blur-[20px] backdrop-filter bg-core-neu-1000/40 w-full h-full flex flex-col justify-between p-4 rounded-[15px] border-none"
+        role="form"
+        aria-label="Content creation form"
+      >
+        
+
         
         {/* Validation Messages */}
         {(hasErrors || hasWarnings) && (
@@ -269,15 +312,17 @@ export const EnhancedAiChatInput = ({
           <div className="flex flex-wrap gap-2 items-start justify-between min-h-7 px-2 py-0 rounded-xl w-full">
             <textarea
               ref={textareaRef}
-              className="font-normal text-[14px] text-invert-low w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] focus:ring-0"
+              className="font-normal text-[14px] text-invert-low w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] focus:ring-0 focus:ring-offset-0"
               placeholder={placeholder}
               value={text}
               onChange={handleTextChange}
               onKeyDown={handleKeyPress}
               disabled={disabled || isSubmitting}
               style={{ lineHeight: "normal" }}
-              aria-label="Content input"
-              aria-describedby="character-count validation-messages"
+              aria-label="Content input. Press Ctrl+Enter to submit, Alt+I to toggle image upload"
+              aria-describedby="character-count validation-messages keyboard-shortcuts"
+              aria-required="true"
+              aria-invalid={hasErrors ? 'true' : 'false'}
             />
           </div>
 
@@ -293,6 +338,8 @@ export const EnhancedAiChatInput = ({
                     : 'text-invert-low'
               }`}
               aria-live="polite"
+              role="status"
+              aria-label={`Character count: ${characterCount} of ${maxLength} characters used${warningMessage ? `. ${warningMessage}` : ''}`}
             >
               {characterCount}/{maxLength}
               {warningMessage && (
@@ -303,12 +350,13 @@ export const EnhancedAiChatInput = ({
 
           {/* Image upload zone */}
           {showImageUpload && (
-            <div className="px-2">
+            <div className="px-2" role="region" aria-label="Image upload area">
               <ImageUploadZone
                 onImagesChange={handleImagesChange}
                 maxImages={maxImages}
                 disabled={disabled || isSubmitting}
                 className="border-core-prim-300/30"
+                aria-describedby="image-upload-instructions"
               />
             </div>
           )}
@@ -321,7 +369,7 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={toggleImageUpload}
             disabled={disabled || isSubmitting}
-            className={`flex gap-2 items-center justify-center min-h-7 min-w-7 p-[4px] rounded-2xl shrink-0 transition-colors ${
+            className={`flex gap-2 items-center justify-center min-h-7 min-w-7 p-[4px] rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${
               showImageUpload 
                 ? 'bg-core-prim-500/20 text-core-prim-400' 
                 : 'hover:bg-core-prim-500/10'
@@ -330,8 +378,10 @@ export const EnhancedAiChatInput = ({
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'cursor-pointer'
             }`}
-            aria-label={`${showImageUpload ? 'Hide' : 'Show'} image upload`}
+            aria-label={`${showImageUpload ? 'Hide' : 'Show'} image upload area. Press Alt+I as shortcut.`}
             aria-pressed={showImageUpload}
+            aria-describedby="image-upload-help"
+            type="button"
           >
             <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
               <div className="relative shrink-0 size-4">
@@ -362,12 +412,14 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`bg-neutral-900 flex gap-1 items-center justify-center px-3 py-2 rounded-2xl shrink-0 transition-colors ${
+            className={`bg-neutral-900 flex gap-1 items-center justify-center px-3 py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${
               canSubmit
                 ? 'hover:bg-neutral-800 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed'
             }`}
-            aria-label="Generate content"
+            aria-label={`Generate content${isSubmitting ? ' (submitting...)' : canSubmit ? '. Press Ctrl+Enter as shortcut.' : ' (form incomplete)'}`}
+            aria-describedby="submit-help"
+            type="submit"
           >
             {isSubmitting ? (
               <>
@@ -399,9 +451,31 @@ export const EnhancedAiChatInput = ({
           </button>
         </div>
 
-        {/* Keyboard shortcut hint */}
+        {/* Keyboard shortcuts help */}
+        <div 
+          id="keyboard-shortcuts" 
+          className="sr-only"
+          aria-label="Keyboard shortcuts"
+        >
+          Press Ctrl+Enter to submit content. Press Alt+I to toggle image upload.
+        </div>
+        
+        {/* Help text for buttons */}
+        <div id="image-upload-help" className="sr-only">
+          Toggle image upload area. You can also use Alt+I keyboard shortcut.
+        </div>
+        
+        <div id="submit-help" className="sr-only">
+          Submit the form to generate content. You can also use Ctrl+Enter keyboard shortcut.
+        </div>
+        
+        <div id="image-upload-instructions" className="sr-only">
+          Drag and drop images or click to select files. Maximum {maxImages} images allowed.
+        </div>
+
+        {/* Visual keyboard shortcut hint */}
         {text.length > 0 && !isSubmitting && (
-          <div className="text-xs text-invert-low/60 text-center mt-2">
+          <div className="text-xs text-invert-low/60 text-center mt-2" aria-hidden="true">
             Press Ctrl+Enter to generate
           </div>
         )}

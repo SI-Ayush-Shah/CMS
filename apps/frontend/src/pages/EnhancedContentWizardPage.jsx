@@ -179,6 +179,20 @@ export default function EnhancedContentWizardPage() {
           Type it. Dream it. Watch it appear!
         </div>
 
+        {/* Page-level error display */}
+        {pageError && (
+          <div className="w-full max-w-[600px] mx-auto mb-4">
+            <ErrorDisplay
+              error={pageError}
+              onRetry={handleRetry}
+              onReset={handleReset}
+              onRefresh={handleRefresh}
+              onContactSupport={handleContactSupport}
+              showTechnicalDetails={import.meta.env.VITE_NODE_ENV === 'development'}
+            />
+          </div>
+        )}
+
         {/* Success message */}
         {lastSubmission?.success && (
           <div className="w-full max-w-[600px] mx-auto mb-4">
@@ -209,18 +223,33 @@ export default function EnhancedContentWizardPage() {
           </div>
         )}
 
-        {/* Enhanced AI Chat Input with Error Boundary */}
+        {/* Submission loading indicator */}
+        {submissionPhase !== 'idle' && (
+          <div className="w-full max-w-[600px] mx-auto mb-4">
+            <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+              <SubmissionLoadingIndicator
+                phase={submissionPhase}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced AI Chat Input with Comprehensive Error Boundary */}
         <div className="w-full max-w-[600px] h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] mx-auto">
-          <ValidationErrorBoundary
+          <ErrorBoundary
+            name="ContentWizardInput"
             title="Content Input Error"
             message="There was an issue with the content input system. Please try again or reset the form."
-            onError={handleValidationError}
+            onError={handleComponentError}
             onRetry={handleRetry}
             onReset={handleReset}
+            onRefresh={handleRefresh}
+            onContactSupport={handleContactSupport}
+            maxRetries={3}
           >
             <EnhancedAiChatInput
               onSubmit={handleSubmit}
-              disabled={isSubmitting}
+              disabled={submissionPhase !== 'idle'}
               maxLength={2000}
               maxImages={10}
               validationOptions={{
@@ -234,7 +263,7 @@ export default function EnhancedContentWizardPage() {
                 }
               }}
             />
-          </ValidationErrorBoundary>
+          </ErrorBoundary>
         </div>
 
         {/* Development info */}
@@ -244,12 +273,26 @@ export default function EnhancedContentWizardPage() {
               <summary className="cursor-pointer hover:text-invert-low">
                 Development Info
               </summary>
-              <div className="mt-2 p-2 bg-core-neu-900/50 rounded text-xs font-mono">
-                <div>Submitting: {isSubmitting.toString()}</div>
+              <div className="mt-2 p-2 bg-core-neu-900/50 rounded text-xs font-mono space-y-1">
+                <div>Submission Phase: {submissionPhase}</div>
+                <div>Page Error: {pageError ? 'Present' : 'None'}</div>
                 <div>Last Submission: {lastSubmission ? 'Available' : 'None'}</div>
                 {lastSubmission && (
                   <div className="mt-1">
                     Status: {lastSubmission.success ? 'Success' : 'Error'}
+                    {lastSubmission.error && (
+                      <div className="ml-2 text-error-400">
+                        Error Type: {lastSubmission.error.category}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {pageError && (
+                  <div className="mt-1 text-error-400">
+                    <div>Error ID: {pageError.errorId}</div>
+                    <div>Category: {pageError.category}</div>
+                    <div>Severity: {pageError.severity}</div>
+                    <div>Retryable: {pageError.retryable.toString()}</div>
                   </div>
                 )}
               </div>

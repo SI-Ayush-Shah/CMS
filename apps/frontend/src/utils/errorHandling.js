@@ -108,8 +108,11 @@ export const enhanceError = (error, context = {}) => {
     return error
   }
 
-  // Handle network errors (axios errors)
-  if (error.isAxiosError || error.response || error.request) {
+  // Handle network errors (axios errors or network-related errors)
+  if (error.isAxiosError || error.response || error.request || 
+      context.type === 'network' || 
+      error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND' || error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+    
     const classification = error.classification || classifyNetworkError(error)
     
     const recoveryActions = []
@@ -204,7 +207,7 @@ export const enhanceError = (error, context = {}) => {
     message: error.message || 'An unexpected error occurred',
     originalError: error,
     category: ErrorCategory.SYSTEM,
-    severity: ErrorSeverity.MEDIUM,
+    severity: context.severity || ErrorSeverity.MEDIUM,
     userMessage: 'Something went wrong. Please try again.',
     technicalMessage: error.message || error.toString(),
     recoveryActions: [RecoveryAction.RETRY, RecoveryAction.REFRESH],

@@ -160,7 +160,13 @@ export const ImageUploadZone = ({
       event.preventDefault()
       openFileDialog()
     }
-  }, [disabled, openFileDialog])
+    
+    // Clear all images with Delete key when focused on upload zone
+    if (event.key === 'Delete' && images.length > 0) {
+      event.preventDefault()
+      clearAllImages()
+    }
+  }, [disabled, openFileDialog, images.length, clearAllImages])
 
   /**
    * Handles image removal
@@ -219,9 +225,10 @@ export const ImageUploadZone = ({
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
         role="button"
-        aria-label={`Upload images. ${canAddMore ? `${remainingSlots} slots remaining.` : 'Maximum images reached.'}`}
-        aria-describedby="upload-instructions upload-status"
+        aria-label={`Upload images. ${canAddMore ? `${remainingSlots} slots remaining.` : 'Maximum images reached.'} Press Enter or Space to select files. Press Delete to clear all images.`}
+        aria-describedby="upload-instructions upload-status upload-help"
         aria-disabled={disabled}
+        aria-expanded={images.length > 0}
       >
         {/* Upload icon */}
         <div className="flex items-center justify-center w-12 h-12 mb-3 rounded-full bg-core-prim-500/20">
@@ -263,9 +270,14 @@ export const ImageUploadZone = ({
         )}
       </div>
 
-      {/* Upload status */}
-      <div id="upload-status" className="sr-only" aria-live="polite">
+      {/* Upload status and help */}
+      <div id="upload-status" className="sr-only" aria-live="polite" role="status">
         {imageCount > 0 && `${imageCount} image${imageCount === 1 ? '' : 's'} selected`}
+      </div>
+      
+      <div id="upload-help" className="sr-only">
+        Keyboard shortcuts: Enter or Space to select files, Delete to clear all images. 
+        Drag and drop is also supported.
       </div>
 
       {/* Error display */}
@@ -313,19 +325,26 @@ export const ImageUploadZone = ({
             {imageCount > 0 && (
               <button
                 onClick={clearAllImages}
-                className="text-error-500 hover:text-error-600 text-sm font-medium transition-colors"
-                aria-label="Remove all images"
+                className="text-error-500 hover:text-error-600 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-1 rounded"
+                aria-label={`Remove all ${imageCount} images`}
+                type="button"
               >
                 Clear All
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {images.map((image) => (
+          <div 
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+            role="grid"
+            aria-label="Selected images"
+          >
+            {images.map((image, index) => (
               <div
                 key={image.id}
-                className="relative group aspect-square bg-core-neu-900 rounded-lg overflow-hidden border border-core-prim-300/20"
+                className="relative group aspect-square bg-core-neu-900 rounded-lg overflow-hidden border border-core-prim-300/20 focus-within:ring-2 focus-within:ring-core-prim-500 focus-within:ring-offset-1"
+                role="gridcell"
+                aria-label={`Image ${index + 1} of ${imageCount}: ${image.file.name}`}
               >
                 {/* Image preview */}
                 <img
@@ -364,8 +383,10 @@ export const ImageUploadZone = ({
                   onClick={(e) => handleRemoveImage(image.id, e)}
                   onKeyDown={(e) => handleRemoveKeyDown(image.id, e)}
                   className="absolute top-1 right-1 w-6 h-6 bg-error-500 hover:bg-error-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-1"
-                  aria-label={`Remove ${image.file.name}`}
+                  aria-label={`Remove image ${index + 1}: ${image.file.name}`}
+                  aria-describedby={`image-${image.id}-status`}
                   tabIndex={0}
+                  type="button"
                 >
                   <svg
                     className="w-4 h-4"
@@ -383,9 +404,17 @@ export const ImageUploadZone = ({
                   </svg>
                 </button>
 
-                {/* File name tooltip */}
+                {/* File name and status */}
                 <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
                   {image.file.name}
+                </div>
+                
+                {/* Hidden status for screen readers */}
+                <div id={`image-${image.id}-status`} className="sr-only">
+                  {image.uploadStatus === 'uploading' && 'Uploading'}
+                  {image.uploadStatus === 'completed' && 'Upload completed'}
+                  {image.uploadStatus === 'error' && `Upload failed: ${image.error}`}
+                  {image.uploadStatus === 'pending' && 'Ready to upload'}
                 </div>
               </div>
             ))}

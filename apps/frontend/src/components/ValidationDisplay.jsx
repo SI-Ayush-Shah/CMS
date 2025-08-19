@@ -86,7 +86,8 @@ export const ValidationDisplay = ({
     <button
       onClick={() => handleDismiss(item, index, type)}
       className="ml-auto flex-shrink-0 p-1 rounded-full hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error-500 transition-colors"
-      aria-label={`Dismiss ${type}`}
+      aria-label={`Dismiss ${type}: ${item.message}`}
+      type="button"
     >
       <svg
         className="w-4 h-4"
@@ -111,13 +112,14 @@ export const ValidationDisplay = ({
   const renderErrorItem = (error, index) => (
     <div
       key={`error-${index}-${error.type || 'unknown'}`}
-      className="flex items-start gap-3 p-3 bg-error-500/10 border border-error-500/20 rounded-lg"
+      className="flex items-start gap-3 p-3 bg-error-500/10 border border-error-500/20 rounded-lg focus-within:ring-2 focus-within:ring-error-500 focus-within:ring-offset-1"
       role="alert"
+      aria-labelledby={`error-${index}-message`}
     >
       {showIcons && getErrorIcon()}
       
       <div className="flex-1 min-w-0">
-        <p className="text-error-600 text-sm font-medium">
+        <p id={`error-${index}-message`} className="text-error-600 text-sm font-medium">
           {error.message}
         </p>
         
@@ -150,14 +152,15 @@ export const ValidationDisplay = ({
   const renderWarningItem = (warning, index) => (
     <div
       key={`warning-${index}-${warning.type || 'unknown'}`}
-      className="flex items-start gap-3 p-3 bg-warning-500/10 border border-warning-500/20 rounded-lg"
+      className="flex items-start gap-3 p-3 bg-warning-500/10 border border-warning-500/20 rounded-lg focus-within:ring-2 focus-within:ring-warning-500 focus-within:ring-offset-1"
       role="alert"
       aria-live="polite"
+      aria-labelledby={`warning-${index}-message`}
     >
       {showIcons && getWarningIcon()}
       
       <div className="flex-1 min-w-0">
-        <p className="text-warning-600 text-sm font-medium">
+        <p id={`warning-${index}-message`} className="text-warning-600 text-sm font-medium">
           {warning.message}
         </p>
         
