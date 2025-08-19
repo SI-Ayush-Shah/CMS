@@ -17,10 +17,41 @@ export const GenerateContentRequestSchema = Type.Object({
   })
 })
 
+// Editor.js block schema
+const EditorJsBlockSchema = Type.Object({
+  id: Type.String({ description: 'Unique block identifier' }),
+  type: Type.Union([
+    Type.Literal("paragraph"),
+    Type.Literal("header"), 
+    Type.Literal("list"),
+    Type.Literal("table"),
+    Type.Literal("code"),
+    Type.Literal("quote"),
+    Type.Literal("delimiter"),
+    Type.Literal("image"),
+    Type.Literal("embed"),
+    Type.Literal("checklist"),
+    Type.Literal("warning"),
+    Type.Literal("linkTool")
+  ], { description: 'Editor.js block type' }),
+  data: Type.Any({ description: 'Block-specific data structure - flexible object' })
+})
+
+// Editor.js document schema
+const EditorJsSchema = Type.Object({
+  time: Type.Optional(Type.Number({ description: 'Creation timestamp' })),
+  blocks: Type.Array(EditorJsBlockSchema, { description: 'Content blocks array' }),
+  version: Type.Optional(Type.String({ description: 'Editor.js version' }))
+})
+
 // Response DTO Schema  
 export const GenerateContentResponseSchema = Type.Object({
-  generatedContent: Type.String({
-    description: 'The generated/processed content'
+  generatedContent: Type.Object({
+    title: Type.String({ description: 'Article title' }),
+    summary: Type.String({ description: 'Article summary' }),
+    category: Type.String({ description: 'Article category' }),
+    tags: Type.Array(Type.String(), { description: 'Article tags' }),
+    body: EditorJsSchema
   }),
   originalContent: Type.String({
     description: 'The original input content'
