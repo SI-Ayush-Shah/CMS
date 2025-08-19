@@ -1,33 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
-import { FaEdit, FaUser } from "react-icons/fa";
-import { IoBriefcaseOutline } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
+import { IoBriefcaseOutline } from "react-icons/io5";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navigationItems = [
     {
       id: "creative-wizard",
       label: "Creative Wizard",
       icon: <PiMagicWand />,
+      path: "/wizard",
     },
     {
       id: "content-hub",
       label: "Content Hub",
       icon: <PiNotePencilThin />,
+      path: "/blog",
     },
     {
       id: "ai-jobs",
       label: "AI Jobs",
       icon: <IoBriefcaseOutline />,
+      path: "/jobs",
     },
     {
       id: "analytics",
       label: "Analytics",
       icon: <PiChartLineUp />,
+      path: "/components",
     },
   ];
 
@@ -35,9 +42,18 @@ export function Leftpanel() {
     setIsExpanded(!isExpanded);
   };
 
-  const handleNavItemClick = (itemId) => {
+  const handleNavItemClick = (itemId, path) => {
     setActiveItemId(itemId);
+    if (path) navigate(path);
   };
+
+  // Highlight active item based on current route
+  useEffect(() => {
+    const matched = navigationItems.find(
+      (item) => item.path && location.pathname.startsWith(item.path)
+    );
+    if (matched) setActiveItemId(matched.id);
+  }, [location.pathname]);
 
   return (
     <div
@@ -78,7 +94,7 @@ export function Leftpanel() {
         {navigationItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => handleNavItemClick(item.id)}
+            onClick={() => handleNavItemClick(item.id, item.path)}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
               activeItemId === item.id
                 ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"

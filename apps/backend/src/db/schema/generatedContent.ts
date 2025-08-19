@@ -1,5 +1,7 @@
-import { pgTable, uuid, varchar, jsonb, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, jsonb, timestamp, pgEnum } from 'drizzle-orm/pg-core'
 import { Type, Static } from '@sinclair/typebox'
+
+export const contentStatus = pgEnum('content_status', ['draft', 'published'])
 
 export const generatedContents = pgTable('generated_contents', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -9,6 +11,7 @@ export const generatedContents = pgTable('generated_contents', {
   tags: jsonb('tags').$type<string[]>().notNull().default([]),
   // Editor.js body stored as JSON
   body: jsonb('body').$type<Record<string, unknown>>().notNull(),
+  status: contentStatus('status').notNull().default('draft'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -20,6 +23,7 @@ export const insertGeneratedContentSchema = Type.Object({
   category: Type.String({ minLength: 1 }),
   tags: Type.Array(Type.String()),
   body: Type.Record(Type.String(), Type.Any()),
+  status: Type.Optional(Type.Union([Type.Literal('draft'), Type.Literal('published')], { default: 'draft' }))
 })
 
 export const selectGeneratedContentSchema = Type.Object({
@@ -29,6 +33,7 @@ export const selectGeneratedContentSchema = Type.Object({
   category: Type.String(),
   tags: Type.Array(Type.String()),
   body: Type.Record(Type.String(), Type.Any()),
+  status: Type.Union([Type.Literal('draft'), Type.Literal('published')]),
   createdAt: Type.String({ format: 'date-time' }),
   updatedAt: Type.String({ format: 'date-time' }),
 })

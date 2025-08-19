@@ -2,6 +2,11 @@ import { useState, useCallback } from "react";
 import { EnhancedAiChatInput } from "../components/EnhancedAiChatInput";
 import { useContentSubmission } from "../hooks/useContentSubmission";
 import ContentWizardErrorBoundary from "../components/ContentWizardErrorBoundary";
+import LoadingProgress from "../components/LoadingProgress";
+import { SubmissionLoadingIndicator } from "../components/LoadingIndicator";
+import ProcessingView from "../components/ProcessingView";
+import { useProcessingStore } from "../store/processingStore";
+import ContentEditorView from "../components/ContentEditorView";
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
@@ -10,8 +15,24 @@ export default function ContentWizardPage() {
   const [feedbackType, setFeedbackType] = useState(""); // 'success' | 'error' | ''
 
   // Content submission hook
-  const { submit, isLoading } = useContentSubmission({
-    onSuccess: () => {
+  const [article, setArticle] = useState(null);
+
+  const { submit, isLoading, loadingState } = useContentSubmission({
+    onSuccess: (result) => {
+      // Normalize API to editor view props
+      const payload = result?.generatedContent;
+      const gc =
+        payload?.data?.generatedContent || payload?.generatedContent || payload;
+      const normalized = {
+        title: gc?.title,
+        summary: gc?.summary,
+        category: gc?.category,
+        tags: gc?.tags || [],
+        bannerUrl: gc?.bannerUrl,
+        images: gc?.images || [],
+        body: gc?.body,
+      };
+      setArticle(normalized);
       setFeedbackMessage("Content generated successfully!");
       setFeedbackType("success");
 
@@ -61,10 +82,16 @@ export default function ContentWizardPage() {
     setFeedbackType("");
   }, []);
 
+  const { isProcessing, phase } = useProcessingStore();
+
   return (
     <ContentWizardErrorBoundary>
       <div className="relative w-full flex h-full items-center justify-center">
-        <div className="flex flex-col w-full gap-4 h-full justify-center">
+        {/* Top progress bar while processing */}
+        <LoadingProgress
+          isLoading={loadingState?.phase && loadingState.phase !== "idle"}
+        />
+        <div className="flex flex-col w-full gap-4 h-full justify-center ">
           {/* Title - responsive design */}
           <div className="font-semibold text-invert-high text-2xl sm:text-3xl lg:text-[36px] text-center px-4">
             What's on your mind today?
@@ -78,7 +105,7 @@ export default function ContentWizardPage() {
           {/* Feedback message */}
           {feedbackMessage && (
             <div
-              className={`max-w-[600px] mx-auto p-3 rounded-lg text-center text-sm font-medium transition-all duration-300 mx-4 sm:mx-auto ${
+              className={`max-w-[600px] mx-auto  p-3 rounded-lg text-center text-sm font-medium transition-all duration-300 mx-4 sm:mx-auto ${
                 feedbackType === "success"
                   ? "bg-green-500/10 border border-green-500/20 text-green-400"
                   : "bg-error-500/10 border border-error-500/20 text-error-400"
@@ -134,27 +161,36 @@ export default function ContentWizardPage() {
             </div>
           )}
 
-          {/* Enhanced AI Chat Input - responsive design */}
-          <div className="w-full max-w-[600px] min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] mx-auto px-4 sm:px-0">
-            <EnhancedAiChatInput
-              onSubmit={handleContentSubmit}
-              placeholder="Your blog crafting experience starts here..."
-              maxLength={5000}
-              maxImages={10}
-              disabled={isLoading}
-              validationOptions={{
-                text: {
-                  required: true,
-                  maxLength: 2000,
-                },
-                images: {
-                  maxImages: 10,
-                  required: false,
-                },
-              }}
-            />
-          </div>
+          {/* Switch between: input → processing → editor */}
+          {isProcessing ? (
+            <ProcessingView phase={phase} />
+          ) : article ? (
+            <ContentEditorView article={article} />
+          ) : (
+            <div className="w-full max-w-[600px] mx-auto min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-4 sm:px-0">
+              <EnhancedAiChatInput
+                onSubmit={handleContentSubmit}
+                placeholder="Your blog crafting experience starts here..."
+                maxLength={5000}
+                maxImages={10}
+                disabled={isLoading}
+                validationOptions={{
+                  text: {
+                    required: true,
+                    maxLength: 2000,
+                  },
+                  images: {
+                    maxImages: 10,
+                    required: false,
+                  },
+                }}
+              />
+            </div>
+          )}
         </div>
+
+        {/* Submission overlay matching Figma loading state */}
+        {/* Overlay removed – page switches to processing view above */}
       </div>
     </ContentWizardErrorBoundary>
   );

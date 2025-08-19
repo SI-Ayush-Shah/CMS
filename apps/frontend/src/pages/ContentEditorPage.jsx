@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EnhancedAiChatInput } from "../components/EnhancedAiChatInput";
 import { Button } from "../components/Button";
 import { contentApi } from "../services/contentApi";
+import EditorJsRenderer from "../components/EditorJsRenderer";
 
 /**
  * Content Editor Page
@@ -16,6 +18,13 @@ import { contentApi } from "../services/contentApi";
  * EnhancedAiChatInput for ideation/help while writing.
  */
 export default function ContentEditorPage() {
+  const { id } = useParams();
+  const { data: article } = useQuery({
+    queryKey: ["article", id],
+    queryFn: () => contentApi.getContent(id),
+    enabled: !!id,
+  });
+
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState("");
@@ -43,24 +52,28 @@ export default function ContentEditorPage() {
     );
   }, []);
 
+  const currentTitle = article?.title || dummyTitle;
+  const currentBanner = article?.bannerUrl || dummyImageUrl;
+  const currentBody = article?.body;
+
   const validate = useCallback(() => {
-    if (!dummyTitle.trim()) {
+    if (!currentTitle.trim()) {
       showMessage("Please add a title.", "error");
       return false;
     }
-    if (!dummyBody.trim()) {
+    if (!currentBody && !dummyBody.trim()) {
       showMessage("Please write the body content.", "error");
       return false;
     }
     return true;
-  }, [dummyTitle, dummyBody, showMessage]);
+  }, [currentTitle, currentBody, dummyBody, showMessage]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!validate()) return;
     try {
       setIsSavingDraft(true);
       const res = await contentApi.saveContent({
-        text: `${dummyTitle}\n\n${dummyBody}`,
+        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
         imageIds: [],
         metadata: { status: "draft" },
       });
@@ -78,7 +91,7 @@ export default function ContentEditorPage() {
     try {
       setIsPublishing(true);
       const res = await contentApi.saveContent({
-        text: `${dummyTitle}\n\n${dummyBody}`,
+        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
         imageIds: [],
         metadata: { status: "published" },
       });
@@ -106,73 +119,73 @@ export default function ContentEditorPage() {
         </div>
       )}
 
-      <div className="flex flex-1 w-full gap-3 h-full">
-        <div className="w-[55%] gap-6 w-full">
-          {/* Editor column */}
-          <section className="lg:col-span-2 space-y-5 p-2 ">
-            {/* Header with actions */}
-
-            <div className="flex items-center sticky top-2 z-10 justify-between mb-6 rounded-2xl border border-core-prim-300/20 px-4 py-2 bg-core-prim-900">
-              <div className="text-[20px] font-semibold text-invert-high">
-                Creative Wizard
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  isLoading={isSavingDraft}
-                  className="min-w-40"
-                >
-                  Save to drafts
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handlePublish}
-                  isLoading={isPublishing}
-                  className="min-w-36"
-                >
-                  Publish
-                </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Editor column */}
+        <section className="lg:col-span-2 space-y-5">
+          {/* Header with actions */}
+          <div className="flex items-center justify-between mb-5 rounded-2xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+            <div className="text-[20px] font-semibold text-invert-high">
+              Creative Wizard {id && (
+                <span className="ml-2 text-[12px] text-invert-low">#{id}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleSaveDraft}
+                isLoading={isSavingDraft}
+                className="min-w-40"
+              >
+                Save to drafts
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handlePublish}
+                isLoading={isPublishing}
+                className="min-w-36"
+              >
+                Publish
+              </Button>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-invert-low mb-2">Image</p>
+            <div className="w-full">
+              <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
+                <img
+                  src={currentBanner}
+                  alt="Cover preview"
+                  className="w-full aspect-[16/10] object-cover"
+                />
               </div>
             </div>
+          </div>
 
-            <div className="px-3 overflow-y-auto">
-              <div className="">
-                <p className="text-xs text-invert-low mb-2">Image</p>
-                <div className="w-full">
-                  <div className="relative w-[90%] overflow-hidden rounded-2xl border border-core-prim-300/20">
-                    <img
-                      src={dummyImageUrl}
-                      alt="Cover preview"
-                      className="w-full aspect-[16/10] object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
+          <div>
+            <p className="text-xs text-invert-low mb-2">Title</p>
+            <h1 className="font-semibold text-invert-high text-[22px] sm:text-[24px] lg:text-[26px] leading-8">
+              {currentTitle}
+            </h1>
+          </div>
 
-              <div className="py-3">
-                <p className="text-xs text-invert-low mb-2">Title</p>
-                <h1 className="font-semibold text-invert-high text-[22px] sm:text-[24px] lg:text-[26px] leading-8">
-                  {dummyTitle}
-                </h1>
-              </div>
-
-              <div className="">
-                <p className="text-xs text-invert-low mb-2">Body</p>
-                <div className="">
-                  {dummyBody.split("\n").map((para, idx) => (
-                    <p
-                      key={idx}
-                      className="text-main-medium text-[14px] leading-7 mb-2 last:mb-0"
-                    >
-                      {para}
-                    </p>
-                  ))}
-                </div>
-              </div>
+          <div>
+            <p className="text-xs text-invert-low mb-2">Body</p>
+            <div className="">
+              {currentBody ? (
+                <EditorJsRenderer data={currentBody} />
+              ) : (
+                dummyBody.split("\n").map((para, idx) => (
+                  <p
+                    key={idx}
+                    className="text-main-medium text-[14px] leading-7 mb-2 last:mb-0"
+                  >
+                    {para}
+                  </p>
+                ))
+              )}
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
         {/* Assistant column */}
         <div className=" w-[45%] bg-black h-screen sticky top-0 p-2">

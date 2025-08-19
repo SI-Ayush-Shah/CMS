@@ -2,10 +2,24 @@
 // This file will export all API service functions for clean imports
 
 // Axios configuration
-export { apiClient } from './axiosConfig'
+export { apiClient } from "./axiosConfig";
 
 // Content API services
-export { contentApi, generateContent, saveContent, getContent, deleteContent } from './contentApi'
+export {
+  contentApi,
+  generateContent,
+  generateContentViaForm,
+  saveContent,
+  getContent,
+  deleteContent,
+} from "./contentApi";
 
 // Image Upload API services
-export { imageUploadApi, uploadImage, uploadMultipleImages, deleteImage, getImage, getUploadProgress } from './imageUploadApi'
+export {
+  imageUploadApi,
+  uploadImage,
+  uploadMultipleImages,
+  deleteImage,
+  getImage,
+  getUploadProgress,
+} from "./imageUploadApi";

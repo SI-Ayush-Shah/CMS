@@ -839,7 +839,7 @@ const MagicBento = ({
                     </div>
                   )}
                   {/* Content */}
-                  <div className="flex flex-col gap-3 p-3">
+                  <div className="flex flex-col gap-3">
                     {card.date && (
                       <span className="text-[12px] text-white/90">
                         {card.date}
@@ -985,7 +985,7 @@ export const BentoCard = ({
   return (
     <div
       ref={ref}
-      className={`card rounded-[15px] border border-solid p-3 ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
+      className={`card rounded-[15px] border border-solid p-2 ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
       style={{
         ...style,
         position: "relative",

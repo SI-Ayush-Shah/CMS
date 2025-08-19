@@ -249,8 +249,10 @@ export const EnhancedAiChatInput = ({
    * Handles form submission
    */
   const handleSubmit = useCallback(async () => {
-    if (disabled || isSubmitting) return;
+    if (isSubmitting) return;
+    if (disabled) return; // disabled driven by parent state
 
+    // Guard to prevent duplicate calls from rapid keypress/click
     setIsSubmitting(true);
 
     try {
@@ -301,6 +303,7 @@ export const EnhancedAiChatInput = ({
       // Announce submission error
       announce(`Submission failed: ${error.message}`, "assertive");
     } finally {
+      // Always release lock
       setIsSubmitting(false);
     }
   }, [
@@ -592,9 +595,9 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`bg-neutral-900 flex gap-1 items-center justify-center px-3 py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${
+            className={`bg-core-prim-500 text-invert-high flex gap-1 items-center justify-center px-3 py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${
               canSubmit
-                ? "hover:bg-neutral-800 cursor-pointer"
+                ? "hover:bg-core-prim-600 active:bg-core-prim-700 cursor-pointer"
                 : "opacity-50 cursor-not-allowed"
             }`}
             aria-label={`Generate content${isSubmitting ? " (submitting...)" : canSubmit ? ". Press Ctrl+Enter as shortcut." : " (form incomplete)"}`}
@@ -604,13 +607,9 @@ export const EnhancedAiChatInput = ({
             {isSubmitting ? (
               <>
                 <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
-                  <div className="relative shrink-0 size-4">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    </div>
-                  </div>
+                  <span className="inline-block size-4 rounded-full border-2 border-invert-high border-t-transparent animate-spin" />
                 </div>
-                <div className="font-normal text-core-neu-800 text-[14px]">
+                <div className="font-normal text-invert-high text-[14px]">
                   Generating...
                 </div>
               </>
@@ -623,7 +622,7 @@ export const EnhancedAiChatInput = ({
                     </div>
                   </div>
                 </div>
-                <div className="font-normal text-core-neu-800 text-[14px]">
+                <div className="font-normal text-invert-high text-[14px]">
                   Generate
                 </div>
               </>
