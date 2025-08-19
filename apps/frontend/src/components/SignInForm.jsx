@@ -121,7 +121,7 @@ const SignInForm = () => {
           <Button
             type="submit"
             disabled={isLoading}
-            variant="dark"
+            variant="solid"
             className="w-full rounded-[10px] text-base"
             isLoading={isLoading}
           >

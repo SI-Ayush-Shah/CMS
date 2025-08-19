@@ -4,6 +4,7 @@ import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
 import { Checkbox } from '../components/Checkbox';
 import { Tabs } from '../components/Tabs';
+import { Leftpanel } from '../components/Leftpanel';
 
 const ComponentsPage = () => {
   const [inputValue, setInputValue] = useState('');
@@ -74,23 +75,16 @@ const ComponentsPage = () => {
               Button Variants
             </h3>
             <div className="flex flex-wrap gap-4 p-6 bg-surface-low rounded-lg">
-              <Button variant="solid">Solid Button</Button>
-              <Button variant="outline">Outline Button</Button>
-              <Button variant="ghost">Ghost Button</Button>
-              <Button variant="link">Link Button</Button>
+              <div className="w-1/2">
+                <Button variant="solid">Solid Button</Button>
+              </div>
+              <div className="w-1/2">
+                <Button variant="outline">Outline Button</Button>
+              </div>
             </div>
           </div>
           
-          <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
-              Button Sizes
-            </h3>
-            <div className="flex flex-wrap items-center gap-4 p-6 bg-surface-low rounded-lg">
-              <Button size="sm">Small</Button>
-              <Button size="md">Medium</Button>
-              <Button size="lg">Large</Button>
-            </div>
-          </div>
+       
           
           <div>
             <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
@@ -294,6 +288,42 @@ const ComponentsPage = () => {
         </h2>
         <div className="p-6 bg-surface-low rounded-lg">
           <Tabs items={tabItems} defaultTabId="overview" />
+        </div>
+      </section>
+
+      {/* Leftpanel Section */}
+      <section className="mb-16">
+        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+          Left Panel Navigation
+        </h2>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+              Interactive Navigation Panel
+            </h3>
+            <p className="text-body leading-body text-main-medium mb-6">
+              A responsive left navigation panel that can be toggled between expanded and collapsed states. 
+              Features smooth animations, active state highlighting, and user profile section.
+            </p>
+            <div className="flex gap-6 p-6 bg-surface-low rounded-lg overflow-hidden">
+              <div className="flex-shrink-0">
+                <Leftpanel />
+              </div>
+              <div className="flex-1 p-4">
+                <h4 className="text-h3 leading-h3 font-semibold text-main-high mb-3">
+                  Features
+                </h4>
+                <ul className="space-y-2 text-body leading-body text-main-medium">
+                  <li>• Toggle between expanded (256px) and collapsed (64px) states</li>
+                  <li>• Smooth width transitions with CSS animations</li>
+                  <li>• Active state highlighting with purple accent colors</li>
+                  <li>• Responsive navigation items with hover effects</li>
+                  <li>• User profile section with avatar</li>
+                  <li>• Dark theme with proper contrast ratios</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
