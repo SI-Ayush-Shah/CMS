@@ -3,7 +3,7 @@ import { Button } from './Button';
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaEdit, FaUser } from "react-icons/fa";
 import { IoBriefcaseOutline } from "react-icons/io5";
-import { PiChartLineUp, PiMagicWand } from "react-icons/pi";
+import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState('creative-wizard');
@@ -20,7 +20,7 @@ export function Leftpanel() {
       id: 'content-hub',
       label: 'Content Hub',
       icon: (
-        <FaEdit/>
+        <PiNotePencilThin/>
       )
     },
     {
@@ -61,7 +61,7 @@ export function Leftpanel() {
               !isExpanded ? 'hover:bg-core-prim-400 cursor-pointer' : 'cursor-default'
             }`}
           >
-            
+            <img src="/logo.png" alt="logo" className="w-full h-full" />
           </button>
         </div>
         
