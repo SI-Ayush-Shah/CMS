@@ -1,4 +1,6 @@
 import MagicBento, { BentoCard } from "../components/MagicBento";
+import BlogCard from "../components/FigmaBlogCard";
+import { useState } from "react";
 
 // Using MagicBento for cards
 
@@ -100,31 +102,11 @@ const BlogPage = () => {
       <div 
         className="min-h-screen"
       >
-        {/* Header Section */}
-        <section className="py-16 px-6 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h1 
-              className="text-white mb-4"
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontSize: "3rem",
-                fontWeight: "700",
-                marginBottom: "1rem"
-              }}
-            >
-              Latest Articles
-            </h1>
-            <p 
-              style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: "1.125rem",
-                color: "#a2a2a2",
-                maxWidth: "600px",
-                margin: "0 auto"
-              }}
-            >
-              Discover insights, tutorials, and stories from the world of technology and development.
-            </p>
+        {/* Page Title + Tabs */}
+        <section className="px-6 pt-10 pb-6">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-white text-[28px] font-semibold mb-4">Content Hub</h1>
+            <Tabs />
           </div>
         </section>
 
@@ -137,43 +119,27 @@ const BlogPage = () => {
               enableSpotlight
               enableBorderGlow
               enableTilt={false}
-              enableMagnetism
+              enableMagnetism={false}
               clickEffect
               spotlightRadius={300}
               glowColor="132, 0, 255"
             >
               <div className="card-responsive grid gap-2">
-                {blogPosts.map((p) => (
+                {blogPosts.slice(0, 8).map((p) => (
                   <BentoCard
                     key={p.id}
                     enableTilt={false}
-                    enableMagnetism
+                    enableMagnetism={false}
                     enableBorderGlow
+                    className="w-full rounded-[15px]"
                   >
-                    {/* Figma-styled card content */}
-                    <div className="inline-grid leading-[0] place-items-start relative shrink-0" style={{ gridColumns: "max-content", gridRows: "max-content" }}>
-                      <div className="overflow-clip relative" style={{ gridArea: "1 / 1", height: "200px", width: "100%", borderRadius: "10px" }}>
-                        <img src={p.image} alt={p.title} className="absolute rounded-[10px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 group-hover:scale-105" style={{ height: "206px", width: "100%" }} />
-                      </div>
-                      <div className="flex flex-col gap-4 items-start justify-start relative" style={{ gridArea: "1 / 1", marginTop: "200px", padding: "12px", width: "100%" }}>
-                        <div className="flex flex-col gap-3 items-center justify-start leading-[0] relative shrink-0 w-full" style={{ height: "149px" }}>
-                          <div className="flex flex-col justify-center text-white text-[12px] w-full">
-                            <p className="block" style={{ fontFamily: "'Poppins', sans-serif", lineHeight: "1.36", margin: 0 }}>{p.date}</p>
-                          </div>
-                          <div className="flex flex-col justify-center text-white text-[16px] w-full">
-                            <h3 className="block transition-colors duration-200" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 600, lineHeight: "20px", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.title}</h3>
-                          </div>
-                          <div className="text-[14px] w-full" style={{ color: "#a2a2a2" }}>
-                            <p style={{ fontFamily: "'Montserrat', sans-serif", lineHeight: "20px", margin: 0, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.description}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 items-center justify-start">
-                          <button className="transition-all duration-200 hover:shadow-lg hover:scale-105" style={{ background: "#641ea7", borderRadius: 8, padding: "8px 16px", border: "none", cursor: "pointer" }}>
-                            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 500, color: "#fff", whiteSpace: "nowrap" }}>Read more</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <BlogCard
+                      image={p.image}
+                      date={p.date}
+                      title={p.title}
+                      description={p.description}
+                      onCtaClick={() => {}}
+                    />
                   </BentoCard>
                 ))}
               </div>
@@ -186,3 +152,27 @@ const BlogPage = () => {
 };
 
 export default BlogPage;
+
+// Simple tabs UI to match provided design (left-aligned pills)
+const Tabs = () => {
+  const [active, setActive] = useState("custom");
+  const base = "px-4 h-9 inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors";
+  return (
+    <div className="flex gap-3">
+      <button
+        className={`${base} ${active === "custom" ? "bg-core-prim-500 text-invert-high" : "bg-border-main-default/60 text-invert-high"}`}
+        onClick={() => setActive("custom")}
+        type="button"
+      >
+        Custom drafts
+      </button>
+      <button
+        className={`${base} ${active === "ai" ? "bg-core-prim-500 text-invert-high" : "bg-border-main-default/60 text-invert-high"}`}
+        onClick={() => setActive("ai")}
+        type="button"
+      >
+        AI drafts
+      </button>
+    </div>
+  );
+};
