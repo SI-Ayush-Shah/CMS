@@ -83,6 +83,7 @@ export const generateContentViaForm = async (text, images = []) => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      skipRetry: true,
     }
   );
 

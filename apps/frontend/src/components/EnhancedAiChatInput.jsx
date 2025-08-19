@@ -251,6 +251,7 @@ export const EnhancedAiChatInput = ({
   const handleSubmit = useCallback(async () => {
     if (disabled || isSubmitting) return;
 
+    // Guard to prevent duplicate calls from rapid keypress/click
     setIsSubmitting(true);
 
     try {
@@ -301,7 +302,8 @@ export const EnhancedAiChatInput = ({
       // Announce submission error
       announce(`Submission failed: ${error.message}`, "assertive");
     } finally {
-      setIsSubmitting(false);
+      // Release lock after a short tick to absorb double-clicks
+      requestAnimationFrame(() => setIsSubmitting(false));
     }
   }, [
     disabled,

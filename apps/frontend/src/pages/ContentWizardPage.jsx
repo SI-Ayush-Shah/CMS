@@ -71,7 +71,7 @@ export default function ContentWizardPage() {
         <LoadingProgress
           isLoading={loadingState?.phase && loadingState.phase !== "idle"}
         />
-        <div className="flex flex-col w-full gap-4 h-full justify-center">
+        <div className="flex flex-col w-full gap-4 h-full justify-center max-w-[600px] ">
           {/* Title - responsive design */}
           <div className="font-semibold text-invert-high text-2xl sm:text-3xl lg:text-[36px] text-center px-4">
             What's on your mind today?
