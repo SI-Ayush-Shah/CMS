@@ -320,6 +320,11 @@ export const useContentSubmission = (options = {}) => {
             onError(enhancedError);
           }
 
+          // Explicitly mark main submission as failed and clear loading
+          try {
+            mainOperation.fail(enhancedError);
+          } catch {}
+
           return { success: false, error: enhancedError };
         }
 
