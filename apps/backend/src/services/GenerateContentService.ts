@@ -3,11 +3,10 @@ import {
   GenerateContentRequestDto,
   GenerateContentResponseDto
 } from '../types/dtos'
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod"; // For LangChain structured output
-import { env } from '../config/env'
 import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { type NewGeneratedContent } from '../db/schema'
+import { createGoogleGenaiModel } from '../llms/google-genai/model';
 
 // Service interface using DTOs
 export interface GenerateContentService {
@@ -56,12 +55,11 @@ export function createGenerateContentService({ generatedContentRepository }: Dep
           body: editorJsSchema // Always Editor.js format
         });
 
-      const model = new ChatGoogleGenerativeAI({
-        apiKey: env.GOOGLE_API_KEY,
-        model: "gemini-2.5-flash", 
-        temperature: 0.7,
-      });
-      
+        const model = createGoogleGenaiModel({
+          modelName: "gemini-2.5-flash",
+          temperature: 0.7,
+        })
+   
       const structuredModel = model.withStructuredOutput(articleSchema);
 
       const imagesList = Array.isArray((request as any).images) ? (request as any).images as string[] : []

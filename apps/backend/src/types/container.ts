@@ -8,8 +8,11 @@ import { UserController } from '../controllers/UserController'
 import { GenerateContentController } from '../controllers/GenerateContentController'
 import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { RssFeedRepository } from '../repositories/RssFeedRepository'
+import { RssFeedItemRepository } from '../repositories/RssFeedItemRepository'
 import type { AppRedisClient } from '../config/redis'
 import type { RssFeedService } from '../services/RssFeedService'
+import type { RssFeedItemService } from '../services/RssFeedItemService'
+import type { RssFeedItemController } from '../controllers/RssFeedItemController'
 
 export interface Dependencies {
   // Database
@@ -23,16 +26,19 @@ export interface Dependencies {
   userService: UserService
   generateContentService: GenerateContentService
   rssFeedService: RssFeedService
+  rssFeedItemService: RssFeedItemService
   
   // Repositories
   userRepository: UserRepository
   generatedContentRepository: GeneratedContentRepository
   rssFeedRepository: RssFeedRepository
+  rssFeedItemRepository: RssFeedItemRepository
   
   // Controllers
   healthController: HealthController
   userController: UserController
   generateContentController: GenerateContentController
+  rssFeedItemController: RssFeedItemController
 }
 
 // TypeScript declarations for @fastify/awilix
