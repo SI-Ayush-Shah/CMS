@@ -10,8 +10,14 @@ const BaseLayout = () => {
     <div className="min-h-screen bg-core-neu-1000 flex">
       <LoadingProgress isLoading={isLoading} />
       {/* Global Left Panel */}
+
+
+      
       <aside className="relative z-20">
+      <div className="p-2 sticky top-0 h-screen">
         <Leftpanel />
+      </div>
+
       </aside>
 
       {/* Main Content Area */}

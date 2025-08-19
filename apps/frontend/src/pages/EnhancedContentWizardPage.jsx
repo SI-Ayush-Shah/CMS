@@ -2,12 +2,16 @@
  * Enhanced Content Wizard Page
  * 
  * An enhanced version of the ContentWizardPage that demonstrates the complete
- * validation and error display system integration.
+ * validation, error handling, and loading state system integration.
  */
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { EnhancedAiChatInput } from '../components/EnhancedAiChatInput'
-import ValidationErrorBoundary from '../components/ValidationErrorBoundary'
+import ErrorBoundary from '../components/ErrorBoundary'
+import ErrorDisplay from '../components/ErrorDisplay'
+import LoadingIndicator, { LoadingVariant, SubmissionLoadingIndicator } from '../components/LoadingIndicator'
+import { setupGlobalErrorHandling, enhanceError, logError } from '../utils/errorHandling'
+import { useErrorHandler } from '../components/ErrorBoundary'
 
 /**
  * Enhanced Content Wizard Page Component
