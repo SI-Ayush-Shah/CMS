@@ -66,9 +66,20 @@ export const GenerateContentResponseSchema = Type.Object({
   })
 })
 
-// Auto-generated TypeScript DTOs from schemas
+// PATCH DTO Schema
+export const PatchGeneratedContentSchema = Type.Object({
+  title: Type.Optional(Type.String()),
+  summary: Type.Optional(Type.String()),
+  category: Type.Optional(Type.String()),
+  tags: Type.Optional(Type.Array(Type.String())),
+  bannerUrl: Type.Optional(Type.String({ format: 'uri' })),
+  images: Type.Optional(Type.Array(Type.String({ format: 'uri' }))),
+  body: Type.Optional(EditorJsSchema)
+})
+
 export type GenerateContentRequestDto = Static<typeof GenerateContentRequestSchema>
 export type GenerateContentResponseDto = Static<typeof GenerateContentResponseSchema>
+export type PatchGeneratedContentDto = Static<typeof PatchGeneratedContentSchema>
 
 // Export schemas for validation usage
 export {

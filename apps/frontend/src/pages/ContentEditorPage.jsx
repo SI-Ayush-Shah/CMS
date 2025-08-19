@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EnhancedAiChatInput } from "../components/EnhancedAiChatInput";
 import { Button } from "../components/Button";
 import { contentApi } from "../services/contentApi";
@@ -16,7 +17,14 @@ import EditorJsRenderer from "../components/EditorJsRenderer";
  * Right column contains an assistant panel using the existing
  * EnhancedAiChatInput for ideation/help while writing.
  */
-export default function ContentEditorPage({ article = null }) {
+export default function ContentEditorPage() {
+  const { id } = useParams();
+  const { data: article } = useQuery({
+    queryKey: ["article", id],
+    queryFn: () => contentApi.getContent(id),
+    enabled: !!id,
+  });
+
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState("");
@@ -116,7 +124,9 @@ export default function ContentEditorPage({ article = null }) {
           {/* Header with actions */}
           <div className="flex items-center justify-between mb-5 rounded-2xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
             <div className="text-[20px] font-semibold text-invert-high">
-              Creative Wizard
+              Creative Wizard {id && (
+                <span className="ml-2 text-[12px] text-invert-low">#{id}</span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button

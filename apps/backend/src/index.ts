@@ -6,6 +6,7 @@ import { handleApiError } from './shared/utils/error-handler'
 import { loggerConfig } from './shared/utils/logger-config'
 import './types/container' // Import type declarations
 import multipart from '@fastify/multipart'
+import cors from '@fastify/cors'
 
 // Create Fastify instance with Pino logger
 const fastify: FastifyInstance = Fastify({
@@ -20,6 +21,8 @@ const start = async (): Promise<void> => {
       disposeOnClose: true,
       disposeOnResponse: false
     })
+    // CORS
+    await fastify.register(cors, { origin: true, credentials: true })
     // Multipart for file uploads (images)
     await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024, files: 10 } })
     

@@ -1,31 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
+import { IoBriefcaseOutline } from "react-icons/io5";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
-  const location = useLocation();
+  const [activeItemId, setActiveItemId] = useState("creative-wizard");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const navigationItems = [
     {
       id: "creative-wizard",
       label: "Creative Wizard",
       icon: <PiMagicWand />,
-      to: "/creative-wizard",
+      path: "/wizard",
     },
     {
       id: "content-hub",
       label: "Content Hub",
       icon: <PiNotePencilThin />,
-      to: "/content-hub",
+      path: "/blog",
+    },
+    {
+      id: "ai-jobs",
+      label: "AI Jobs",
+      icon: <IoBriefcaseOutline />,
+      path: "/jobs",
     },
     {
       id: "analytics",
       label: "Analytics",
       icon: <PiChartLineUp />,
-      to: "/analytics",
+      path: "/components",
     },
   ];
 
@@ -33,9 +42,18 @@ export function Leftpanel() {
     setIsExpanded(!isExpanded);
   };
 
-  const handleNavItemClick = (to) => {
-    navigate(to);
+  const handleNavItemClick = (itemId, path) => {
+    setActiveItemId(itemId);
+    if (path) navigate(path);
   };
+
+  // Highlight active item based on current route
+  useEffect(() => {
+    const matched = navigationItems.find(
+      (item) => item.path && location.pathname.startsWith(item.path)
+    );
+    if (matched) setActiveItemId(matched.id);
+  }, [location.pathname]);
 
   return (
     <div
@@ -73,31 +91,26 @@ export function Leftpanel() {
 
       {/* Navigation Menu */}
       <nav className="flex-1 p-3 space-y-1">
-        {navigationItems.map((item) => {
-          const isActive =
-            location.pathname === item.to ||
-            location.pathname.startsWith(`${item.to}/`);
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNavItemClick(item.to)}
-              className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
-                isActive
-                  ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"
-                  : "text-text-invert-low hover:text-invert-high"
-              }`}
+        {navigationItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => handleNavItemClick(item.id, item.path)}
+            className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
+              activeItemId === item.id
+                ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"
+                : "text-text-invert-low hover:text-invert-high"
+            }`}
+          >
+            <span
+              className={`flex-shrink-0 text-[24px] group-hover:text-invert-high ${activeItemId === item.id ? "text-invert-high" : "text-text-invert-low"}`}
             >
-              <span
-                className={`flex-shrink-0 text-[24px] group-hover:text-invert-high ${isActive ? "text-invert-high" : "text-text-invert-low"}`}
-              >
-                {item.icon}
-              </span>
-              {isExpanded && (
-                <span className="font-medium truncate">{item.label}</span>
-              )}
-            </button>
-          );
-        })}
+              {item.icon}
+            </span>
+            {isExpanded && (
+              <span className="font-medium truncate">{item.label}</span>
+            )}
+          </button>
+        ))}
       </nav>
 
       {/* User Profile Section */}

@@ -32,7 +32,7 @@ const BlogCard = ({
       {/* Content */}
       <div
         className="flex flex-col gap-4 items-start justify-start relative"
-        style={{ gridArea: "1 / 1", marginTop: "calc((100%/16)*9)", padding: "12px", width: "100%" }}
+        style={{ gridArea: "1 / 1", marginTop: "calc((100%/16)*9)", padding: "16px 8px", width: "100%" }}
       >
         {/* Text Block */}
         <div
@@ -78,7 +78,7 @@ const BlogCard = ({
                   lineHeight: "20px",
                   margin: 0,
                   display: "-webkit-box",
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 4,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                 }}

@@ -32,7 +32,16 @@ export const router = createBrowserRouter([
         errorElement: <ErrorBoundary />,
       },
       {
-        path: "/creative-wizard",
+        path: "editor/:id",
+        element: (
+          <LazyPageWrapper>
+            <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "/wizard",
         element: (
           <LazyPageWrapper>
             <ContentWizardPage />

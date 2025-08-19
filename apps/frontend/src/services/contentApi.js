@@ -1,6 +1,33 @@
 import { apiClient } from "./axiosConfig";
 
 /**
+ * Blog listing (server-backed)
+ */
+export const fetchBlogPosts = async ({
+  page = 1,
+  pageSize = 10,
+  status,
+  category,
+  categories,
+  tags,
+  sort = 'desc'
+} = {}) => {
+  const params = new URLSearchParams()
+  if (page) params.append('page', String(page))
+  if (pageSize) params.append('pageSize', String(pageSize))
+  if (status) params.append('status', status)
+  if (category) params.append('category', category)
+  if (Array.isArray(categories)) categories.forEach((c) => params.append('categories', c))
+  if (Array.isArray(tags)) tags.forEach((t) => params.append('tags', t))
+  if (sort) params.append('sort', sort)
+
+  const url = `http://localhost:3001/content-studio/api/generate-content?${params.toString()}`
+  const { data } = await apiClient.get(url, { skipRetry: false })
+  // API returns { success: boolean, data: { items, total, page, pageSize } }
+  return data?.data || { items: [], total: 0, page, pageSize }
+}
+
+/**
  * Content API service for handling content generation and management
  * Currently implements mock functions for development and testing
  */
@@ -186,4 +213,5 @@ export const contentApi = {
   saveContent,
   getContent,
   deleteContent,
-};
+  fetchBlogPosts
+}
