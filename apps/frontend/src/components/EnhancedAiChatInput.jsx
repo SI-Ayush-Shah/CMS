@@ -10,8 +10,8 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import StarBorder from "./StarBorder";
-import { ImageUploadZone } from "./ImageUploadZone";
 import { ValidationDisplay } from "./ValidationDisplay";
 import { useTextInput } from "../hooks/useTextInput";
 import { useImageUpload } from "../hooks/useImageUpload";
@@ -36,24 +36,47 @@ export const EnhancedAiChatInput = ({
   maxImages = 10,
   disabled = false,
   validationOptions = {},
-  ...props
 }) => {
   // Refs
   const textareaRef = useRef(null);
+  const containerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // State for UI interactions
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGlobalDragOver, setIsGlobalDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
+  const [, setDragCounter] = useState(0);
+  const [thumbOverlayRect, setThumbOverlayRect] = useState(null);
+
+  const updateThumbOverlayRect = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const stripHeight = 64; // approximate thumbnail strip height
+    const top = Math.max(8, rect.top - stripHeight - 8);
+    setThumbOverlayRect({
+      top,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateThumbOverlayRect();
+  }, [updateThumbOverlayRect]);
+
+  useEffect(() => {
+    const onResize = () => updateThumbOverlayRect();
+    const onScroll = () => updateThumbOverlayRect();
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [updateThumbOverlayRect]);
 
   // Accessibility hook
-  const {
-    announce,
-    createKeyboardHandler,
-    createAriaAttributes,
-    manageFocusTo,
-  } = useAccessibility({
+  const { announce, createKeyboardHandler } = useAccessibility({
     announceChanges: true,
     manageFocus: true,
   });
@@ -63,7 +86,6 @@ export const EnhancedAiChatInput = ({
     text,
     setText,
     characterCount,
-    remainingCharacters,
     isValid: isTextValid,
     isAtWarning,
     isAtLimit,
@@ -74,21 +96,13 @@ export const EnhancedAiChatInput = ({
     warningThreshold: 0.8,
   });
 
-  const {
-    images,
-    addImages,
-    removeImage,
-    clearAllImages,
-    canAddMore,
-    remainingSlots,
-    imageCount,
-    errors: imageUploadErrors,
-  } = useImageUpload({
-    maxImages,
-    onError: (error) => {
-      handleValidationError("image", error);
-    },
-  });
+  const { images, addImages, removeImage, clearAllImages, imageCount } =
+    useImageUpload({
+      maxImages,
+      onError: (error) => {
+        handleValidationError("image", error);
+      },
+    });
 
   const {
     errors,
@@ -101,7 +115,6 @@ export const EnhancedAiChatInput = ({
     clearErrors,
     clearWarnings,
     handleSubmissionError,
-    handleNetworkError,
   } = useValidation();
 
   // Auto-resize functionality
@@ -119,6 +132,11 @@ export const EnhancedAiChatInput = ({
     },
     [announce]
   );
+
+  // Recompute overlay rect when image count changes
+  useEffect(() => {
+    updateThumbOverlayRect();
+  }, [imageCount, updateThumbOverlayRect]);
 
   /**
    * File selection via hidden input
@@ -217,25 +235,7 @@ export const EnhancedAiChatInput = ({
     [setText, errors.text, clearErrors]
   );
 
-  /**
-   * Handles image changes with validation
-   */
-  const handleImagesChange = useCallback(
-    (newImages) => {
-      // Clear image errors when images change
-      if (errors.image.length > 0) {
-        clearErrors("image");
-      }
-
-      // Announce image changes to screen readers
-      if (newImages && newImages.length > 0) {
-        announce(
-          `${newImages.length} image${newImages.length === 1 ? "" : "s"} selected`
-        );
-      }
-    },
-    [errors.image, clearErrors, announce]
-  );
+  // (Inline image change handler not needed: global drop & picker already announce and validate on submit)
 
   /**
    * Toggles image upload zone visibility
@@ -293,7 +293,6 @@ export const EnhancedAiChatInput = ({
         clearAllImages();
         clearErrors("all");
         clearWarnings("all");
-        setShowImageUpload(false);
 
         // Announce successful submission
         announce("Content submitted successfully");
@@ -322,6 +321,7 @@ export const EnhancedAiChatInput = ({
     clearErrors,
     clearWarnings,
     handleSubmissionError,
+    announce,
   ]);
 
   /**
@@ -380,10 +380,12 @@ export const EnhancedAiChatInput = ({
       thickness={0}
     >
       <div
-        className="relative backdrop-blur-[20px] backdrop-filter bg-core-neu-1000/40 w-full h-full flex flex-col justify-between p-4 rounded-[15px] border-none"
+        ref={containerRef}
+        className="relative backdrop-blur-[20px]  backdrop-filter bg-core-neu-1000/40 w-full h-full flex flex-col justify-between p-4 rounded-[15px] border-none"
         role="form"
         aria-label="Content creation form"
       >
+        <div className="inset-[2px] -z-1 bg-black absolute rounded-xl"></div>
         {/* Hidden file input for selecting multiple images */}
         <input
           ref={fileInputRef}
@@ -395,62 +397,59 @@ export const EnhancedAiChatInput = ({
           aria-hidden="true"
         />
 
-        {/* Floating thumbnails strip above chat */}
-        {imageCount > 0 && (
-          <div className="absolute -top-16 left-0 right-0 z-20 px-3">
-            <div className="mx-auto max-w-[600px] bg-core-neu-1000/80 backdrop-blur rounded-xl border border-core-prim-300/20 p-2 shadow-lg">
-              <div className="flex items-center justify-between mb-1">
-                <div className="text-xs text-invert-low">
-                  Selected Images ({imageCount}/{maxImages})
-                </div>
-                <button
-                  onClick={clearAllImages}
-                  className="text-[11px] text-error-500 hover:text-error-400 focus:outline-none focus:ring-2 focus:ring-error-500 rounded px-1"
-                  type="button"
-                  aria-label="Clear all images"
-                >
-                  Clear All
-                </button>
+        {imageCount > 0 && thumbOverlayRect && (
+          <div className="w-full mb-4  bg-core-neu-1000/80 backdrop-blur rounded-xl border border-core-prim-300/20 p-2 shadow-lg">
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-xs text-invert-low">
+                Selected Images ({imageCount}/{maxImages})
               </div>
-              <div
-                className="flex gap-2 overflow-x-auto"
-                role="list"
-                aria-label="Selected image thumbnails"
+              <button
+                onClick={clearAllImages}
+                className="text-[11px] text-error-500 hover:text-error-400 focus:outline-none focus:ring-2 focus:ring-error-500 rounded px-1"
+                type="button"
+                aria-label="Clear all images"
               >
-                {images.map((img, idx) => (
-                  <div
-                    key={img.id}
-                    role="listitem"
-                    className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden border border-core-prim-300/20"
+                Clear All
+              </button>
+            </div>
+            <div
+              className="flex gap-2 overflow-x-auto"
+              role="list"
+              aria-label="Selected image thumbnails"
+            >
+              {images.map((img, idx) => (
+                <div
+                  key={img.id}
+                  role="listitem"
+                  className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden border border-core-prim-300/20"
+                >
+                  <img
+                    src={img.preview}
+                    alt={`Preview ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    onClick={() => removeImage(img.id)}
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-error-500 text-white flex items-center justify-center"
+                    aria-label={`Remove image ${idx + 1}`}
+                    type="button"
                   >
-                    <img
-                      src={img.preview}
-                      alt={`Preview ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      onClick={() => removeImage(img.id)}
-                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-error-500 text-white flex items-center justify-center"
-                      aria-label={`Remove image ${idx + 1}`}
-                      type="button"
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
