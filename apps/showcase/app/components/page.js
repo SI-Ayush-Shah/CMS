@@ -1,12 +1,10 @@
-import { Button } from "./components/Button";
-import { Tabs } from "./components/Tabs";
-import { Input } from "./components/Input";
-import { Badge } from "./components/Badge";
-import { Checkbox } from "./components/Checkbox";
+import { Button } from "@repo/ui/button";
+import { Tabs } from "@repo/ui/tabs";
+import { Input } from "@repo/ui/input";
+import { Badge } from "@repo/ui/badge";
+import { Checkbox } from "@repo/ui/checkbox";
 
-import "./App.css";
-
-function App() {
+export default function ComponentsPage() {
   return (
     <main className="p-10 flex flex-col gap-10">
       <h1 className="text-h1 leading-h1 font-bold text-main-high">
@@ -86,5 +84,3 @@ function App() {
     </main>
   );
 }
-
-export default App;
