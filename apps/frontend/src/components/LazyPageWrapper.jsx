@@ -18,9 +18,9 @@ const LazyPageWrapper = ({ children }) => {
     <ErrorBoundary>
       <Suspense fallback={<LoadingSkeleton type={getSkeletonType()} />}>
         <RouteTransition>
-          <div className="bg-core-neu-1000 w-full h-full">
+          <div className="bg-core-neu-1000 w-full h-full isolate">
             {/* Aurora Background (behind page content, not the sidebar) */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 -z-1">
               <Aurora
                 colorStops={["#3c1264", "#280c43", "#140621"]}
                 blend={1}

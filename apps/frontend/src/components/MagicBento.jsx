@@ -489,7 +489,7 @@ const GlobalSpotlight = ({
 
 const BentoCardGrid = ({ children, gridRef }) => (
   <div
-    className="bento-section grid gap-2 p-3 w-full select-none relative"
+    className="bento-section grid gap-2  w-full select-none relative"
     style={{ fontSize: "clamp(1rem, 0.9rem + 0.5vw, 1.5rem)" }}
     ref={gridRef}
   >
@@ -555,9 +555,7 @@ const MagicBento = ({
           
           .card-responsive {
             grid-template-columns: 1fr;
-            width: 90%;
             margin: 0 auto;
-            padding: 0.5rem;
           }
           
           @media (min-width: 600px) {
@@ -636,7 +634,6 @@ const MagicBento = ({
           @media (max-width: 599px) {
             .card-responsive {
               grid-template-columns: 1fr;
-              width: 90%;
               margin: 0 auto;
               padding: 0.5rem;
             }
@@ -665,7 +662,7 @@ const MagicBento = ({
         ) : (
           <div className="card-responsive grid gap-2">
           {dataToUse.map((card, index) => {
-            const baseClassName = `card flex flex-col justify-between relative w-full max-w-full rounded-[15px] border border-solid font-light overflow-hidden transition-all duration-300 ease-in-out hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] ${enableBorderGlow ? "card--border-glow" : ""}`;
+            const baseClassName = `group card flex flex-col justify-between relative w-full max-w-full rounded-[15px] border border-solid font-light overflow-hidden transition-all duration-300 ease-in-out hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] ${enableBorderGlow ? "card--border-glow" : ""}`;
 
             const cardStyle = {
               backgroundColor: "transparent",
@@ -692,16 +689,16 @@ const MagicBento = ({
                 >
                   {/* Image */}
                   {card.image && (
-                    <div className="w-full h-[200px] overflow-hidden relative rounded-[10px]">
+                    <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px]">
                       <img
                         src={card.image}
                         alt={card.title || card.label}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
                   )}
                   {/* Content */}
-                  <div className="flex flex-col gap-3 p-3">
+                  <div className="flex flex-col gap-3 ">
                     {card.date && (
                       <span className="text-[12px] text-white/90">{card.date}</span>
                     )}
@@ -837,11 +834,11 @@ const MagicBento = ({
               >
                 {/* Image */}
                 {card.image && (
-                  <div className="w-full h-[200px] overflow-hidden relative rounded-[10px]">
+                  <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px]">
                     <img
                       src={card.image}
                       alt={card.title || card.label}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                 )}
@@ -975,11 +972,12 @@ export const BentoCard = ({
   return (
     <div
       ref={ref}
-      className={`card ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
+      className={`card rounded-[15px] border border-solid p-3 ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
       style={{
         ...style,
         position: "relative",
         overflow: "hidden",
+        background: "transparent",
         borderColor: "var(--border-color)",
         color: "var(--white)",
         "--glow-x": "50%",
@@ -1011,7 +1009,7 @@ export const BentoCard = ({
         .text-clamp-1 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; }
         .text-clamp-2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
       `}</style>
-      {children}
+      <div className="relative z-[2] w-full h-full">{children}</div>
     </div>
   );
 };
