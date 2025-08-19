@@ -10,7 +10,6 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 import StarBorder from "./StarBorder";
 import { ValidationDisplay } from "./ValidationDisplay";
 import { useTextInput } from "../hooks/useTextInput";
@@ -329,6 +328,17 @@ export const EnhancedAiChatInput = ({
    */
   const handleKeyPress = createKeyboardHandler({
     custom: (event, key, modifiers) => {
+      // Enter behavior: Enter submits, Shift+Enter makes a new line
+      if (key === "Enter") {
+        if (modifiers.shiftKey) {
+          // Allow default newline
+          return;
+        }
+        event.preventDefault();
+        handleSubmit();
+        return;
+      }
+
       // Submit on Ctrl/Cmd + Enter
       if ((modifiers.ctrlKey || modifiers.metaKey) && key === "Enter") {
         event.preventDefault();
@@ -506,7 +516,7 @@ export const EnhancedAiChatInput = ({
               onKeyDown={handleKeyPress}
               disabled={disabled || isSubmitting}
               style={{ lineHeight: "normal" }}
-              aria-label="Content input. Press Ctrl+Enter to submit, Alt+I to toggle image upload"
+              aria-label="Content input. Press Enter to submit, Shift+Enter for new line, Alt+I to add photos"
               aria-describedby="character-count validation-messages keyboard-shortcuts"
               aria-required="true"
               aria-invalid={hasErrors ? "true" : "false"}
@@ -627,8 +637,8 @@ export const EnhancedAiChatInput = ({
           className="sr-only"
           aria-label="Keyboard shortcuts"
         >
-          Press Ctrl+Enter to submit content. Press Alt+I to toggle image
-          upload.
+          Press Enter to submit content. Press Shift+Enter for a new line. Press
+          Alt+I to add photos.
         </div>
 
         {/* Help text for buttons */}
@@ -652,7 +662,7 @@ export const EnhancedAiChatInput = ({
             className="text-xs text-invert-low/60 text-center mt-2"
             aria-hidden="true"
           >
-            Press Ctrl+Enter to generate
+            Press Enter to generate, Shift+Enter for new line
           </div>
         )}
       </div>
