@@ -4,6 +4,7 @@ import { useContentSubmission } from "../hooks/useContentSubmission";
 import ContentWizardErrorBoundary from "../components/ContentWizardErrorBoundary";
 import LoadingProgress from "../components/LoadingProgress";
 import { SubmissionLoadingIndicator } from "../components/LoadingIndicator";
+import ProcessingOverlay from "../components/ProcessingOverlay";
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
@@ -164,25 +165,7 @@ export default function ContentWizardPage() {
 
         {/* Submission overlay matching Figma loading state */}
         {loadingState?.phase && loadingState.phase !== "idle" && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="w-[92%] max-w-[420px] rounded-2xl bg-core-neu-1000/90 border border-core-prim-300/20 p-6 shadow-2xl">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-invert-high font-medium text-sm">
-                  Processing
-                </div>
-                <div className="text-invert-low text-[11px] uppercase tracking-wide">
-                  {loadingState.phase}
-                </div>
-              </div>
-              <div className="mt-2">
-                <SubmissionLoadingIndicator phase={loadingState.phase} />
-              </div>
-              <div className="mt-4 text-invert-low text-xs">
-                Please wait while we process your request. Do not close this
-                window.
-              </div>
-            </div>
-          </div>
+          <ProcessingOverlay phase={loadingState.phase} />
         )}
       </div>
     </ContentWizardErrorBoundary>
