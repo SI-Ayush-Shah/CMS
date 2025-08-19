@@ -12,6 +12,7 @@ const ContentWizardPage = lazy(() => import("../pages/ContentWizardPage"));
 const BlogPage = lazy(() => import("../pages/BlogPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
+const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
@@ -20,6 +21,15 @@ export const router = createBrowserRouter([
     element: <BaseLayout />,
     errorElement: <ErrorBoundary />,
     children: [
+      {
+        path: "editor",
+        element: (
+          <LazyPageWrapper>
+            <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
       {
         path: "/wizard",
         element: (
