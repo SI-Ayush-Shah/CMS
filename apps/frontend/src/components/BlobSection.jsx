@@ -10,6 +10,7 @@ const BlobSection = () => {
             hoverIntensity={0.5}
             rotateOnHover={true}
             hue={0}
+            interactive={false}
             forceHoverState={false}
           />
         </div>

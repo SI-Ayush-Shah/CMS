@@ -104,6 +104,20 @@ const ComponentsPage = () => {
               </Button>
             </div>
           </div>
+          
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+              Dark Theme Variants
+            </h3>
+            <div className="flex flex-wrap gap-4 p-6 bg-gray-900 rounded-lg">
+              <Button variant="dark">Dark Primary</Button>
+              <Button variant="dark-secondary">Dark Secondary</Button>
+              <Button variant="dark" disabled>Dark Disabled</Button>
+              <Button variant="dark" isLoading={isLoading} onClick={handleLoadingDemo}>
+                {isLoading ? 'Loading...' : 'Dark Loading'}
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -157,6 +171,62 @@ const ComponentsPage = () => {
                 disabled
                 value="Cannot edit this"
               />
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+              Dark Theme Inputs
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6 p-6 bg-gray-900 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input
+                </label>
+                <Input 
+                  placeholder="Dark themed input..."
+                  variant="dark"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input with Hint
+                </label>
+                <Input 
+                  placeholder="Email address"
+                  hint="This is a dark themed hint"
+                  variant="dark"
+                  type="email"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input with Error
+                </label>
+                <Input 
+                  placeholder="Password"
+                  error="This is a dark themed error message"
+                  variant="dark"
+                  invalid
+                  type="password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Disabled Input
+                </label>
+                <Input 
+                  placeholder="Disabled dark input"
+                  variant="dark"
+                  disabled
+                  value="Cannot edit this"
+                />
+              </div>
             </div>
           </div>
         </div>

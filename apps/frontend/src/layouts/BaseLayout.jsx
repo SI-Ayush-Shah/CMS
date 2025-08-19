@@ -6,10 +6,10 @@ import Aurora from '../components/Aurora';
 
 const BaseLayout = () => {
   const navigation = useNavigation();
-  const isLoading = navigation.state === 'loading';
+  const isLoading = navigation.state === "loading";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#000] flex flex-col">
       <LoadingProgress isLoading={isLoading} />
       {/* Header with Navigation */}
       {/* <header className="bg-white shadow-sm border-b border-gray-200">

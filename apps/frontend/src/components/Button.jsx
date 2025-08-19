@@ -10,7 +10,9 @@ export function Button({
   onClick,
 }) {
   const base =
-    "inline-flex items-center justify-center rounded-2xl font-medium gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  
+  const roundedClasses = variant === "dark" || variant === "dark-secondary" ? "rounded-xl" : "rounded-2xl";
 
   function variantClasses(v) {
     switch (v) {
@@ -22,6 +24,10 @@ export function Button({
         return "bg-transparent hover:bg-card text-main-high";
       case "link":
         return "bg-transparent text-core-prim-500 hover:text-core-prim-600 underline underline-offset-2";
+      case "dark":
+        return "bg-[#641ea7] hover:bg-[#8c53c3] text-white font-light font-['Montserrat']";
+      case "dark-secondary":
+        return "bg-neutral-900 hover:bg-neutral-800 text-white font-['Montserrat']";
       default:
         return "";
     }
@@ -41,7 +47,7 @@ export function Button({
   }
 
   const classes =
-    `${base} ${variantClasses(variant)} ${sizeClasses(size)} ${className}`.trim();
+    `${base} ${roundedClasses} ${variantClasses(variant)} ${sizeClasses(size)} ${className}`.trim();
 
   return (
     <button
