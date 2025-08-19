@@ -116,7 +116,7 @@ const Navbar = ({ state = "Default" }) => {
 };
 
 // AI Chat Input component
-const AiChatInput = ({ state = "Default" }) => {
+const AiChatInput = () => {
   const [inputValue, setInputValue] = useState("");
 
   return (
@@ -192,7 +192,7 @@ export default function ContentWizardPage() {
       <div className="left">
         <Navbar state="Collapsed" />
       </div>
-      <div className="right flex flex-col w-full">
+      <div className="right flex flex-col w-full gap-4">
         {/* Title - positioned exactly as in Figma */}
         <div className="  font-semibold text-[#ffffff] text-[36px] text-center whitespace-nowrap">
           What's on your mind today?
@@ -204,7 +204,7 @@ export default function ContentWizardPage() {
         </div>
 
         {/* AI Chat Input - positioned exactly as in Figma */}
-        <div className=" w-full max-w-[600px] h-[175px] backdrop-blur-[20px] backdrop-filter bg-[#000000] rounded-[15px]">
+        <div className=" w-full max-w-[600px] h-[175px] backdrop-blur-[20px] backdrop-filter bg-[#000000] rounded-[15px] mx-auto">
           <AiChatInput />
         </div>
       </div>
