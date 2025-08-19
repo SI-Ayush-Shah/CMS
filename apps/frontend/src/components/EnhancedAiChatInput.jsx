@@ -32,7 +32,7 @@ import { useAccessibility } from "../hooks/useAccessibility";
 export const EnhancedAiChatInput = ({
   onSubmit,
   placeholder = "Your blog crafting experience starts here...",
-  maxLength = 2000,
+  maxLength = 5000,
   maxImages = 10,
   disabled = false,
   validationOptions = {},
