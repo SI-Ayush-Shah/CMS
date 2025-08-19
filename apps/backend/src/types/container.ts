@@ -2,11 +2,12 @@ import { AwilixContainer } from 'awilix'
 import { UserService } from '../services/UserService'
 import { GenerateContentService } from '../services/GenerateContentService'
 import { DatabaseConnection, db } from '../db'
-import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
 import { UserRepository } from '../repositories/UserRepository'
 import { HealthController } from '../controllers/HealthController'
 import { UserController } from '../controllers/UserController'
 import { GenerateContentController } from '../controllers/GenerateContentController'
+import { GeneratedContentRepository } from '../repositories/GeneratedContentRepository'
+import { RssFeedRepository } from '../repositories/RssFeedRepository'
 
 export interface Dependencies {
   // Database
@@ -16,10 +17,11 @@ export interface Dependencies {
   // Services
   userService: UserService
   generateContentService: GenerateContentService
-  generatedContentRepository: GeneratedContentRepository
   
   // Repositories
   userRepository: UserRepository
+  generatedContentRepository: GeneratedContentRepository
+  rssFeedRepository: RssFeedRepository
   
   // Controllers
   healthController: HealthController
