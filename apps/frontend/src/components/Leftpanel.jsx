@@ -5,6 +5,7 @@ import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
+import { MdRssFeed } from "react-icons/md";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
@@ -29,6 +30,12 @@ export function Leftpanel() {
       label: "AI Jobs",
       icon: <IoBriefcaseOutline />,
       path: "/jobs",
+    },
+    {
+      id: "feed-manager",
+      label: "Feed Manager",
+      icon: <MdRssFeed />,
+      path: "/feed-manager",
     },
     {
       id: "analytics",
