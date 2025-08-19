@@ -48,7 +48,7 @@ export function Leftpanel() {
   };
 
   return (
-    <div className={`text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out border border-core-prim-500  ${
+    <div className={`text-invert-high h-full flex rounded-lg flex-col transition-all duration-300 ease-in-out border border-core-prim-500  ${
       isExpanded ? 'w-56' : 'w-16'
     }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.4) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
       {/* Header Section */}

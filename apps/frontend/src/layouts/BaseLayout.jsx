@@ -14,7 +14,7 @@ const BaseLayout = () => {
 
       
       <aside className="relative z-20">
-      <div className="p-2 sticky top-0">
+      <div className="p-2 sticky top-0 h-screen">
         <Leftpanel />
       </div>
 
