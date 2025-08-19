@@ -16,11 +16,7 @@ const BaseLayout = () => {
 
       {/* Main Content Area */}
       <main className="relative flex-1 min-h-screen">
-        {/* Content */}
-        <div className="relative z-10">
-          {/* <Breadcrumb /> */}
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
     </div>
   );

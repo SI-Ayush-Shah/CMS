@@ -72,8 +72,8 @@ const AiChatInput = () => {
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
   return (
-    <div className="relative w-full flex">
-      <div className="flex flex-col w-full gap-4">
+    <div className="relative w-full flex h-full items-center justify-center">
+      <div className="flex flex-col w-full gap-4 h-full justify-center">
         {/* Title - positioned exactly as in Figma */}
         <div className="font-semibold text-invert-high text-[36px] text-center whitespace-nowrap">
           What's on your mind today?
