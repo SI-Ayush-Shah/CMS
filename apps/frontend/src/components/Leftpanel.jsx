@@ -48,7 +48,7 @@ export function Leftpanel() {
   };
 
   return (
-    <div className={`text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
+    <div className={`text-invert-high h-screen sticky top-0 flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
       isExpanded ? 'w-56' : 'w-16'
     }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.05) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
       {/* Header Section */}
@@ -97,7 +97,7 @@ export function Leftpanel() {
 
       {/* User Profile Section */}
       <div className="p-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
             <FaUser />
           </div>
