@@ -3,7 +3,7 @@ import { Button } from './Button';
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaEdit, FaUser } from "react-icons/fa";
 import { IoBriefcaseOutline } from "react-icons/io5";
-import { PiChartLineUp, PiMagicWand } from "react-icons/pi";
+import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState('creative-wizard');
@@ -20,7 +20,7 @@ export function Leftpanel() {
       id: 'content-hub',
       label: 'Content Hub',
       icon: (
-        <FaEdit/>
+        <PiNotePencilThin/>
       )
     },
     {
@@ -48,9 +48,9 @@ export function Leftpanel() {
   };
 
   return (
-    <div className={`bg-core-neu-950 text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
+    <div className={`text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
       isExpanded ? 'w-56' : 'w-16'
-    }`}>
+    }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.05) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
       {/* Header Section */}
       <div className="flex items-center justify-between p-3 ">
         {/* Logo - Clickable to open panel */}
@@ -61,7 +61,7 @@ export function Leftpanel() {
               !isExpanded ? 'hover:bg-core-prim-400 cursor-pointer' : 'cursor-default'
             }`}
           >
-            
+            <img src="/logo.png" alt="logo" className="w-full h-full" />
           </button>
         </div>
         
