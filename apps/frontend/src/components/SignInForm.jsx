@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { Button } from './Button';
-import { Input } from './Input';
+import { useState } from "react";
+import { Button } from "./Button";
+import { Input } from "./Input";
 
 const SignInForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       // Handle successful login here
-      console.log('Login successful');
+      console.log("Login successful");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -25,7 +25,7 @@ const SignInForm = () => {
 
   const handleGoogleSignIn = () => {
     // Handle Google Sign In
-    console.log('Google Sign In clicked');
+    console.log("Google Sign In clicked");
   };
 
   return (
@@ -37,7 +37,7 @@ const SignInForm = () => {
           <h1 className="font-['Montserrat'] font-semibold text-2xl text-white text-center">
             Sign In
           </h1>
-          <p className="font-['Montserrat'] font-normal text-sm text-[#747474]">
+          <p className="font-['Montserrat'] font-normal text-sm text-invert-low">
             Your Social Accounts
           </p>
         </div>
@@ -49,7 +49,12 @@ const SignInForm = () => {
             variant="dark-secondary"
             className="w-full h-10"
             leftIcon={
-              <svg width="24" height="24" viewBox="0 0 24 24" className="text-white">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="text-white"
+              >
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -75,11 +80,11 @@ const SignInForm = () => {
 
         {/* Divider */}
         <div className="flex items-center gap-[15px] mb-8">
-          <div className="flex-1 h-px bg-[#747474]"></div>
-          <span className="font-['Montserrat'] font-normal text-sm text-[#747474]">
+          <div className="flex-1 h-px bg-invert-low"></div>
+          <span className="font-['Montserrat'] font-normal text-sm text-invert-low">
             Or with Email
           </span>
-          <div className="flex-1 h-px bg-[#747474]"></div>
+          <div className="flex-1 h-px bg-invert-low"></div>
         </div>
 
         {/* Login Form */}
@@ -111,7 +116,7 @@ const SignInForm = () => {
           <div className="text-right mb-6">
             <button
               variant="link"
-              className="font-['Montserrat'] font-medium text-sm text-[#8c53c3] hover:text-[#b588e0] bg-transparent p-0 h-auto"
+              className="font-['Montserrat'] font-medium text-sm text-core-prim-300 hover:text-core-prim-100 bg-transparent p-0 h-auto"
             >
               Forgot Password?
             </button>
@@ -125,17 +130,17 @@ const SignInForm = () => {
             className="w-full rounded-[10px] text-base"
             isLoading={isLoading}
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
         {/* Sign Up Link */}
         {/* <div className="text-center mt-8">
           <p className="font-['Montserrat'] font-medium text-sm">
-            <span className="text-[#747474]">Not a Member yet?</span>
+            <span className="text-invert-low">Not a Member yet?</span>
             <Button
               variant="link"
-              className="font-['Montserrat'] font-medium text-sm text-[#8c53c3] hover:text-[#b588e0] bg-transparent p-0 h-auto ml-1"
+              className="font-['Montserrat'] font-medium text-sm text-core-prim-300 hover:text-core-prim-100 bg-transparent p-0 h-auto ml-1"
             >
               Sign Up
             </Button>

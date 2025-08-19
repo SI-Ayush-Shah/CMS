@@ -21,7 +21,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/wizard",
-        element: <ContentWizardPage />,
+        element: (
+          <LazyPageWrapper>
+            <ContentWizardPage />
+          </LazyPageWrapper>
+        ),
         errorElement: <ErrorBoundary />,
       },
       {
@@ -49,14 +53,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "login",
-        element: (
-          <LazyPageWrapper>
-            <LoginPage />
-          </LazyPageWrapper>
-        ),
-      },
-      {
         path: "*",
         element: (
           <LazyPageWrapper>
@@ -65,6 +61,14 @@ export const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: "login",
+    element: (
+      <LazyPageWrapper>
+        <LoginPage />
+      </LazyPageWrapper>
+    ),
   },
 ]);
 

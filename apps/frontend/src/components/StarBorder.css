@@ -33,7 +33,7 @@
 
 .inner-content {
   position: relative;
-  border: 0.5px solid #5f2e9f;
+  border: 0.5px solid var(--color-core-prim-600);
   background: transparent;
   color: white;
   border-radius: 15px;
