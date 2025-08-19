@@ -5,6 +5,7 @@ export const useProcessingStore = create((set) => ({
   phase: "idle",
   message: "",
   data: null,
+  request: { text: "", images: [] },
 
   start: (phase = "submitting", message = "") =>
     set({ isProcessing: true, phase, message }),
@@ -13,5 +14,12 @@ export const useProcessingStore = create((set) => ({
     set({ isProcessing: false, phase: "idle", message: "", data }),
   fail: (message = "") => set({ isProcessing: false, phase: "idle", message }),
   reset: () =>
-    set({ isProcessing: false, phase: "idle", message: "", data: null }),
+    set({
+      isProcessing: false,
+      phase: "idle",
+      message: "",
+      data: null,
+      request: { text: "", images: [] },
+    }),
+  setRequest: (request) => set({ request }),
 }));

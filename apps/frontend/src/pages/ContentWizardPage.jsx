@@ -6,6 +6,7 @@ import LoadingProgress from "../components/LoadingProgress";
 import { SubmissionLoadingIndicator } from "../components/LoadingIndicator";
 import ProcessingView from "../components/ProcessingView";
 import { useProcessingStore } from "../store/processingStore";
+import ContentEditorView from "../components/ContentEditorView";
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
@@ -14,8 +15,24 @@ export default function ContentWizardPage() {
   const [feedbackType, setFeedbackType] = useState(""); // 'success' | 'error' | ''
 
   // Content submission hook
+  const [article, setArticle] = useState(null);
+
   const { submit, isLoading, loadingState } = useContentSubmission({
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Normalize API to editor view props
+      const payload = result?.generatedContent;
+      const gc =
+        payload?.data?.generatedContent || payload?.generatedContent || payload;
+      const normalized = {
+        title: gc?.title,
+        summary: gc?.summary,
+        category: gc?.category,
+        tags: gc?.tags || [],
+        bannerUrl: gc?.bannerUrl,
+        images: gc?.images || [],
+        body: gc?.body,
+      };
+      setArticle(normalized);
       setFeedbackMessage("Content generated successfully!");
       setFeedbackType("success");
 
@@ -144,11 +161,13 @@ export default function ContentWizardPage() {
             </div>
           )}
 
-          {/* Switch between normal and processing view */}
+          {/* Switch between: input → processing → editor */}
           {isProcessing ? (
             <ProcessingView phase={phase} />
+          ) : article ? (
+            <ContentEditorView article={article} />
           ) : (
-            <div className="w-full max-w-[600px] min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] mx-auto px-4 sm:px-0">
+            <div className="w-full max-w-[600px] mx-auto min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-4 sm:px-0">
               <EnhancedAiChatInput
                 onSubmit={handleContentSubmit}
                 placeholder="Your blog crafting experience starts here..."

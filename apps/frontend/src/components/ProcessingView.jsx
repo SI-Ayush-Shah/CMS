@@ -1,7 +1,9 @@
 import React from "react";
+import { useProcessingStore } from "../store/processingStore";
 import { EnhancedAiChatInput } from "./EnhancedAiChatInput";
 
 export default function ProcessingView({ phase }) {
+  const { request } = useProcessingStore();
   return (
     <div className="min-h-[calc(100vh-0px)] w-full">
       <div className="relative w-full">
@@ -42,14 +44,8 @@ export default function ProcessingView({ phase }) {
             {/* Right prompt panel */}
             <div className="order-1 md:order-2 md:col-span-5 flex flex-col gap-4">
               <div className="bg-neutral-900 text-white rounded-[15px] p-3">
-                <p className="text-[14px] leading-[18px] font-[Montserrat]">
-                  Write a 500–700 word professional sports news article on Virat
-                  Kohli’s recent performance. Include a strong headline,
-                  introduction, match highlights, statistics, and realistic
-                  quotes (not fabricated) in an engaging yet objective tone.
-                  Provide contextual analysis of his impact on the team’s
-                  momentum and the ongoing series/tournament. Structure the
-                  article with a clear beginning, middle, and conclusion.
+                <p className="text-[14px] leading-[18px] font-[Montserrat] whitespace-pre-wrap break-words">
+                  {request?.text || "Preparing your content..."}
                 </p>
               </div>
 
@@ -58,7 +54,10 @@ export default function ProcessingView({ phase }) {
                 <div className="px-3 py-3">
                   <EnhancedAiChatInput
                     disabled
-                    placeholder="Your blog crafting experience starts here..."
+                    placeholder={
+                      request?.text?.slice(0, 80) ||
+                      "Your blog crafting experience starts here..."
+                    }
                   />
                 </div>
               </div>

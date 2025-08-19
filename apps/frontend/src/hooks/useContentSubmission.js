@@ -284,6 +284,7 @@ export const useContentSubmission = (options = {}) => {
         cancellable: true,
       });
       processingStore.start("submitting", "Submitting content...");
+      processingStore.setRequest({ text, images });
 
       try {
         // Single step: send multipart/form-data per backend contract

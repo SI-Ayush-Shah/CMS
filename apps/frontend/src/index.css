@@ -148,3 +148,6 @@
   --spacing-5: 20px; /* spacing/5 */
   --spacing-10: 40px; /* spacing/10 */
 }
+body{
+  color: var(--color-main-medium);
+}

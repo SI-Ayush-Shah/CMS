@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { EnhancedAiChatInput } from "../components/EnhancedAiChatInput";
 import { Button } from "../components/Button";
 import { contentApi } from "../services/contentApi";
+import EditorJsRenderer from "../components/EditorJsRenderer";
 
 /**
  * Content Editor Page
@@ -15,7 +16,7 @@ import { contentApi } from "../services/contentApi";
  * Right column contains an assistant panel using the existing
  * EnhancedAiChatInput for ideation/help while writing.
  */
-export default function ContentEditorPage() {
+export default function ContentEditorPage({ article = null }) {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,24 +43,28 @@ export default function ContentEditorPage() {
     );
   }, []);
 
+  const currentTitle = article?.title || dummyTitle;
+  const currentBanner = article?.bannerUrl || dummyImageUrl;
+  const currentBody = article?.body;
+
   const validate = useCallback(() => {
-    if (!dummyTitle.trim()) {
+    if (!currentTitle.trim()) {
       showMessage("Please add a title.", "error");
       return false;
     }
-    if (!dummyBody.trim()) {
+    if (!currentBody && !dummyBody.trim()) {
       showMessage("Please write the body content.", "error");
       return false;
     }
     return true;
-  }, [dummyTitle, dummyBody, showMessage]);
+  }, [currentTitle, currentBody, dummyBody, showMessage]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!validate()) return;
     try {
       setIsSavingDraft(true);
       const res = await contentApi.saveContent({
-        text: `${dummyTitle}\n\n${dummyBody}`,
+        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
         imageIds: [],
         metadata: { status: "draft" },
       });
@@ -77,7 +82,7 @@ export default function ContentEditorPage() {
     try {
       setIsPublishing(true);
       const res = await contentApi.saveContent({
-        text: `${dummyTitle}\n\n${dummyBody}`,
+        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
         imageIds: [],
         metadata: { status: "published" },
       });
@@ -137,7 +142,7 @@ export default function ContentEditorPage() {
             <div className="w-full">
               <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
                 <img
-                  src={dummyImageUrl}
+                  src={currentBanner}
                   alt="Cover preview"
                   className="w-full aspect-[16/10] object-cover"
                 />
@@ -148,21 +153,25 @@ export default function ContentEditorPage() {
           <div>
             <p className="text-xs text-invert-low mb-2">Title</p>
             <h1 className="font-semibold text-invert-high text-[22px] sm:text-[24px] lg:text-[26px] leading-8">
-              {dummyTitle}
+              {currentTitle}
             </h1>
           </div>
 
           <div>
             <p className="text-xs text-invert-low mb-2">Body</p>
             <div className="">
-              {dummyBody.split("\n").map((para, idx) => (
-                <p
-                  key={idx}
-                  className="text-main-medium text-[14px] leading-7 mb-2 last:mb-0"
-                >
-                  {para}
-                </p>
-              ))}
+              {currentBody ? (
+                <EditorJsRenderer data={currentBody} />
+              ) : (
+                dummyBody.split("\n").map((para, idx) => (
+                  <p
+                    key={idx}
+                    className="text-main-medium text-[14px] leading-7 mb-2 last:mb-0"
+                  >
+                    {para}
+                  </p>
+                ))
+              )}
             </div>
           </div>
         </section>
