@@ -1,15 +1,24 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const navigationItems = [
-    { name: 'Home', href: '/', current: location.pathname === '/' },
-    { name: 'Components', href: '/components', current: location.pathname === '/components' },
-    { name: 'About', href: '/about', current: location.pathname === '/about' },
+    { name: "Home", href: "/", current: location.pathname === "/" },
     { name: 'Login', href: '/login', current: location.pathname === '/login' },
+    {
+      name: "Components",
+      href: "/components",
+      current: location.pathname === "/components",
+    },
+    {
+      name: "Content Wizard",
+      href: "/wizard",
+      current: location.pathname === "/wizard",
+    },
+    { name: "About", href: "/about", current: location.pathname === "/about" },
   ];
 
   const toggleMobileMenu = () => {
@@ -17,7 +26,7 @@ const Navigation = () => {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       toggleMobileMenu();
     }
@@ -28,8 +37,8 @@ const Navigation = () => {
       <div className="flex items-center justify-between h-16">
         {/* Logo/Brand */}
         <div className="flex-shrink-0">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
             aria-label="Go to homepage"
           >
@@ -46,10 +55,10 @@ const Navigation = () => {
                 to={item.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   item.current
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 }`}
-                aria-current={item.current ? 'page' : undefined}
+                aria-current={item.current ? "page" : undefined}
               >
                 {item.name}
               </Link>
@@ -70,7 +79,7 @@ const Navigation = () => {
             <span className="sr-only">Open main menu</span>
             {/* Hamburger icon */}
             <svg
-              className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+              className={`${isMobileMenuOpen ? "hidden" : "block"} h-6 w-6`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -86,7 +95,7 @@ const Navigation = () => {
             </svg>
             {/* Close icon */}
             <svg
-              className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+              className={`${isMobileMenuOpen ? "block" : "hidden"} h-6 w-6`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -106,7 +115,7 @@ const Navigation = () => {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`}
+        className={`${isMobileMenuOpen ? "block" : "hidden"} md:hidden`}
         id="mobile-menu"
       >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
@@ -116,10 +125,10 @@ const Navigation = () => {
               to={item.href}
               className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                 item.current
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  ? "bg-blue-100 text-blue-700"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               }`}
-              aria-current={item.current ? 'page' : undefined}
+              aria-current={item.current ? "page" : undefined}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
