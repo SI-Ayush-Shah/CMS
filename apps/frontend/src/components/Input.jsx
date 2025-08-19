@@ -5,7 +5,7 @@ export const Input = React.forwardRef(function Input(
   ref
 ) {
   const base =
-    "w-full rounded px-3 py-2 border text-main-high placeholder:text-main-low bg-surface";
+    "w-full rounded px-3 py-2 border text-main-high placeholder:text-main-low bg-button-filled-main-default";
   const state =
     invalid || error
       ? "border-error-500 focus:outline-error-500"
