@@ -13,6 +13,12 @@ const schema = Type.Object({
   GOOGLE_API_KEY: Type.String(),
   // Optional database URL - can be undefined if not using database features
   DATABASE_URL: Type.Optional(Type.String()),
+  // Redis configuration (either REDIS_URL or discrete host/port/credentials)
+  REDIS_URL: Type.Optional(Type.String({ default: 'redis://localhost:6379' })),
+  REDIS_HOST: Type.Optional(Type.String()),
+  REDIS_PORT: Type.Optional(Type.Number()),
+  REDIS_USERNAME: Type.Optional(Type.String()),
+  REDIS_PASSWORD: Type.Optional(Type.String()),
   CLOUDINARY_CLOUD_NAME: Type.Optional(Type.String()),
   CLOUDINARY_API_KEY: Type.Optional(Type.String()),
   CLOUDINARY_API_SECRET: Type.Optional(Type.String()),
