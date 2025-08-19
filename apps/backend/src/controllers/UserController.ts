@@ -26,6 +26,10 @@ interface Dependencies {
 }
 
 export function createUserController({ userService }: Dependencies): UserController {
+  if (!userService) {
+    throw new Error('userService is required for userController')
+  }
+  
   return {
     async getAllUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
       try {

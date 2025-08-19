@@ -1,28 +1,58 @@
-import { asFunction } from 'awilix'
+import { asFunction, createContainer, InjectionMode } from 'awilix'
+import * as glob from 'glob'
 import path from 'path'
 
-// Import factory functions
-import { createUserService } from '../services/UserService'
-import { createUserRepository } from '../repositories/UserRepository'
-import { createHealthController } from '../controllers/HealthController'
-import { createUserController } from '../controllers/UserController'
+export function setupContainerWithAutoDiscovery() {
+  const container = createContainer({
+    injectionMode: InjectionMode.PROXY
+  })
 
-export const containerConfig = {
-  // Manually register dependencies
-  userRepository: asFunction(createUserRepository).singleton(),
-  userService: asFunction(createUserService).singleton(),
-  healthController: asFunction(createHealthController).singleton(),
-  userController: asFunction(createUserController).singleton(),
+  // TRUE FILESYSTEM AUTODISCOVERY
+  autodiscoverAndRegister(container)
+
+  return container
 }
 
-// Alternative: Auto-discovery configuration (commented out for now)
-// export const autoDiscoveryConfig = {
-//   modules: [
-//     ['repositories/*.ts', { register: asFunction, lifetime: 'SINGLETON' }],
-//     ['services/*.ts', { register: asFunction, lifetime: 'SINGLETON' }],
-//     ['controllers/*.ts', { register: asFunction, lifetime: 'SINGLETON' }]
-//   ],
-//   resolverOptions: {
-//     injectionMode: 'CLASSIC'
-//   }
-// }
+function autodiscoverAndRegister(container: any) {
+  const srcPath = path.resolve(__dirname, '..')
+
+  // Scan for all factory files
+  const patterns = [
+    'repositories/**/*.ts',
+    'services/**/*.ts', 
+    'controllers/**/*.ts'
+  ]
+
+  for (const pattern of patterns) {
+    const files = glob.sync(pattern, { cwd: srcPath })
+
+    for (const file of files) {
+      // Skip ExampleService
+      if (file.includes('ExampleService')) continue
+
+      try {
+        const modulePath = path.resolve(srcPath, file)
+        const module = require(modulePath)
+        
+        // Find factory functions (createXxx)
+        for (const [exportName, exportValue] of Object.entries(module)) {
+          if (typeof exportValue === 'function' && exportName.startsWith('create')) {
+            const dependencyName = exportName.charAt(6).toLowerCase() + exportName.slice(7)
+            
+            container.register({
+              [dependencyName]: asFunction(exportValue as any).singleton()
+            })
+          }
+        }
+      } catch (error) {
+        // Silently skip files that can't be loaded
+        continue
+      }
+    }
+  }
+}
+
+// Manual registration fallback (if needed)
+export const manualDependencies = {
+  // Add manual overrides here if autodiscovery fails for specific dependencies
+}

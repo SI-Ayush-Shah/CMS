@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import autoload from '@fastify/autoload'
 import path from 'path'
-import { containerConfig } from './config/container'
+import { setupContainerWithAutoDiscovery } from './config/container'
 import { handleApiError } from './shared/utils/error-handler'
 import { loggerConfig } from './shared/utils/logger-config'
 import './types/container' // Import type declarations
@@ -20,8 +20,14 @@ const start = async (): Promise<void> => {
       disposeOnResponse: false
     })
     
-    // Register dependencies
-    fastify.diContainer.register(containerConfig)
+    // Setup container with autodiscovery
+    const container = setupContainerWithAutoDiscovery()
+    
+    // Replace the default container with our autodiscovered one
+    fastify.diContainer = container
+    
+    // Log discovered dependencies
+    const discoveredDeps = Object.keys(container.cradle)
     
     // Global error handler
     fastify.setErrorHandler(handleApiError)
@@ -31,19 +37,8 @@ const start = async (): Promise<void> => {
       dir: path.join(__dirname, 'routes'),
       options: {}
     })
-    
     // Start server
     await fastify.listen({ port: 3001, host: '0.0.0.0' })
-    fastify.log.info('🚀 Fastify API with @fastify/awilix DI and Autoload running!')
-    fastify.log.info('Available endpoints:')
-    fastify.log.info('  GET  / - Root endpoint')
-    fastify.log.info('  GET  /health - Health check')
-    fastify.log.info('  GET  /readiness - Readiness check')
-    fastify.log.info('  GET  /users - Get all users')
-    fastify.log.info('  GET  /users/:id - Get user by ID')
-    fastify.log.info('  POST /users - Create new user')
-    fastify.log.info('  PUT  /users/:id - Update user')
-    fastify.log.info('  DELETE /users/:id - Delete user')
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)

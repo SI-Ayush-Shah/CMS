@@ -24,6 +24,10 @@ interface Dependencies {
 }
 
 export function createUserService({ userRepository }: Dependencies): UserService {
+  if (!userRepository) {
+    throw new Error('userRepository is required for userService')
+  }
+  
   return {
     async getAllUsers(): Promise<User[]> {
       return await userRepository.findAll()
