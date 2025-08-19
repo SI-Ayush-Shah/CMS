@@ -1,33 +1,31 @@
 import { useState } from "react";
-import { Button } from "./Button";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
-import { FaEdit, FaUser } from "react-icons/fa";
-import { IoBriefcaseOutline } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [activeItemId, setActiveItemId] = useState("creative-wizard");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const navigationItems = [
     {
       id: "creative-wizard",
       label: "Creative Wizard",
       icon: <PiMagicWand />,
+      to: "/creative-wizard",
     },
     {
       id: "content-hub",
       label: "Content Hub",
       icon: <PiNotePencilThin />,
-    },
-    {
-      id: "ai-jobs",
-      label: "AI Jobs",
-      icon: <IoBriefcaseOutline />,
+      to: "/content-hub",
     },
     {
       id: "analytics",
       label: "Analytics",
       icon: <PiChartLineUp />,
+      to: "/analytics",
     },
   ];
 
@@ -35,8 +33,8 @@ export function Leftpanel() {
     setIsExpanded(!isExpanded);
   };
 
-  const handleNavItemClick = (itemId) => {
-    setActiveItemId(itemId);
+  const handleNavItemClick = (to) => {
+    navigate(to);
   };
 
   return (
@@ -75,26 +73,31 @@ export function Leftpanel() {
 
       {/* Navigation Menu */}
       <nav className="flex-1 p-3 space-y-1">
-        {navigationItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleNavItemClick(item.id)}
-            className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
-              activeItemId === item.id
-                ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"
-                : "text-text-invert-low hover:text-invert-high"
-            }`}
-          >
-            <span
-              className={`flex-shrink-0 text-[24px] group-hover:text-invert-high ${activeItemId === item.id ? "text-invert-high" : "text-text-invert-low"}`}
+        {navigationItems.map((item) => {
+          const isActive =
+            location.pathname === item.to ||
+            location.pathname.startsWith(`${item.to}/`);
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavItemClick(item.to)}
+              className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
+                isActive
+                  ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"
+                  : "text-text-invert-low hover:text-invert-high"
+              }`}
             >
-              {item.icon}
-            </span>
-            {isExpanded && (
-              <span className="font-medium truncate">{item.label}</span>
-            )}
-          </button>
-        ))}
+              <span
+                className={`flex-shrink-0 text-[24px] group-hover:text-invert-high ${isActive ? "text-invert-high" : "text-text-invert-low"}`}
+              >
+                {item.icon}
+              </span>
+              {isExpanded && (
+                <span className="font-medium truncate">{item.label}</span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       {/* User Profile Section */}
