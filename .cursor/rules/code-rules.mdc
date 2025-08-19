@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
+globs: /apps
+alwaysApply: false
 ---
 - any frontend changes should be run in /apps/frontend
 - always follow todo list method
-- 

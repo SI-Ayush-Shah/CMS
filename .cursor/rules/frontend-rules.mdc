@@ -1,0 +1,13 @@
+---
+globs: /apps/frontend
+alwaysApply: false
+---
+
+- **Framework**: Use React Hooks and functional components. State management should primarily use `useState`, `useReducer`, or the Context API. Avoid class components.
+- **Styling**: All styling must be done with Tailwind 4 utility classes directly in JSX. Custom design tokens and styles should be defined in `src/index.css` using the `@theme` directive. Do not create a `tailwind.config.js` file.
+- **Component Structure**: Create reusable components inside `apps/frontend/src/components`. Components should be small and focused on a single responsibility.
+- **File Naming**: Use PascalCase for component files (e.g., `MyComponent.jsx`).
+- **Language**: Use modern JavaScript (ES6+ features) and JSX.
+- **Linting**: Adhere to the ESLint rules configured in `eslint.config.js`. Run `pnpm lint` to check for issues.
+- **Dependencies**: Manage all frontend packages using `pnpm` from the `apps/frontend` directory.
+- **Build Process**: The project is built using Vite. The main configuration is in `vite.config.js`. The development server is started with `pnpm dev`.

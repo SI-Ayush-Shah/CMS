@@ -1,0 +1,13 @@
+---
+globs: /apps/backend
+alwaysApply: false
+---
+
+- **Framework**: Use Fastify as the web framework. Leverage its plugin architecture for code organization.
+- **Language**: All backend code must be written in TypeScript. Use strong types and interfaces to ensure type safety. Avoid using `any`.
+- **API Design**: Design RESTful APIs. Use JSON Schema for request validation and serialization.
+- **Project Structure**: Organize the code into logical directories like `src/routes`, `src/plugins`, `src/services`, and `src/lib`. The main server entry point should be `src/server.ts`.
+- **Asynchronous Code**: Use `async/await` for all asynchronous operations to maintain clean and readable code.
+- **Error Handling**: Implement a centralized error handling mechanism using Fastify hooks (`setErrorHandler`).
+- **Configuration**: Manage environment variables using a library like `dotenv`. Do not commit `.env` files.
+- **Dependencies**: Manage dependencies with `pnpm` from the `apps/backend` directory.
