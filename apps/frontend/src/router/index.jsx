@@ -1,19 +1,29 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { lazy } from 'react';
-import ErrorBoundary from '../components/ErrorBoundary';
-import LazyPageWrapper from '../components/LazyPageWrapper';
-import BaseLayout from '../layouts/BaseLayout';
+import { createBrowserRouter } from "react-router-dom";
+import { lazy } from "react";
+import ErrorBoundary from "../components/ErrorBoundary";
+import LazyPageWrapper from "../components/LazyPageWrapper";
+import BaseLayout from "../layouts/BaseLayout";
 
 // Lazy load page components for code splitting
-const HomePage = lazy(() => import('../pages/HomePage'));
-const ComponentsPage = lazy(() => import('../pages/ComponentsPage'));
-const AboutPage = lazy(() => import('../pages/AboutPage'));
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const HomePage = lazy(() => import("../pages/HomePage"));
+const ComponentsPage = lazy(() => import("../pages/ComponentsPage"));
+const AboutPage = lazy(() => import("../pages/AboutPage"));
+const ContentWizardPage = lazy(() => import("../pages/ContentWizardPage"));
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/wizard",
+    element: (
+      <LazyPageWrapper>
+        <ContentWizardPage />
+      </LazyPageWrapper>
+    ),
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/",
     element: <BaseLayout />,
     errorElement: <ErrorBoundary />,
     children: [
@@ -26,7 +36,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'components',
+        path: "components",
         element: (
           <LazyPageWrapper>
             <ComponentsPage />
@@ -34,7 +44,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'about',
+        path: "about",
         element: (
           <LazyPageWrapper>
             <AboutPage />
@@ -42,7 +52,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
+        path: "*",
         element: (
           <LazyPageWrapper>
             <NotFoundPage />
