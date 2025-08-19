@@ -47,7 +47,8 @@ const generateContentRoutes: FastifyPluginAsync = async (fastify) => {
     method: 'POST',
     url: '/',
     schema: {
-      body: GenerateContentRequestSchema, // Uses DTO schema from service
+      // Accept both multipart form-data (files + content field) and JSON body
+      consumes: ['multipart/form-data', 'application/json'],
       response: {
         200: GenerateContentApiResponseSchema, // Wraps DTO with API response format
         400: ErrorResponseSchema,

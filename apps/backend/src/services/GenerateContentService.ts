@@ -67,6 +67,10 @@ export function createGenerateContentService({ generatedContentRepository }: Dep
       const structuredModel = model.withStructuredOutput(articleSchema);
 
       
+      const imagesList = Array.isArray((request as any).images) ? (request as any).images as string[] : []
+      const imagesSection = imagesList.length
+        ? `\n\nImages (use where contextually appropriate as Editor.js image blocks with captions):\n${imagesList.map((u, i) => `- [img${i+1}] ${u}`).join('\n')}`
+        : ''
 
       const result = await structuredModel.invoke([
         {
@@ -123,6 +127,7 @@ Example: [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
 - End with a "Conclusion" section.
 
 IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
+${imagesSection}
 CORRECT TABLE: "content": [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
 WRONG TABLE: "content": ["Header1", "Header2", "Row1Col1", "Row1Col2"]
 

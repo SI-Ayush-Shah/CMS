@@ -13,6 +13,9 @@ const schema = Type.Object({
   GOOGLE_API_KEY: Type.String(),
   // Optional database URL - can be undefined if not using database features
   DATABASE_URL: Type.Optional(Type.String()),
+  CLOUDINARY_CLOUD_NAME: Type.Optional(Type.String()),
+  CLOUDINARY_API_KEY: Type.Optional(Type.String()),
+  CLOUDINARY_API_SECRET: Type.Optional(Type.String()),
 })
 
 export const env = envSchema<Static<typeof schema>>({
