@@ -1,6 +1,8 @@
 import type { AppRedisClient } from '../config/redis'
 import type { RssFeedRepository, ListParams, ListResult } from '../repositories/RssFeedRepository'
 import type { NewRssFeed, RssFeed } from '../db/schema'
+import { rssSchedulerQueue } from '../background-processes/rss-scheduler/queues'
+import { minutesToMs, hoursToMs } from '../shared/utils/commonFunctions'
 
 export interface RssFeedService {
   create(data: NewRssFeed): Promise<RssFeed>
@@ -33,6 +35,36 @@ export function createRssFeedService({ rssFeedRepository, redis }: Dependencies)
     } catch {
       // ignore cache errors
     }
+  }
+
+  async function removeRepeatForFeed(feedId: string) {
+    // 1. Construct the EXACT same scheduler ID string
+    const schedulerId = `feed:${feedId}`;
+  
+    console.log(`Attempting to remove scheduler with ID: ${schedulerId}`);
+    // 2. Use that full ID to remove the job
+    // NOTE: The function name depends on your library. 
+    // For BullMQ, it's often removeRepeatableByKey.
+    const result = await rssSchedulerQueue.removeJobScheduler(schedulerId);
+  
+    if (result) {
+      console.log(`Successfully removed scheduler: ${schedulerId}`);
+    } else {
+      console.log(`Could not find scheduler to remove: ${schedulerId}`);
+    }
+  }
+
+  function getEveryMs(interval: RssFeed['updateInterval']): number {
+    const map: Record<string, number> = {
+      '15_minutes': minutesToMs({ minutes: 15 }).milliseconds,
+      '30_minutes': minutesToMs({ minutes: 30 }).milliseconds,
+      '1_hour': hoursToMs({ hours: 1 }).milliseconds,
+      '2_hours': hoursToMs({ hours: 2 }).milliseconds,
+      '6_hours': hoursToMs({ hours: 6 }).milliseconds,
+      '12_hours': hoursToMs({ hours: 12 }).milliseconds,
+      '24_hours': hoursToMs({ hours: 24 }).milliseconds
+    }
+    return map[interval] ?? hoursToMs({ hours: 1 }).milliseconds
   }
 
   return {
@@ -69,8 +101,28 @@ export function createRssFeedService({ rssFeedRepository, redis }: Dependencies)
     },
 
     async update(id: string, data: Partial<NewRssFeed>): Promise<RssFeed | null> {
+      const previous = await rssFeedRepository.getById(id)
       const updated = await rssFeedRepository.update(id, data)
-      if (updated) await invalidateListCaches()
+      if (updated) {
+        await invalidateListCaches()
+        if (previous && previous.isActive === false && updated.isActive === true) {
+          console.log('RSS feed activated', { id: updated.id, feedName: updated.feedName })
+          const everyMs = getEveryMs(updated.updateInterval)
+          await removeRepeatForFeed(updated.id)
+          await rssSchedulerQueue.add('scrape-feed', { feedId: updated.id }, {
+            repeat: { every: 2000 },
+            jobId: `feed:${updated.id}`,
+            repeatJobKey: `feed:${updated.id}`,
+            removeOnComplete: true,
+            removeOnFail: 100
+          })
+        }
+
+        if (previous && previous.isActive === true && updated.isActive === false) {
+          console.log('RSS feed deactivated', { id: updated.id, feedName: updated.feedName })
+          await removeRepeatForFeed(updated.id)
+        }
+      }
       return updated
     },
 

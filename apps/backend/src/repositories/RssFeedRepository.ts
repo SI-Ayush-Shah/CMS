@@ -5,6 +5,7 @@ import { count, ilike, desc, asc, eq } from 'drizzle-orm'
 export interface RssFeedRepository {
   create(data: NewRssFeed): Promise<RssFeed>
   list(params: ListParams): Promise<ListResult>
+  getById(id: string): Promise<RssFeed | null>
   update(id: string, data: Partial<NewRssFeed>): Promise<RssFeed | null>
   delete(id: string): Promise<boolean>
 }
@@ -58,6 +59,15 @@ export function createRssFeedRepository({ db }: Dependencies): RssFeedRepository
         .offset((page - 1) * pageSize)
 
       return { items, total: Number(total), page, pageSize }
+    },
+    async getById(id: string): Promise<RssFeed | null> {
+      if (!id) return null
+      const [row] = await db
+        .select()
+        .from(rssFeeds)
+        .where(eq(rssFeeds.id, id))
+        .limit(1)
+      return row ?? null
     },
     async update(id: string, data: Partial<NewRssFeed>): Promise<RssFeed | null> {
       if (!id) return null

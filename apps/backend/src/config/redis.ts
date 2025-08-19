@@ -3,6 +3,15 @@ import { env } from './env'
 
 export type AppRedisClient = ReturnType<typeof createClient>
 
+
+export const redisConnection = {
+  host: env.REDIS_HOST,
+  port: env.REDIS_PORT,
+  username: env.REDIS_USERNAME,
+  password: env.REDIS_PASSWORD,
+}
+
+
 export async function createRedisClient(): Promise<AppRedisClient | null> {
   try {
     const hasDiscreteConfig = !!env.REDIS_HOST || !!env.REDIS_PORT || !!env.REDIS_USERNAME || !!env.REDIS_PASSWORD
