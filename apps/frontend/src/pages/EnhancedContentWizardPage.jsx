@@ -103,30 +103,66 @@ export default function EnhancedContentWizardPage() {
   }, [clearError, handlePageError])
 
   /**
-   * Handles validation error boundary errors
+   * Handles component error boundary errors
    */
-  const handleValidationError = useCallback((error, errorInfo) => {
-    console.error('Validation system error:', error, errorInfo)
+  const handleComponentError = useCallback((error, errorInfo) => {
+    const enhancedError = enhanceError(error, {
+      type: 'component',
+      context: 'content_wizard_component',
+      componentStack: errorInfo.componentStack
+    })
+    
+    logError(enhancedError, {
+      context: 'error_boundary',
+      component: 'EnhancedContentWizardPage'
+    })
     
     // In a real app, you might want to report this to an error tracking service
-    // reportError(error, { context: 'validation', errorInfo })
+    // errorTrackingService.captureError(enhancedError)
   }, [])
 
   /**
    * Handles error boundary retry
    */
-  const handleRetry = useCallback(() => {
+  const handleRetry = useCallback(async () => {
+    clearError()
     setLastSubmission(null)
-    setIsSubmitting(false)
-  }, [])
+    setSubmissionPhase('idle')
+    
+    // If there was a previous submission attempt, we could retry it here
+    if (lastSubmission?.error) {
+      console.log('Retrying after error boundary recovery')
+    }
+  }, [clearError, lastSubmission])
 
   /**
    * Handles error boundary reset
    */
   const handleReset = useCallback(() => {
+    clearError()
     setLastSubmission(null)
-    setIsSubmitting(false)
-    // Could also clear any global state here
+    setSubmissionPhase('idle')
+    
+    // Clear any cached form data or state
+    console.log('Resetting content wizard state')
+  }, [clearError])
+
+  /**
+   * Handles page refresh recovery
+   */
+  const handleRefresh = useCallback(() => {
+    window.location.reload()
+  }, [])
+
+  /**
+   * Handles contact support recovery
+   */
+  const handleContactSupport = useCallback((error) => {
+    // In a real app, this would open a support modal or redirect to help
+    console.log('Contact support requested for error:', error?.errorId)
+    
+    // Could open a modal with error details pre-filled
+    // or redirect to a support page with error context
   }, [])
 
   return (
