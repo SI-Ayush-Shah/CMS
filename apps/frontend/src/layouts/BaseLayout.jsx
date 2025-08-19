@@ -2,6 +2,7 @@ import { Outlet, useNavigation } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Breadcrumb from '../components/Breadcrumb';
 import LoadingProgress from '../components/LoadingProgress';
+import Aurora from '../components/Aurora';
 
 const BaseLayout = () => {
   const navigation = useNavigation();
@@ -18,9 +19,22 @@ const BaseLayout = () => {
       </header> */}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* <Breadcrumb /> */}
-        <Outlet />
+      <main className="relative min-h-screen">
+        {/* Aurora Background */}
+        <div className="absolute inset-0 z-0 bg-core-neu-1000">
+          <Aurora
+            colorStops={["#1e0a32", "#1e0a32", "#1e0a32"]}
+            blend={1}
+            amplitude={1}
+            speed={0.5}
+          />
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          {/* <Breadcrumb /> */}
+          <Outlet />
+        </div>
       </main>
 
       {/* Footer */}
