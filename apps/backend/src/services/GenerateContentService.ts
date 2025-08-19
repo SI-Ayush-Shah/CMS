@@ -66,8 +66,8 @@ export function createGenerateContentService({ generatedContentRepository }: Dep
       
       const structuredModel = model.withStructuredOutput(articleSchema);
 
-      
       const imagesList = Array.isArray((request as any).images) ? (request as any).images as string[] : []
+      const bannerUrl = (request as any).bannerUrl as string | undefined
       const imagesSection = imagesList.length
         ? `\n\nImages (use where contextually appropriate as Editor.js image blocks with captions):\n${imagesList.map((u, i) => `- [img${i+1}] ${u}`).join('\n')}`
         : ''
@@ -78,7 +78,7 @@ export function createGenerateContentService({ generatedContentRepository }: Dep
           content: `Generate a comprehensive, well-structured long-form article for: ${request.content}
 
 CRITICAL: All table blocks must have content as a 2D array (array of arrays)!
-Example: [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
+Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
 
 ### Instructions:
 1. Article length: ~100-200 lines.
@@ -119,17 +119,18 @@ Example: [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
 - Opinion pieces → headers + quotes + paragraphs
 
 ### Requirements:
-- Each block must have a unique descriptive id (e.g., "intro_header", "history_para1", "pros_table").
+- Each block must have a unique descriptive id (e.g., \"intro_header\", \"history_para1\", \"pros_table\").
 - Use delimiter to separate major sections.
 - Headers must clearly mark new sections.
 - Mix block types (not just paragraphs).
 - Make content scannable (lists, tables, quotes).
-- End with a "Conclusion" section.
+- End with a \"Conclusion\" section.
 
 IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
+(Banner image URL provided separately: ${bannerUrl ?? 'N/A'}; do not duplicate banner as a body image block)
 ${imagesSection}
-CORRECT TABLE: "content": [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
-WRONG TABLE: "content": ["Header1", "Header2", "Row1Col1", "Row1Col2"]
+CORRECT TABLE: \"content\": [[\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"]]
+WRONG TABLE: \"content\": [\"Header1\", \"Header2\", \"Row1Col1\", \"Row1Col2\"]
 
 Return JSON ONLY in Editor.js format, no extra explanation.`
         }
@@ -146,10 +147,13 @@ Return JSON ONLY in Editor.js format, no extra explanation.`
       const saved = await generatedContentRepository.create(toInsert)
 
       return {
-        generatedContent: result,
+        generatedContent: {
+          ...result,
+          bannerUrl,
+          images: imagesList
+        },
         originalContent: request.content,
         timestamp: new Date().toISOString(),
-        // optional: echo db id in response via result augmentation if needed
       }
     }
   }
