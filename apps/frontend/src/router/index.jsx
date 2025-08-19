@@ -31,6 +31,15 @@ export const router = createBrowserRouter([
         errorElement: <ErrorBoundary />,
       },
       {
+        path: "editor/:id",
+        element: (
+          <LazyPageWrapper>
+            <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
         path: "/wizard",
         element: (
           <LazyPageWrapper>

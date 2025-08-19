@@ -1,6 +1,7 @@
 import MagicBento, { BentoCard } from "../components/MagicBento";
-import BlogCard from "../components/FigmaBlogCard";
+import BlogCard from "../components/BlogCard";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Using MagicBento for cards
 
@@ -89,6 +90,8 @@ const BlogPage = () => {
     }
   ];
 
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Google Fonts */}
@@ -124,7 +127,7 @@ const BlogPage = () => {
               spotlightRadius={300}
               glowColor="132, 0, 255"
             >
-              <div className="card-responsive grid gap-2">
+              <div className="card-responsive grid gap-6">
                 {blogPosts.slice(0, 8).map((p) => (
                   <BentoCard
                     key={p.id}
@@ -138,7 +141,7 @@ const BlogPage = () => {
                       date={p.date}
                       title={p.title}
                       description={p.description}
-                      onCtaClick={() => {}}
+                      onCtaClick={() => navigate(`/editor/${p.id}`)}
                     />
                   </BentoCard>
                 ))}
