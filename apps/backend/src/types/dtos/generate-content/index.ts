@@ -14,7 +14,9 @@ export const GenerateContentRequestSchema = Type.Object({
     minLength: 1,
     maxLength: 10000,
     description: 'Content to process/generate from'
-  })
+  }),
+  bannerUrl: Type.Optional(Type.String({ format: 'uri', description: 'Banner image URL (Cloudinary)' })),
+  images: Type.Optional(Type.Array(Type.String({ format: 'uri' }), { description: 'Hosted image URLs' }))
 })
 
 // Editor.js block schema
@@ -51,6 +53,8 @@ export const GenerateContentResponseSchema = Type.Object({
     summary: Type.String({ description: 'Article summary' }),
     category: Type.String({ description: 'Article category' }),
     tags: Type.Array(Type.String(), { description: 'Article tags' }),
+    bannerUrl: Type.Optional(Type.String({ format: 'uri', description: 'Banner image URL' })),
+    images: Type.Array(Type.String(), { description: 'Gallery image URLs', default: [] }),
     body: EditorJsSchema
   }),
   originalContent: Type.String({
