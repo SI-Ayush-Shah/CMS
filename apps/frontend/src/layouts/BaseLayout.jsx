@@ -1,14 +1,14 @@
-import { Outlet, useNavigation } from 'react-router-dom';
-import Navigation from '../components/Navigation';
-import Breadcrumb from '../components/Breadcrumb';
-import LoadingProgress from '../components/LoadingProgress';
+import { Outlet, useNavigation } from "react-router-dom";
+import Navigation from "../components/Navigation";
+import Breadcrumb from "../components/Breadcrumb";
+import LoadingProgress from "../components/LoadingProgress";
 
 const BaseLayout = () => {
   const navigation = useNavigation();
-  const isLoading = navigation.state === 'loading';
+  const isLoading = navigation.state === "loading";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#000] flex flex-col">
       <LoadingProgress isLoading={isLoading} />
       {/* Header with Navigation */}
       {/* <header className="bg-white shadow-sm border-b border-gray-200">

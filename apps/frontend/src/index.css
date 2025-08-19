@@ -146,4 +146,59 @@
   --spacing-4: 16px; /* spacing/4 */
   --spacing-5: 20px; /* spacing/5 */
   --spacing-10: 40px; /* spacing/10 */
+
+  /* Content Wizard specific variables */
+  /* Navbar */
+  --navbar-collapsed-width: 40px;
+  --navbar-height: 868px;
+  --navbar-bg-gradient: linear-gradient(
+    90deg,
+    rgba(74, 49, 102, 1) 0%,
+    rgba(126, 76, 171, 1) 100%
+  );
+  --navbar-border-color: rgba(97, 63, 130, 0.5);
+  --navbar-border-width: 0.5px;
+  --navbar-border-radius: 12px;
+  --navbar-padding: 16px 12px;
+
+  /* Nav Items */
+  --nav-item-size: 40px;
+  --nav-item-padding: 8px;
+  --nav-item-border-radius: 10px;
+  --nav-item-active-bg: rgba(100, 30, 167, 0.15);
+  --nav-item-active-border: rgba(97, 63, 130, 0.25);
+  --nav-item-icon-size: 24px;
+  --nav-item-icon-active-color: #ffffff;
+  --nav-item-icon-inactive-color: #747474;
+
+  /* AI Chat Input */
+  --chat-input-width: 600px;
+  --chat-input-height: 175px;
+  --chat-input-bg: rgba(0, 0, 0, 0.4);
+  --chat-input-backdrop-blur: 40px;
+  --chat-input-border-gradient: linear-gradient(
+    150deg,
+    rgba(95, 46, 159, 1) 0%,
+    rgba(124, 238, 255, 1) 100%
+  );
+  --chat-input-border-radius: 15px;
+  --chat-input-padding: 16px 12px;
+
+  /* Typography */
+  --page-title-font-size: 36px;
+  --page-title-font-weight: 600;
+  --page-title-color: #ffffff;
+  --page-subtitle-font-size: 14px;
+  --page-subtitle-font-weight: 400;
+  --page-subtitle-color: #a2a2a2;
+
+  /* Buttons */
+  --generate-button-bg: #171717;
+  --generate-button-text-color: #2e2e2e;
+  --cover-image-button-text-color: #ffffff;
+
+  /* Layout */
+  --content-wizard-bg: #000000;
+  --gradient-orb-color: rgba(100, 30, 167, 0.3);
+  --gradient-orb-blur: 1000px;
 }

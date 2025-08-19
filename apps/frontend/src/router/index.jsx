@@ -10,24 +10,20 @@ const ComponentsPage = lazy(() => import("../pages/ComponentsPage"));
 const AboutPage = lazy(() => import("../pages/AboutPage"));
 const ContentWizardPage = lazy(() => import("../pages/ContentWizardPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
-const LoginPage = lazy(() => import('../pages/LoginPage'));
+const LoginPage = lazy(() => import("../pages/LoginPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
-  {
-    path: "/wizard",
-    element: (
-      <LazyPageWrapper>
-        <ContentWizardPage />
-      </LazyPageWrapper>
-    ),
-    errorElement: <ErrorBoundary />,
-  },
   {
     path: "/",
     element: <BaseLayout />,
     errorElement: <ErrorBoundary />,
     children: [
+      {
+        path: "/wizard",
+        element: <ContentWizardPage />,
+        errorElement: <ErrorBoundary />,
+      },
       {
         index: true,
         element: (
@@ -53,7 +49,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'login',
+        path: "login",
         element: (
           <LazyPageWrapper>
             <LoginPage />
@@ -61,7 +57,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
+        path: "*",
         element: (
           <LazyPageWrapper>
             <NotFoundPage />
