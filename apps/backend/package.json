@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec 'tsx src --env-file=.env | pino-pretty' ",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",

@@ -35,7 +35,9 @@ const start = async (): Promise<void> => {
     // Auto-load routes from routes directory
     await fastify.register(autoload, {
       dir: path.join(__dirname, 'routes'),
-      options: {}
+      options: {
+        prefix: '/content-studio/api',
+      }
     })
     // Start server
     const { env } = require('./config/env')
