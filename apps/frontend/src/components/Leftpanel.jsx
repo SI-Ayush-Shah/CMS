@@ -48,9 +48,9 @@ export function Leftpanel() {
   };
 
   return (
-    <div className={`bg-core-neu-950 text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
+    <div className={`text-invert-high h-screen flex rounded-lg flex-col transition-all duration-300 ease-in-out ${
       isExpanded ? 'w-56' : 'w-16'
-    }`}>
+    }`} style={{background: 'linear-gradient(90deg, rgba(74, 49, 102, 0.05) 0%, rgba(126, 76, 171, 0.05) 100%)'}}>
       {/* Header Section */}
       <div className="flex items-center justify-between p-3 ">
         {/* Logo - Clickable to open panel */}
