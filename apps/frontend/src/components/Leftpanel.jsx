@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
-import { FaEdit, FaUser } from "react-icons/fa";
-import { IoBriefcaseOutline } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
+import { IoBriefcaseOutline } from "react-icons/io5";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
