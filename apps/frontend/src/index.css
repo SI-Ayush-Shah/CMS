@@ -63,6 +63,11 @@
   --color-core-neu-900: #212121;
   --color-core-neu-950: #25272c;
 
+
+  --color-button-filled-main-default: #171717;
+  --color-border-main-default: #613F82;
+--color-tes
+
   /* Text roles */
   --color-text-main-high: #212121; /* txt/main/high */
   --color-text-main-medium: #424242; /* txt/main/medium */
@@ -70,8 +75,8 @@
   --color-text-main-disabled: #bdbdbd; /* txt/main/disable */
   --color-text-invert-high: #ffffff; /* txt/invert/high */
   --color-text-invert-medium: #eeeeee; /* txt/invert/medium */
-  --color-text-invert-low: #e0e0e0; /* txt/invert/low */
-  --color-text-invert-disabled: #bdbdbd; /* txt/invert/disable */
+  --color-text-invert-low: #747474; /* txt/invert/low */
+  --color-text-invert-disabled: #464646; /* txt/invert/disable */
   /* Aliases for cleaner class names */
   --color-main-high: var(--color-text-main-high);
   --color-main-medium: var(--color-text-main-medium);
