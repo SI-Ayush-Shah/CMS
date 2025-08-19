@@ -132,6 +132,8 @@ export default function Aurora(props) {
   propsRef.current = props;
 
   const ctnDom = useRef(null);
+  const resizeTimeoutRef = useRef(null);
+  const lastDimensionsRef = useRef({ width: 0, height: 0 });
 
   useEffect(() => {
     const ctn = ctnDom.current;
@@ -154,12 +156,82 @@ export default function Aurora(props) {
       if (!ctn) return;
       const width = ctn.offsetWidth;
       const height = ctn.offsetHeight;
-      renderer.setSize(width, height);
+      
+      // Only resize if dimensions actually changed significantly
+      const lastDim = lastDimensionsRef.current;
+      const widthChanged = Math.abs(width - lastDim.width) > 1;
+      const heightChanged = Math.abs(height - lastDim.height) > 1;
+      
+      if (!widthChanged && !heightChanged) return;
+      
+      // Ensure minimum dimensions
+      const minWidth = Math.max(width, 1);
+      const minHeight = Math.max(height, 1);
+      
+      renderer.setSize(minWidth, minHeight);
       if (program) {
-        program.uniforms.uResolution.value = [width, height];
+        program.uniforms.uResolution.value = [minWidth, minHeight];
       }
+      
+      // Update last known dimensions
+      lastDimensionsRef.current = { width: minWidth, height: minHeight };
     }
-    window.addEventListener("resize", resize);
+
+    // Debounced resize function to prevent excessive calls
+    function debouncedResize() {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      resizeTimeoutRef.current = setTimeout(resize, 16); // ~60fps
+    }
+
+    // Function to ensure initial dimensions are set
+    function ensureInitialDimensions() {
+      if (!ctn) return;
+      
+      // Get container dimensions
+      let width = ctn.offsetWidth;
+      let height = ctn.offsetHeight;
+      
+      // If container has no dimensions, try to get them from parent or use viewport
+      if (width === 0 || height === 0) {
+        const parent = ctn.parentElement;
+        if (parent) {
+          width = parent.offsetWidth || window.innerWidth;
+          height = parent.offsetHeight || window.innerHeight;
+        } else {
+          width = window.innerWidth;
+          height = window.innerHeight;
+        }
+      }
+      
+      // Ensure minimum dimensions
+      const minWidth = Math.max(width, 100);
+      const minHeight = Math.max(height, 100);
+      
+      renderer.setSize(minWidth, minHeight);
+      if (program) {
+        program.uniforms.uResolution.value = [minWidth, minHeight];
+      }
+      
+      lastDimensionsRef.current = { width: minWidth, height: minHeight };
+    }
+
+    // Use ResizeObserver for better performance and responsiveness
+    let resizeObserver;
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.target === ctn) {
+            debouncedResize();
+          }
+        }
+      });
+      resizeObserver.observe(ctn);
+    } else {
+      // Fallback to window resize listener
+      window.addEventListener("resize", debouncedResize);
+    }
 
     const geometry = new Triangle(gl);
     if (geometry.attributes.uv) {
@@ -178,13 +250,19 @@ export default function Aurora(props) {
         uTime: { value: 0 },
         uAmplitude: { value: amplitude },
         uColorStops: { value: colorStopsArray },
-        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+        uResolution: { value: [100, 100] }, // Default fallback dimensions
         uBlend: { value: blend }
       }
     });
 
     const mesh = new Mesh(gl, { geometry, program });
     ctn.appendChild(gl.canvas);
+
+    // Ensure initial dimensions are set
+    ensureInitialDimensions();
+    
+    // Also try to resize after a short delay to catch any late layout changes
+    setTimeout(ensureInitialDimensions, 100);
 
     let animateId = 0;
     const update = (t) => {
@@ -202,11 +280,16 @@ export default function Aurora(props) {
     };
     animateId = requestAnimationFrame(update);
 
-    resize();
-
     return () => {
       cancelAnimationFrame(animateId);
-      window.removeEventListener("resize", resize);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      } else {
+        window.removeEventListener("resize", debouncedResize);
+      }
       if (ctn && gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
@@ -215,5 +298,5 @@ export default function Aurora(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amplitude]);
 
-  return <div ref={ctnDom} className="w-full h-full" />;
+  return <div ref={ctnDom} className="w-full h-full absolute inset-0" />;
 }

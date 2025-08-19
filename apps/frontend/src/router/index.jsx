@@ -72,14 +72,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "login",
-        element: (
-          <LazyPageWrapper>
-            <LoginPage />
-          </LazyPageWrapper>
-        ),
-      },
-      {
         path: "*",
         element: (
           <LazyPageWrapper>

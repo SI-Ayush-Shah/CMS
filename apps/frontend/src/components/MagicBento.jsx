@@ -45,11 +45,7 @@ const cardData = [
   },
 ];
 
-const createParticleElement = (
-  x,
-  y,
-  color = DEFAULT_GLOW_COLOR
-) => {
+const createParticleElement = (x, y, color = DEFAULT_GLOW_COLOR) => {
   const el = document.createElement("div");
   el.className = "particle";
   el.style.cssText = `
@@ -72,13 +68,7 @@ const calculateSpotlightValues = (radius) => ({
   fadeDistance: radius * 0.75,
 });
 
-const updateCardGlowProperties = (
-  card,
-  mouseX,
-  mouseY,
-  glow,
-  radius
-) => {
+const updateCardGlowProperties = (card, mouseX, mouseY, glow, radius) => {
   const rect = card.getBoundingClientRect();
   const relativeX = ((mouseX - rect.left) / rect.width) * 100;
   const relativeY = ((mouseY - rect.top) / rect.height) * 100;
@@ -661,31 +651,182 @@ const MagicBento = ({
           children
         ) : (
           <div className="card-responsive grid gap-2">
-          {dataToUse.map((card, index) => {
-            const baseClassName = `group card flex flex-col justify-between relative w-full max-w-full rounded-[15px] border border-solid font-light overflow-hidden transition-all duration-300 ease-in-out hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] ${enableBorderGlow ? "card--border-glow" : ""}`;
+            {dataToUse.map((card, index) => {
+              const baseClassName = `group card flex flex-col justify-between relative w-full max-w-full rounded-[15px] border border-solid font-light overflow-hidden transition-all duration-300 ease-in-out hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] ${enableBorderGlow ? "card--border-glow" : ""}`;
 
-            const cardStyle = {
-              backgroundColor: "transparent",
-              borderColor: "var(--border-color)",
-              color: "var(--white)",
-              "--glow-x": "50%",
-              "--glow-y": "50%",
-              "--glow-intensity": "0",
-              "--glow-radius": "200px",
-            };
+              const cardStyle = {
+                backgroundColor: "transparent",
+                borderColor: "var(--border-color)",
+                color: "var(--white)",
+                "--glow-x": "50%",
+                "--glow-y": "50%",
+                "--glow-intensity": "0",
+                "--glow-radius": "200px",
+              };
 
-            if (enableStars) {
+              if (enableStars) {
+                return (
+                  <ParticleCard
+                    key={index}
+                    className={baseClassName}
+                    style={cardStyle}
+                    disableAnimations={shouldDisableAnimations}
+                    particleCount={particleCount}
+                    glowColor={glowColor}
+                    enableTilt={enableTilt}
+                    clickEffect={clickEffect}
+                    enableMagnetism={enableMagnetism}
+                  >
+                    {/* Image */}
+                    {card.image && (
+                      <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px]">
+                        <img
+                          src={card.image}
+                          alt={card.title || card.label}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    {/* Content */}
+                    <div className="flex flex-col gap-3 ">
+                      {card.date && (
+                        <span className="text-[12px] text-white/90">
+                          {card.date}
+                        </span>
+                      )}
+                      {card.title && (
+                        <h3
+                          className={`text-white text-[16px] font-semibold ${textAutoHide ? "text-clamp-1" : ""}`}
+                        >
+                          {card.title}
+                        </h3>
+                      )}
+                      {card.description && (
+                        <p
+                          className={`text-[14px] text-white/70 leading-5 ${textAutoHide ? "text-clamp-2" : ""}`}
+                        >
+                          {card.description}
+                        </p>
+                      )}
+                    </div>
+                  </ParticleCard>
+                );
+              }
+
               return (
-                <ParticleCard
+                <div
                   key={index}
                   className={baseClassName}
                   style={cardStyle}
-                  disableAnimations={shouldDisableAnimations}
-                  particleCount={particleCount}
-                  glowColor={glowColor}
-                  enableTilt={enableTilt}
-                  clickEffect={clickEffect}
-                  enableMagnetism={enableMagnetism}
+                  ref={(el) => {
+                    if (!el) return;
+
+                    const handleMouseMove = (e) => {
+                      if (shouldDisableAnimations) return;
+
+                      const rect = el.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      const centerX = rect.width / 2;
+                      const centerY = rect.height / 2;
+
+                      if (enableTilt) {
+                        const rotateX = ((y - centerY) / centerY) * -10;
+                        const rotateY = ((x - centerX) / centerX) * 10;
+
+                        gsap.to(el, {
+                          rotateX,
+                          rotateY,
+                          duration: 0.1,
+                          ease: "power2.out",
+                          transformPerspective: 1000,
+                        });
+                      }
+
+                      if (enableMagnetism) {
+                        const magnetX = (x - centerX) * 0.05;
+                        const magnetY = (y - centerY) * 0.05;
+
+                        gsap.to(el, {
+                          x: magnetX,
+                          y: magnetY,
+                          duration: 0.3,
+                          ease: "power2.out",
+                        });
+                      }
+                    };
+
+                    const handleMouseLeave = () => {
+                      if (shouldDisableAnimations) return;
+
+                      if (enableTilt) {
+                        gsap.to(el, {
+                          rotateX: 0,
+                          rotateY: 0,
+                          duration: 0.3,
+                          ease: "power2.out",
+                        });
+                      }
+
+                      if (enableMagnetism) {
+                        gsap.to(el, {
+                          x: 0,
+                          y: 0,
+                          duration: 0.3,
+                          ease: "power2.out",
+                        });
+                      }
+                    };
+
+                    const handleClick = (e) => {
+                      if (!clickEffect || shouldDisableAnimations) return;
+
+                      const rect = el.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+
+                      const maxDistance = Math.max(
+                        Math.hypot(x, y),
+                        Math.hypot(x - rect.width, y),
+                        Math.hypot(x, y - rect.height),
+                        Math.hypot(x - rect.width, y - rect.height)
+                      );
+
+                      const ripple = document.createElement("div");
+                      ripple.style.cssText = `
+                      position: absolute;
+                      width: ${maxDistance * 2}px;
+                      height: ${maxDistance * 2}px;
+                      border-radius: 50%;
+                      background: radial-gradient(circle, rgba(${glowColor}, 0.4) 0%, rgba(${glowColor}, 0.2) 30%, transparent 70%);
+                      left: ${x - maxDistance}px;
+                      top: ${y - maxDistance}px;
+                      pointer-events: none;
+                      z-index: 1000;
+                    `;
+
+                      el.appendChild(ripple);
+
+                      gsap.fromTo(
+                        ripple,
+                        {
+                          scale: 0,
+                          opacity: 1,
+                        },
+                        {
+                          scale: 1,
+                          opacity: 0,
+                          duration: 0.8,
+                          ease: "power2.out",
+                          onComplete: () => ripple.remove(),
+                        }
+                      );
+                    };
+
+                    el.addEventListener("mousemove", handleMouseMove);
+                    el.addEventListener("mouseleave", handleMouseLeave);
+                    el.addEventListener("click", handleClick);
+                  }}
                 >
                   {/* Image */}
                   {card.image && (
@@ -698,169 +839,30 @@ const MagicBento = ({
                     </div>
                   )}
                   {/* Content */}
-                  <div className="flex flex-col gap-3 ">
+                  <div className="flex flex-col gap-3 p-3">
                     {card.date && (
-                      <span className="text-[12px] text-white/90">{card.date}</span>
+                      <span className="text-[12px] text-white/90">
+                        {card.date}
+                      </span>
                     )}
                     {card.title && (
-                      <h3 className={`text-white text-[16px] font-semibold ${textAutoHide ? "text-clamp-1" : ""}`}>
+                      <h3
+                        className={`text-white text-[16px] font-semibold ${textAutoHide ? "text-clamp-1" : ""}`}
+                      >
                         {card.title}
                       </h3>
                     )}
                     {card.description && (
-                      <p className={`text-[14px] text-white/70 leading-5 ${textAutoHide ? "text-clamp-2" : ""}`}>
+                      <p
+                        className={`text-[14px] text-white/70 leading-5 ${textAutoHide ? "text-clamp-2" : ""}`}
+                      >
                         {card.description}
                       </p>
                     )}
                   </div>
-                </ParticleCard>
-              );
-            }
-
-            return (
-              <div
-                key={index}
-                className={baseClassName}
-                style={cardStyle}
-                ref={(el) => {
-                  if (!el) return;
-
-                  const handleMouseMove = (e) => {
-                    if (shouldDisableAnimations) return;
-
-                    const rect = el.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-
-                    if (enableTilt) {
-                      const rotateX = ((y - centerY) / centerY) * -10;
-                      const rotateY = ((x - centerX) / centerX) * 10;
-
-                      gsap.to(el, {
-                        rotateX,
-                        rotateY,
-                        duration: 0.1,
-                        ease: "power2.out",
-                        transformPerspective: 1000,
-                      });
-                    }
-
-                    if (enableMagnetism) {
-                      const magnetX = (x - centerX) * 0.05;
-                      const magnetY = (y - centerY) * 0.05;
-
-                      gsap.to(el, {
-                        x: magnetX,
-                        y: magnetY,
-                        duration: 0.3,
-                        ease: "power2.out",
-                      });
-                    }
-                  };
-
-                  const handleMouseLeave = () => {
-                    if (shouldDisableAnimations) return;
-
-                    if (enableTilt) {
-                      gsap.to(el, {
-                        rotateX: 0,
-                        rotateY: 0,
-                        duration: 0.3,
-                        ease: "power2.out",
-                      });
-                    }
-
-                    if (enableMagnetism) {
-                      gsap.to(el, {
-                        x: 0,
-                        y: 0,
-                        duration: 0.3,
-                        ease: "power2.out",
-                      });
-                    }
-                  };
-
-                  const handleClick = (e) => {
-                    if (!clickEffect || shouldDisableAnimations) return;
-
-                    const rect = el.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-
-                    const maxDistance = Math.max(
-                      Math.hypot(x, y),
-                      Math.hypot(x - rect.width, y),
-                      Math.hypot(x, y - rect.height),
-                      Math.hypot(x - rect.width, y - rect.height)
-                    );
-
-                    const ripple = document.createElement("div");
-                    ripple.style.cssText = `
-                      position: absolute;
-                      width: ${maxDistance * 2}px;
-                      height: ${maxDistance * 2}px;
-                      border-radius: 50%;
-                      background: radial-gradient(circle, rgba(${glowColor}, 0.4) 0%, rgba(${glowColor}, 0.2) 30%, transparent 70%);
-                      left: ${x - maxDistance}px;
-                      top: ${y - maxDistance}px;
-                      pointer-events: none;
-                      z-index: 1000;
-                    `;
-
-                    el.appendChild(ripple);
-
-                    gsap.fromTo(
-                      ripple,
-                      {
-                        scale: 0,
-                        opacity: 1,
-                      },
-                      {
-                        scale: 1,
-                        opacity: 0,
-                        duration: 0.8,
-                        ease: "power2.out",
-                        onComplete: () => ripple.remove(),
-                      }
-                    );
-                  };
-
-                  el.addEventListener("mousemove", handleMouseMove);
-                  el.addEventListener("mouseleave", handleMouseLeave);
-                  el.addEventListener("click", handleClick);
-                }}
-              >
-                {/* Image */}
-                {card.image && (
-                  <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px]">
-                    <img
-                      src={card.image}
-                      alt={card.title || card.label}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                )}
-                {/* Content */}
-                <div className="flex flex-col gap-3 p-3">
-                  {card.date && (
-                    <span className="text-[12px] text-white/90">{card.date}</span>
-                  )}
-                  {card.title && (
-                    <h3 className={`text-white text-[16px] font-semibold ${textAutoHide ? "text-clamp-1" : ""}`}>
-                      {card.title}
-                    </h3>
-                  )}
-                  {card.description && (
-                    <p className={`text-[14px] text-white/70 leading-5 ${textAutoHide ? "text-clamp-2" : ""}`}>
-                      {card.description}
-                    </p>
-                  )}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
           </div>
         )}
       </BentoCardGrid>
@@ -921,7 +923,12 @@ export const BentoCard = ({
 
     const handleMouseLeave = () => {
       if (enableTilt) {
-        gsap.to(el, { rotateX: 0, rotateY: 0, duration: 0.3, ease: "power2.out" });
+        gsap.to(el, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
       }
       if (enableMagnetism) {
         gsap.to(el, { x: 0, y: 0, duration: 0.3, ease: "power2.out" });
@@ -955,7 +962,13 @@ export const BentoCard = ({
       gsap.fromTo(
         ripple,
         { scale: 0, opacity: 1 },
-        { scale: 1, opacity: 0, duration: 0.8, ease: "power2.out", onComplete: () => ripple.remove() }
+        {
+          scale: 1,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          onComplete: () => ripple.remove(),
+        }
       );
     };
 

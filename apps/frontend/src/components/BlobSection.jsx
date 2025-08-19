@@ -7,8 +7,8 @@ const BlobSection = () => {
       <div className="relative z-10 w-full h-full flex items-center justify-center">
         <div style={{ width: '100%', height: '600px', position: 'relative' }}>
           <Orb
-            hoverIntensity={0.5}
-            rotateOnHover={true}
+            hoverIntensity={0}
+            rotateOnHover={false}
             hue={0}
             interactive={false}
             forceHoverState={false}
