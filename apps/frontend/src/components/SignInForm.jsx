@@ -130,7 +130,7 @@ const SignInForm = () => {
         </form>
 
         {/* Sign Up Link */}
-        <div className="text-center mt-8">
+        {/* <div className="text-center mt-8">
           <p className="font-['Montserrat'] font-medium text-sm">
             <span className="text-[#747474]">Not a Member yet?</span>
             <Button
@@ -140,7 +140,7 @@ const SignInForm = () => {
               Sign Up
             </Button>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

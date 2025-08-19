@@ -25,7 +25,7 @@ export function Button({
       case "link":
         return "bg-transparent text-core-prim-500 hover:text-core-prim-600 underline underline-offset-2";
       case "dark":
-        return "bg-[#641ea7] hover:bg-[#8c53c3] text-white font-light font-['Montserrat']";
+        return "bg-[#641ea7] hover:bg-[#8c53c3] text-white font-['Montserrat']";
       case "dark-secondary":
         return "bg-neutral-900 hover:bg-neutral-800 text-white font-['Montserrat']";
       default:
