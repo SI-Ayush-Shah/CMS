@@ -8,6 +8,7 @@ import BaseLayout from '../layouts/BaseLayout';
 const HomePage = lazy(() => import('../pages/HomePage'));
 const ComponentsPage = lazy(() => import('../pages/ComponentsPage'));
 const AboutPage = lazy(() => import('../pages/AboutPage'));
+const LoginPage = lazy(() => import('../pages/LoginPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 // Router configuration with route definitions
@@ -38,6 +39,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyPageWrapper>
             <AboutPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: 'login',
+        element: (
+          <LazyPageWrapper>
+            <LoginPage />
           </LazyPageWrapper>
         ),
       },

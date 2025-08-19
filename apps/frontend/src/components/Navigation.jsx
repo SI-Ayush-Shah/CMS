@@ -9,6 +9,7 @@ const Navigation = () => {
     { name: 'Home', href: '/', current: location.pathname === '/' },
     { name: 'Components', href: '/components', current: location.pathname === '/components' },
     { name: 'About', href: '/about', current: location.pathname === '/about' },
+    { name: 'Login', href: '/login', current: location.pathname === '/login' },
   ];
 
   const toggleMobileMenu = () => {
