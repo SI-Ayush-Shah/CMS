@@ -128,7 +128,8 @@ Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
 - Headers must clearly mark new sections.
 - Mix block types (not just paragraphs).
 - Make content scannable (lists, tables, quotes).
-- End with a \"Conclusion\" section.
+- short summary of the article should be 100 words in the end.
+- never show any code in the article, it should be a pure text article.
 
 IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
 (Banner image URL provided separately: ${bannerUrl ?? "N/A"}; do not duplicate banner as a body image block)
