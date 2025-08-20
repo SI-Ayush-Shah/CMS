@@ -97,16 +97,26 @@ export const generateContentViaForm = async (
   const formData = new FormData();
   formData.append("content", text ?? "");
 
-  // Banner is single – use the first image if available
-  if (images && images.length > 0 && images[0]?.file) {
+  // Banner handling: prefer explicit bannerFile, then bannerIndex, else fallback to first image
+  let usedBannerIndex = null;
+  if (options?.bannerFile instanceof File) {
+    formData.append("banner", options.bannerFile);
+  } else if (
+    Number.isInteger(options?.bannerIndex) &&
+    options.bannerIndex >= 0 &&
+    images?.[options.bannerIndex]?.file
+  ) {
+    formData.append("banner", images[options.bannerIndex].file);
+    usedBannerIndex = options.bannerIndex;
+  } else if (images && images.length > 0 && images[0]?.file) {
     formData.append("banner", images[0].file);
+    usedBannerIndex = 0;
   }
 
   // Append remaining images (excluding banner) as multiple `image` fields
-  images.slice(1).forEach((img) => {
-    if (img?.file) {
-      formData.append("image", img.file);
-    }
+  images.forEach((img, index) => {
+    if (index === usedBannerIndex) return;
+    if (img?.file) formData.append("image", img.file);
   });
 
   // Build URL with optional platform query params
@@ -241,7 +251,7 @@ export const refineContent = async (
  * @returns {Promise<Object>} Update response
  */
 export const updateBlogContent = async (blogId, updatedBody) => {
-  const response = await apiClient.put(
+  const response = await apiClient.patch(
     `/content-studio/api/content/${blogId}`,
     { body: updatedBody }
   );
