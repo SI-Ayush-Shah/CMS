@@ -147,7 +147,7 @@ export default function ContentEditorPage() {
         {/* Editor column */}
         <section className="lg:col-span-2 space-y-5">
           {/* Header with actions */}
-          <div className="flex items-center justify-between mb-5 rounded-2xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+          <div className="flex items-center justify-between mb-5 rounded-md border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-2 sticky top-2 z-10 backdrop-blur-lg">
             <div className="text-[20px] font-semibold text-invert-high">
               Creative Wizard{" "}
               {id && (

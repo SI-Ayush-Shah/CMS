@@ -61,7 +61,7 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
   ];
 
   return (
-    <div className="w-full bg-black h-full p-2">
+    <div className="w-full bg-black h-full p-2 max-h-screen sticky top-0">
       <div className="flex flex-col h-full">
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
