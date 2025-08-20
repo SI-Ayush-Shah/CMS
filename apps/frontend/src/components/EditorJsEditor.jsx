@@ -5,7 +5,7 @@ import List from "@editorjs/list";
 import Table from "@editorjs/table";
 import Code from "@editorjs/code";
 import Quote from "@editorjs/quote";
-import Delimiter from "@editorjs/delimiter";
+// Delimiter intentionally disabled to avoid injecting separators
 import Checklist from "@editorjs/checklist";
 import Warning from "@editorjs/warning";
 import Embed from "@editorjs/embed";
@@ -91,7 +91,7 @@ export default function EditorJsEditor({
             captionPlaceholder: "Quote author",
           },
         },
-        delimiter: Delimiter,
+        // delimiter: Delimiter,
         checklist: {
           class: Checklist,
           inlineToolbar: true,

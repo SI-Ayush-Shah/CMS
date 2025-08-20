@@ -12,6 +12,10 @@ export function normalizeEditorJsBody(body) {
   let pendingTable = null;
 
   for (const block of body.blocks) {
+    // Drop delimiter blocks entirely
+    if (block?.type === "delimiter") {
+      continue;
+    }
     if (block?.type === "table") {
       const content2D = to2D(block?.data?.content);
       const withHeadings = !!block?.data?.withHeadings;

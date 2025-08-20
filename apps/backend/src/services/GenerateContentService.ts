@@ -42,7 +42,7 @@ export function createGenerateContentService({
           "warning",
           "linkTool",
         ]),
-        data: z.any(), 
+        data: z.any(),
       });
 
       const editorJsSchema = z.object({
@@ -56,7 +56,7 @@ export function createGenerateContentService({
         summary: z.string(),
         category: z.string(),
         tags: z.array(z.string()),
-        body: editorJsSchema, 
+        body: editorJsSchema,
       });
 
       const model = createGoogleGenaiModel({
@@ -105,7 +105,7 @@ Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
    - table
    - code
    - quote
-   - delimiter
+   - delimiter (avoid using)
    - checklist
    - warning
    - image
@@ -124,7 +124,7 @@ Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
 
 ### Requirements:
 - Each block must have a unique descriptive id (e.g., \"intro_header\", \"history_para1\", \"pros_table\").
-- Use delimiter to separate major sections.
+- Do NOT use delimiter blocks. Use headers to separate major sections instead.
 - Headers must clearly mark new sections.
 - Mix block types (not just paragraphs).
 - Make content scannable (lists, tables, quotes).
@@ -184,6 +184,10 @@ function normalizeEditorJsBody(body: any) {
   let pendingTable: any | null = null;
 
   for (const block of (body as any).blocks) {
+    // Strip delimiter blocks
+    if (block?.type === "delimiter") {
+      continue;
+    }
     if (block?.type === "table") {
       const content2D = to2D(block?.data?.content);
       const withHeadings = !!block?.data?.withHeadings;

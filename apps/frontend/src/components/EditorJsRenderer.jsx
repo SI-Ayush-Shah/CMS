@@ -10,6 +10,8 @@ export default function EditorJsRenderer({ data }) {
   const renderBlock = (block) => {
     const { id, type, data } = block;
     switch (type) {
+      case "delimiter":
+        return null;
       case "header": {
         const level = Math.min(Math.max(data?.level || 2, 1), 6);
         const Tag = `h${level}`;
@@ -109,9 +111,6 @@ export default function EditorJsRenderer({ data }) {
             )}
           </figure>
         );
-      }
-      case "delimiter": {
-        return <hr key={id} className="my-5 border-core-prim-300/20" />;
       }
       case "checklist": {
         const rawItems = Array.isArray(data?.items) ? data.items : [];
