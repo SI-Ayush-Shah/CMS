@@ -60,6 +60,7 @@ export default function ContentEditorPage() {
   const currentBanner = article?.bannerUrl || dummyImageUrl;
   const currentBody = article?.body;
   const [editorBody, setEditorBody] = useState(currentBody || null);
+  const [editorMountKey, setEditorMountKey] = useState(0);
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState("");
@@ -70,6 +71,7 @@ export default function ContentEditorPage() {
     setSummary(article?.summary || "");
     setCategory(article?.category || "");
     setTags(Array.isArray(article?.tags) ? article.tags : []);
+    setEditorMountKey((k) => k + 1);
   }, [
     currentBody,
     article?.title,
@@ -205,6 +207,7 @@ export default function ContentEditorPage() {
         const blogId = article?.id;
         const normalized = normalizeEditorJsBody(updatedBody);
         setEditorBody(normalized);
+        setEditorMountKey((k) => k + 1);
         if (blogId) {
           await contentApi.updateBlogContent(blogId, normalized);
           showMessage("Refinement saved.");
@@ -358,6 +361,7 @@ export default function ContentEditorPage() {
               {/* Keep editor mounted for state retention; toggle visibility */}
               <div className={viewMode === "edit" ? "block" : "hidden"}>
                 <EditorJsEditor
+                  key={editorMountKey}
                   initialData={initialEditorData}
                   onChange={handleEditorChange}
                   className="mx-auto max-w-[860px]"
@@ -365,7 +369,9 @@ export default function ContentEditorPage() {
               </div>
               {viewMode === "preview" && (
                 <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
-                  <EditorJsRenderer data={editorBody || currentBody} />
+                  <EditorJsRenderer
+                    data={editorBody || currentBody || initialEditorData}
+                  />
                 </div>
               )}
             </div>
@@ -375,7 +381,7 @@ export default function ContentEditorPage() {
         {/* Right Panel */}
         <RightPanel
           blogId={article?.id}
-          body={editorBody || currentBody}
+          body={editorBody || currentBody || initialEditorData}
           onRefinement={handleRefinementApplied}
         />
       </div>

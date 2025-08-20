@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import EnhancedAiChatInput from "./EnhancedAiChatInput";
 import { contentApi } from "../services/contentApi";
 import { normalizeEditorJsBody } from "../utils";
@@ -15,50 +15,103 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
     }));
   };
 
-  const contentBoxes = [
-    {
-      id: 1,
-      content: `Write a 500–700 word professional sports news article on the
-        chosen topic. Include a strong headline, introduction, match
-        highlights, statistics, and realistic quotes (not fabricated)
-        in an engaging yet objective tone. Provide contextual analysis
-        of impact on team momentum and the ongoing tournament.
-        Structure with a clear beginning, middle, and conclusionWrite a 500–700 word professional sports news article on the
-        chosen topic. Include a strong headline, introduction, match
-        highlights, statistics, and realistic quotes (not fabricated)
-        in an engaging yet objective tone. Provide contextual analysis
-        of impact on team momentum and the ongoing tournament.
-        Structure with a clear beginning, middle, and conclusion.`,
+  // Derive dynamic suggestions based on current body content
+  const suggestions = useMemo(() => {
+    const blocks = Array.isArray(body?.blocks) ? body.blocks : [];
+    const textFromBlocks = (types) =>
+      blocks
+        .filter((b) => types.includes(b.type))
+        .map((b) => {
+          if (b.type === "paragraph" || b.type === "header")
+            return b.data?.text || "";
+          return "";
+        })
+        .join(" ");
+    const plainText = textFromBlocks(["header", "paragraph"])
+      .replace(/<[^>]*>/g, " ")
+      .trim();
+    const wordCount = plainText
+      ? plainText.split(/\s+/).filter(Boolean).length
+      : 0;
+    const hasHeaders = blocks.some((b) => b.type === "header");
+    const hasImages = blocks.some((b) => b.type === "image");
+    const hasLists = blocks.some((b) => b.type === "list");
+    const hasConclusionHeader = blocks.some(
+      (b) =>
+        b.type === "header" &&
+        /conclusion|summary|final thoughts/i.test(b.data?.text || "")
+    );
+    const hasIntroHeader = blocks.some(
+      (b) =>
+        b.type === "header" &&
+        /intro|introduction|overview/i.test(b.data?.text || "")
+    );
+
+    const s = [];
+    if (wordCount < 500)
+      s.push(
+        "Expand the article to at least 700 words with more depth and examples."
+      );
+    if (!hasHeaders)
+      s.push("Add clear subheadings (H2/H3) to structure the content.");
+    if (!hasIntroHeader)
+      s.push(
+        "Add an engaging introduction that sets context and hooks the reader."
+      );
+    if (!hasConclusionHeader)
+      s.push(
+        "Add a concise conclusion summarizing key takeaways and next steps."
+      );
+    if (!hasImages)
+      s.push(
+        "Suggest where an image or chart would improve readability and add an <image> block."
+      );
+    if (!hasLists)
+      s.push("Convert dense paragraphs into bullet lists where appropriate.");
+    if (s.length === 0)
+      s.push("Improve clarity and flow while preserving meaning.");
+    return s.map((content, idx) => ({ id: idx + 1, content }));
+  }, [body]);
+
+  const runRefinement = useCallback(
+    async (text) => {
+      if (!text || !body || !Array.isArray(body?.blocks)) return;
+      const normalized = normalizeEditorJsBody(body);
+      const userMsg = { role: "user", content: text };
+      setMessages((prev) => [...prev, userMsg]);
+      setIsRefining(true);
+      try {
+        const res = await contentApi.refineContent(
+          blogId,
+          text,
+          normalized,
+          "custom"
+        );
+        const updated = res?.data?.updatedBody;
+        if (updated && onRefinement) {
+          onRefinement(updated);
+        }
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: res?.data?.message || "Refinement applied.",
+          },
+        ]);
+      } catch (err) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: err?.message || "Failed to refine content.",
+          },
+        ]);
+      } finally {
+        setIsRefining(false);
+      }
     },
-    {
-      id: 2,
-      content: `Create engaging social media content that drives engagement.
-        Focus on trending topics, use relevant hashtags, and include
-        compelling visuals. Keep the tone conversational and encourage
-        user interaction through questions and calls-to-action.`,
-    },
-    {
-      id: 3,
-      content: `Develop a comprehensive marketing strategy for product launch.
-        Include target audience analysis, competitive positioning,
-        messaging framework, and multi-channel distribution plan.
-        Focus on measurable KPIs and ROI optimization.`,
-    },
-    {
-      id: 4,
-      content: `Write compelling email newsletter content that increases open rates.
-        Use personalized subject lines, engaging preview text, and
-        clear value propositions. Include actionable insights and
-        maintain consistent branding throughout.`,
-    },
-    {
-      id: 5,
-      content: `Create a technical blog post explaining complex concepts simply.
-        Use clear examples, code snippets where relevant, and
-        step-by-step explanations. Include practical applications
-        and real-world use cases for better understanding.`,
-    },
-  ];
+    [blogId, body, onRefinement]
+  );
 
   return (
     <div className="w-full bg-black h-full p-2 max-h-screen sticky top-0">
@@ -66,33 +119,50 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           <div className="flex flex-col items-end gap-2 pb-4">
-            {contentBoxes.map((box) => {
-              // Check if content height is less than 164px (approximately 8 lines)
-              const isShortContent = box.content.length < 200; // Rough estimate for short content
+            {/* Show chat history if present */}
+            {messages.length > 0 && (
+              <div className="w-full flex flex-col gap-2">
+                {messages.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className={`max-w-[80%] rounded-2xl border border-core-prim-300/20 p-2 ${
+                      m.role === "user"
+                        ? "self-end bg-core-prim-500/10 text-invert-high"
+                        : "self-start bg-button-filled-main-default text-invert-low"
+                    }`}
+                  >
+                    <p className="text-[12px] leading-relaxed">{m.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
+            {/* Dynamic suggestions (click to apply) */}
+            {suggestions.map((s) => {
+              const isShortContent = s.content.length < 200;
               return (
                 <div
-                  key={box.id}
+                  key={s.id}
                   className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 overflow-hidden w-[80%] ${
-                    expandedBoxes[box.id]
+                    expandedBoxes[s.id]
                       ? "h-auto"
                       : isShortContent
                         ? "h-auto"
                         : "max-h-[164px]"
                   }`}
                   onClick={() => {
-                    // Toggle between expanded and collapsed states
-                    toggleBoxExpansion(box.id);
+                    toggleBoxExpansion(s.id);
+                    runRefinement(s.content);
                   }}
                 >
                   <p
                     className={`text-[12px] text-invert-low leading-relaxed ${
-                      !expandedBoxes[box.id] && !isShortContent
+                      !expandedBoxes[s.id] && !isShortContent
                         ? "line-clamp-8"
                         : ""
                     }`}
                   >
-                    {box.content}
+                    {s.content}
                   </p>
                 </div>
               );
@@ -101,7 +171,7 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
         </div>
 
         {/* Bottom-aligned chat input - Compact height */}
-        <div className="h-[200px] w-full mt-2">
+        <div className="h-[150px] w-full mt-2">
           <EnhancedAiChatInput
             placeholder="Refine this blog via AI..."
             maxLength={2000}
@@ -110,42 +180,7 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
               text: { required: true, maxLength: 2000 },
               images: { required: false, maxImages: 0 },
             }}
-            onSubmit={async ({ text }) => {
-              if (!body || !Array.isArray(body?.blocks)) return;
-              const normalized = normalizeEditorJsBody(body);
-              const userMsg = { role: "user", content: text };
-              setMessages((prev) => [...prev, userMsg]);
-              setIsRefining(true);
-              try {
-                const res = await contentApi.refineContent(
-                  blogId,
-                  text,
-                  normalized,
-                  "custom"
-                );
-                const updated = res?.data?.updatedBody;
-                if (updated && onRefinement) {
-                  onRefinement(updated);
-                }
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    role: "assistant",
-                    content: res?.data?.message || "Refinement applied.",
-                  },
-                ]);
-              } catch (err) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    role: "assistant",
-                    content: err?.message || "Failed to refine content.",
-                  },
-                ]);
-              } finally {
-                setIsRefining(false);
-              }
-            }}
+            onSubmit={async ({ text }) => runRefinement(text)}
             disabled={isRefining}
           />
         </div>
