@@ -51,6 +51,7 @@ export function startRssSchedulerWorker(): Worker {
           z.array(
             z.object({
               title: z.string(),
+              guid: z.string().optional(),
               summary: z.string(),
               imageUrl: z.url().optional(),
               link: z.url().optional(),
