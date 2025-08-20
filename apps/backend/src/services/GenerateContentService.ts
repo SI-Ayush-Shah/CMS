@@ -143,6 +143,7 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
 
       // persist
       // Normalize tables to ensure 2D arrays and merge consecutive table rows
+      
       const normalizedBody = normalizeEditorJsBody(
         result.body as any
       ) as unknown as Record<string, unknown>;

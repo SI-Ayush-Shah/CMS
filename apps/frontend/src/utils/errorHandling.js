@@ -399,16 +399,31 @@ export const formatErrorForDisplay = (error, options = {}) => {
     showErrorId = false
   } = options
 
+  // Check if error is null or undefined
+  if (!error) {
+    return {
+      title: 'Unknown Error',
+      message: 'An unexpected error occurred',
+      technicalMessage: null,
+      severity: ErrorSeverity.MEDIUM,
+      category: ErrorCategory.SYSTEM,
+      recoveryActions: [],
+      errorId: null,
+      timestamp: new Date().toISOString(),
+      retryable: false
+    }
+  }
+
   return {
     title: getErrorTitle(error),
-    message: error.userMessage,
-    technicalMessage: showTechnicalDetails ? error.technicalMessage : null,
-    severity: error.severity,
-    category: error.category,
-    recoveryActions: showRecoveryActions ? error.recoveryActions : [],
-    errorId: showErrorId ? error.errorId : null,
-    timestamp: error.timestamp,
-    retryable: error.retryable
+    message: error.userMessage || 'An unexpected error occurred',
+    technicalMessage: showTechnicalDetails ? (error.technicalMessage || error.message || 'No details available') : null,
+    severity: error.severity || ErrorSeverity.MEDIUM,
+    category: error.category || ErrorCategory.SYSTEM,
+    recoveryActions: showRecoveryActions ? (error.recoveryActions || []) : [],
+    errorId: showErrorId ? (error.errorId || null) : null,
+    timestamp: error.timestamp || new Date().toISOString(),
+    retryable: error.retryable || false
   }
 }
 
@@ -418,6 +433,11 @@ export const formatErrorForDisplay = (error, options = {}) => {
  * @returns {string} Error title
  */
 const getErrorTitle = (error) => {
+  // Check if error is null or undefined
+  if (!error || !error.category) {
+    return 'Unknown Error';
+  }
+  
   switch (error.category) {
     case ErrorCategory.NETWORK:
       return error.severity === ErrorSeverity.HIGH ? 'Connection Problem' : 'Network Error'

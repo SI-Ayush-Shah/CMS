@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
@@ -23,10 +23,17 @@ import { normalizeEditorJsBody } from "../utils";
  */
 export default function ContentEditorPage() {
   const { id } = useParams();
+  const location = useLocation();
+  const rssFeedItem = location.state?.rssFeedItem;
+  const isSummarizeMode = location.state?.mode === 'summarize';
+  
+  // State for summarization loading
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  
   const { data: article } = useQuery({
     queryKey: ["article", id],
     queryFn: () => contentApi.getContent(id),
-    enabled: !!id,
+    enabled: !!id && id !== 'new',
   });
 
   const [isSavingDraft, setIsSavingDraft] = useState(false);
@@ -57,7 +64,7 @@ export default function ContentEditorPage() {
   }, []);
 
   const currentTitle = article?.title || dummyTitle;
-  const currentBanner = article?.bannerUrl || dummyImageUrl;
+  const currentBanner = article?.bannerUrl || (location.state?.generatedContent?.bannerUrl) || rssFeedItem?.imageUrl || dummyImageUrl;
   const currentBody = article?.body;
   const [editorBody, setEditorBody] = useState(currentBody || null);
   const [editorMountKey, setEditorMountKey] = useState(0);
@@ -65,10 +72,60 @@ export default function ContentEditorPage() {
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState([]);
+  // Effect to handle RSS feed item summarization
+  useEffect(() => {
+    const processSummarization = async () => {
+      if (rssFeedItem && isSummarizeMode && !isSummarizing) {
+        try {
+          setIsSummarizing(true);
+          showMessage("Summarizing content...", "info");
+          
+          // Set initial values from RSS item
+          setTitle(rssFeedItem.title || "");
+          setSummary(rssFeedItem.summary || "");
+          
+          // Call the summarize API
+          const response = await contentApi.summarizeContent(rssFeedItem, rssFeedItem.imageUrl);
+          
+          if (response && response.success && response.data) {
+            showMessage("Content summarized successfully!", "success");
+            
+            // Extract generatedContent from the response
+            const { generatedContent } = response.data;
+            
+            if (generatedContent) {
+              // Update title, summary, category, tags
+              setTitle(generatedContent.title || rssFeedItem.title || "");
+              setSummary(generatedContent.summary || rssFeedItem.summary || "");
+              setCategory(generatedContent.category || "");
+              setTags(Array.isArray(generatedContent.tags) ? generatedContent.tags : []);
+              
+              // Update editor body
+              if (generatedContent.body) {
+                setEditorBody(generatedContent.body);
+                setEditorMountKey((k) => k + 1);
+              }
+            }
+          } else {
+            showMessage("Failed to summarize content. Using original content.", "error");
+          }
+        } catch (error) {
+          console.error("Error summarizing content:", error);
+          showMessage("Error summarizing content. Please try again.", "error");
+        } finally {
+          setIsSummarizing(false);
+        }
+      }
+    };
+    
+    processSummarization();
+  }, [rssFeedItem, isSummarizeMode]);
+
+  // Effect to handle article data changes
   useEffect(() => {
     setEditorBody(currentBody || null);
-    setTitle(article?.title || "");
-    setSummary(article?.summary || "");
+    setTitle(article?.title || (rssFeedItem?.title || ""));
+    setSummary(article?.summary || (rssFeedItem?.summary || ""));
     setCategory(article?.category || "");
     setTags(Array.isArray(article?.tags) ? article.tags : []);
     setEditorMountKey((k) => k + 1);
@@ -78,6 +135,7 @@ export default function ContentEditorPage() {
     article?.summary,
     article?.category,
     article?.tags,
+    rssFeedItem
   ]);
 
   const initialEditorData = useMemo(() => {
@@ -236,6 +294,17 @@ export default function ContentEditorPage() {
         </div>
       )}
 
+      {/* Show loader overlay when summarizing */}
+      {isSummarizing && (
+        <div className="fixed inset-0 bg-core-neu-1000/70 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-surface-main-default p-6 rounded-xl shadow-lg flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-core-prim-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-invert-high text-lg font-medium">Summarizing content...</p>
+            <p className="text-invert-low text-sm mt-2">This may take a few moments</p>
+          </div>
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
         <section className="lg:col-span-2 space-y-5">

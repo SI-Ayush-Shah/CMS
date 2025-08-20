@@ -7,6 +7,7 @@ import { PiSignOutLight } from "react-icons/pi";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import { MdRssFeed } from "react-icons/md";
+import { FaHashtag } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -39,6 +40,12 @@ export function Leftpanel() {
       label: "Feed Manager",
       icon: <MdRssFeed />,
       path: "/feed-manager",
+    },
+    {
+      id: "social-media",
+      label: "Social Media",
+      icon: <FaHashtag />,
+      path: "/social-media",
     },
     {
       id: "analytics",

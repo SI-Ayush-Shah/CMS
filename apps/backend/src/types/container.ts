@@ -2,12 +2,14 @@ import { AwilixContainer } from "awilix";
 import { UserService } from "../services/UserService";
 import { GenerateContentService } from "../services/GenerateContentService";
 import { RefineContentService } from "../services/RefineContentService";
+import { SummarizeContentService } from "../services/SummarizeContentService";
 import { DatabaseConnection, db } from "../db";
 import { UserRepository } from "../repositories/UserRepository";
 import { HealthController } from "../controllers/HealthController";
 import { UserController } from "../controllers/UserController";
 import { GenerateContentController } from "../controllers/GenerateContentController";
 import { RefineContentController } from "../controllers/RefineContentController";
+import { SummarizeContentController } from "../controllers/SummarizeContentController";
 import { GeneratedContentRepository } from "../repositories/GeneratedContentRepository";
 import { RssFeedRepository } from "../repositories/RssFeedRepository";
 import { RssFeedItemRepository } from "../repositories/RssFeedItemRepository";
@@ -28,6 +30,7 @@ export interface Dependencies {
   userService: UserService;
   generateContentService: GenerateContentService;
   refineContentService: RefineContentService;
+  summarizeContentService: SummarizeContentService;
   rssFeedService: RssFeedService;
   rssFeedItemService: RssFeedItemService;
 
@@ -42,6 +45,7 @@ export interface Dependencies {
   userController: UserController;
   generateContentController: GenerateContentController;
   refineContentController: RefineContentController;
+  summarizeContentController: SummarizeContentController;
   rssFeedItemController: RssFeedItemController;
 }
 

@@ -18,6 +18,7 @@ const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
 const EditorPage = lazy(() => import("../pages/EditorPage"));
 const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
 const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
+const SocialMediaPage = lazy(() => import("../pages/SocialMediaPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
@@ -135,6 +136,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute>
             <LazyPageWrapper>
               <FeedManagerPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "social-media",
+        element: (
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <SocialMediaPage />
             </LazyPageWrapper>
           </ProtectedRoute>
         ),

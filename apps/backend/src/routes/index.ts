@@ -11,6 +11,7 @@ const rootRoutes: FastifyPluginAsync = async (fastify) => {
         readiness: "/readiness",
         users: "/users",
         generateContent: "/generate-content",
+        summarize: "/summarize",
         content: "/content",
         refineContent: "/refine-content",
       },
