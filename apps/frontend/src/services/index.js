@@ -3,6 +3,7 @@
 
 // Axios configuration
 export { apiClient } from "./axiosConfig";
+export { buildUrlWithParams, postMultipart, getWithParams } from "./httpUtils";
 
 // Content API services
 export {

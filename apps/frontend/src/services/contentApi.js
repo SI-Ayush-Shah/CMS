@@ -1,4 +1,5 @@
 import { apiClient } from "./axiosConfig";
+import { buildUrlWithParams, postMultipart, getWithParams } from "./httpUtils";
 
 /**
  * Blog listing (server-backed)
@@ -88,7 +89,11 @@ export const generateContent = async (text, imageIds = []) => {
  * @param {Array<{file: File}>} images - Images selected in the UI (each item must include a `file`)
  * @returns {Promise<Object>} Backend response with blog ID
  */
-export const generateContentViaForm = async (text, images = []) => {
+export const generateContentViaForm = async (
+  text,
+  images = [],
+  options = {}
+) => {
   const formData = new FormData();
   formData.append("content", text ?? "");
 
@@ -104,16 +109,13 @@ export const generateContentViaForm = async (text, images = []) => {
     }
   });
 
-  const response = await apiClient.post(
-    "/content-studio/api/generate-content",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      skipRetry: true,
-    }
-  );
+  // Build URL with optional platform query params
+  const url = buildUrlWithParams("/content-studio/api/generate-content", {
+    instagram: options?.instagram,
+    twitter: options?.twitter,
+  });
+
+  const response = await postMultipart(url, formData, { skipRetry: true });
 
   return response.data;
 };
@@ -300,16 +302,12 @@ export const rollbackBlogContent = async (blogId, previousBody) => {
  * @param {number} options.pageSize - Number of items per page
  * @returns {Promise<Object>} RSS feed items response
  */
-export const fetchRssItems = async ({
-  page = 1,
-  pageSize = 10,
-} = {}) => {
-  const params = new URLSearchParams();
-  if (page) params.append("page", String(page));
-  if (pageSize) params.append("pageSize", String(pageSize));
-
-  const url = `/content-studio/api/rss-items?${params.toString()}`;
-  const { data } = await apiClient.get(url, { skipRetry: false });
+export const fetchRssItems = async ({ page = 1, pageSize = 10 } = {}) => {
+  const { data } = await getWithParams(
+    "/content-studio/api/rss-items",
+    { page: String(page), pageSize: String(pageSize) },
+    { skipRetry: false }
+  );
   // API returns { success: boolean, data: { items, total, page, pageSize } }
   return data?.data || { items: [], total: 0, page, pageSize };
 };
@@ -323,15 +321,15 @@ export const fetchRssItems = async ({
 export const summarizeContent = async (content, bannerUrl) => {
   const payload = {
     content,
-    bannerUrl
+    bannerUrl,
   };
-  
+
   const { data } = await apiClient.post(
     "/content-studio/api/summarize",
     payload,
     { skipRetry: false }
   );
-  
+
   return data;
 };
 
