@@ -2,59 +2,10 @@ import {
   GenerateContentRequestDto,
   GenerateContentResponseDto,
 } from "../types/dtos";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { z } from "zod"; // For LangChain structured output
-import { env } from "../config/env";
 import { GeneratedContentRepository } from "../repositories/GeneratedContentRepository";
 import { type NewGeneratedContent } from "../db/schema";
-
-// Normalize Editor.js body data to ensure tables are single blocks with 2D content
-function normalizeEditorJsBody(body: any) {
-  if (!body || !Array.isArray(body.blocks)) return body;
-
-  const to2D = (content: any): any[] => {
-    if (!Array.isArray(content)) return [];
-    if (Array.isArray(content[0])) return content; // already 2D
-    return [content]; // wrap single row
-  };
-
-  const mergedBlocks: any[] = [];
-  let pendingTable: any | null = null;
-
-  for (const block of body.blocks) {
-    if (block?.type === "table") {
-      const content2D = to2D(block?.data?.content);
-      const withHeadings = !!block?.data?.withHeadings;
-
-      if (pendingTable) {
-        pendingTable.data = pendingTable.data || {};
-        const existing = to2D(pendingTable.data.content);
-        pendingTable.data.content = [...existing, ...content2D];
-        if (withHeadings) pendingTable.data.withHeadings = true;
-      } else {
-        pendingTable = {
-          ...block,
-          data: {
-            ...(block.data || {}),
-            content: content2D,
-          },
-        };
-        if (withHeadings) pendingTable.data.withHeadings = true;
-      }
-      continue;
-    }
-
-    if (pendingTable) {
-      mergedBlocks.push(pendingTable);
-      pendingTable = null;
-    }
-    mergedBlocks.push(block);
-  }
-
-  if (pendingTable) mergedBlocks.push(pendingTable);
-
-  return { ...body, blocks: mergedBlocks };
-}
+import { createGoogleGenaiModel } from "../llms/google-genai/model";
 
 // Service interface using DTOs
 export interface GenerateContentService {
@@ -108,9 +59,8 @@ export function createGenerateContentService({
         body: editorJsSchema, // Always Editor.js format
       });
 
-      const model = new ChatGoogleGenerativeAI({
-        apiKey: env.GOOGLE_API_KEY,
-        model: "gemini-2.5-flash",
+      const model = createGoogleGenaiModel({
+        modelName: "gemini-2.5-flash",
         temperature: 0.7,
       });
 
@@ -126,141 +76,84 @@ export function createGenerateContentService({
 
       const result = await structuredModel.invoke([
         {
-          role: "user",
-          content: `
-          Generate a comprehensive, well-structured long-form article for: ${request.content}  
+          role: "human",
+          content: `Generate a comprehensive, well-structured long-form article for: ${request.content}
+
+CRITICAL: All table blocks must have content as a 2D array (array of arrays)!
+Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
+
+### Instructions:
+1. Article length: ~100-200 lines.
+2. Cover the topic from multiple angles:
+   - Introduction
+   - Background/History
+   - Key Concepts/Features
+   - Current Trends
+   - Comparisons or Alternatives
+   - Case Studies / Real Examples
+   - Statistics or Data Tables
+   - Expert Opinions or Quotes
+   - Practical Applications / How-to steps
+   - Pros & Cons
+   - FAQs
+   - Future Outlook
+   - Conclusion
+3. Use **Editor.js block format**. Available blocks:
+   - paragraph
+   - header
+   - list
+   - table
+   - code
+   - quote
+   - delimiter
+   - checklist
+   - warning
+   - image
+   - embed
+   - linkTool
+4. The article should be releted to sports, and if user asks for a topic that is not related to sports, you should say that you are not able to generate content for that topic.
+5. Make sure to use the images provided by the user, and if its not there then generate your own images.
+
+### Adaptation rules:
+- Tutorials/Guides → headers + paragraphs + ordered lists + code blocks
+- Comparisons → tables + headers + paragraphs
+- Technical docs → code + headers + warning blocks
+- News → headers + paragraphs + quotes
+- Reviews → headers + paragraphs + checklists + images
+- Opinion pieces → headers + quotes + paragraphs
 
 ### Requirements:
-1. Output ONLY valid **JSON** in **Editor.js format** (no extra text).  
-2. The JSON must include:  
-   - title (10–255 characters)  
-   - description (<1000 characters)  
-   - slug (URL-friendly, hyphenated, from title)  
-   - tags (comma-separated relevant keywords)  
-   - categories (1–3 broad categories)  
-   - time (generation timestamp)  
-   - version: "2.28.0"  
-   - blocks (array with Editor.js block objects)  
+- Each block must have a unique descriptive id (e.g., \"intro_header\", \"history_para1\", \"pros_table\").
+- Use delimiter to separate major sections.
+- Headers must clearly mark new sections.
+- Mix block types (not just paragraphs).
+- Make content scannable (lists, tables, quotes).
+- short summary of the article should be 100 words in the end.
+- never show any code in the article, it should be a pure text article.
 
-3. **Blocks Rules:**  
-   - Use at least 4–6 sections with proper **headers**.  
-   - Block types allowed: 'paragraph', 'header', 'list', 'table', 'quote', 'code', 'delimiter', 'checklist', 'warning', 'image', 'embed', 'linkTool'.  
-   - Every block MUST have a **unique ID** ('"block-1"', '"block-2"', etc.).  
-   - Mix block types for **scannability** (not just paragraphs).  
-   - Use **delimiter** to divide major sections.  
-   - Include at least one **table** with correct 2D array format:  
-     Example:  
-     "content": [  
-       ["Header1", "Header2"],  
-       ["Row1Col1", "Row1Col2"]  
-     ]  
-   - Keep the entire comparison in a SINGLE "table" block. Do NOT split header and rows across multiple table blocks; put the header as the first row and set "withHeadings": true.  
-   - End with a clear **Conclusion** section.  
+IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
+(Banner image URL provided separately: ${bannerUrl ?? "N/A"}; do not duplicate banner as a body image block)
+${imagesSection}
+CORRECT TABLE: \"content\": [[\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"]]
+WRONG TABLE: \"content\": [\"Header1\", \"Header2\", \"Row1Col1\", \"Row1Col2\"]
 
-4. **Content Instructions:**  
-   - Make it **informative, engaging, and factually accurate**.  
-   - Use **headers, paragraphs, and lists** for readability.  
-   - Incorporate at least one **quote** to add authority.  
-   - Add a practical **code snippet** if relevant to the topic.  
-   - Balance perspectives with **pros & cons**.  
-   - Include **real-world examples, stats, or trends** where possible.  
-
-### Output Format Example (simplified):
-{
-  "title": "Sample Title",
-  "description": "Short description under 1000 chars",
-  "slug": "sample-title",
-  "tags": "tag1, tag2, tag3",
-  "categories": ["Category1", "Category2"],
-  "time": 1692455160,
-  "version": "2.28.0",
-  "blocks": [
-    {
-      "id": "block-1",
-      "type": "header",
-      "data": { "text": "Header Example", "level": 2 }
-    },
-    {
-      "id": "block-2",
-      "type": "paragraph",
-      "data": { "text": "Your informative content here." }
-    },
-    {
-      "type" : "table",
-      "data" : {
-          "content" : [ ["Kine", "1 pcs", "100$"], ["Pigs", "3 pcs", "200$"], ["Chickens", "12 pcs", "150$"] ]
-      }
-    },
-  ]
-}
-{
-  here are examples of the blocks as per their types:
-    "header": {
-      "data": {
-        "text": "Header text",
-        "level": "A number between 1-6, usually 2 for section headers"
-      }
-    },
-    "paragraph": {
-      "data": {
-        "text": "Paragraph text with <b>formatting</b> if needed"
-      }
-    },
-    "list": {
-      "data": {
-        "style": "unordered | ordered",
-        "items": ["Item 1", "Item 2", "Item 3"]
-      }
-    },
-    "delimiter": {
-      "data": {}
-    },
-    "code": {
-      "data": {
-        "code": "console.log('Hello world');",
-        "language": "javascript"
-      }
-    },
-    "quote": {
-      "data": {
-        "text": "Quote text",
-        "caption": "Quote caption",
-        "alignment": "left | center | right"
-      }
-    },
-    "table": {
-      "data": {
-        "withHeadings": false,
-        "stretched": false,
-        "content": [
-          ["Header 1", "Header 2", "Header 3"],
-          ["Row 1, Cell 1", "Row 1, Cell 2", "Row 1, Cell 3"],
-          ["Row 2, Cell 1", "Row 2, Cell 2", "Row 2, Cell 3"]
-        ]
-      }
-    }
-  }
-          `,
+Return JSON ONLY in Editor.js format, no extra explanation.`,
         },
       ]);
 
-      // normalize body (merge any consecutive table blocks and enforce 2D arrays)
-      const normalizedBody = normalizeEditorJsBody(result.body);
-      const normalizedResult = { ...result, body: normalizedBody };
-
       // persist
       const toInsert: NewGeneratedContent = {
-        title: normalizedResult.title,
-        summary: normalizedResult.summary,
-        category: normalizedResult.category,
-        tags: normalizedResult.tags,
-        body: normalizedResult.body as unknown as Record<string, unknown>,
+        title: result.title,
+        summary: result.summary,
+        category: result.category,
+        tags: result.tags,
+        body: result.body as unknown as Record<string, unknown>,
       };
       const saved = await generatedContentRepository.create(toInsert);
 
       return {
         generatedContent: {
-          ...normalizedResult,
+          ...result,
           bannerUrl,
           images: imagesList,
         },

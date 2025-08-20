@@ -7,6 +7,7 @@ import { loggerConfig } from './shared/utils/logger-config'
 import './types/container' // Import type declarations
 import multipart from '@fastify/multipart'
 import cors from '@fastify/cors'
+import rssSchedulerWorkerPlugin from './infra/bullmq/rssSchedulerWorkerPlugin'
 
 // Create Fastify instance with Pino logger
 const fastify: FastifyInstance = Fastify({
@@ -27,7 +28,7 @@ const start = async (): Promise<void> => {
     await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024, files: 10 } })
     
     // Setup container with autodiscovery
-    const container = setupContainerWithAutoDiscovery()
+    const container = await setupContainerWithAutoDiscovery()
     
     // Replace the default container with our autodiscovered one
     fastify.diContainer = container
@@ -47,6 +48,8 @@ const start = async (): Promise<void> => {
     })
     // Start server
     const { env } = require('./config/env')
+    // Register BullMQ worker plugin before listening so lifecycle hooks are bound
+    await fastify.register(rssSchedulerWorkerPlugin)
     await fastify.listen({ port: env.PORT, host: '0.0.0.0' })
     console.log(`🚀 Server listening on http://0.0.0.0:${env.PORT}`)
   } catch (err) {

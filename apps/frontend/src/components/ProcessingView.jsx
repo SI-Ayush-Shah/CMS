@@ -1,6 +1,7 @@
 import React from "react";
 import { useProcessingStore } from "../store/processingStore";
 import { EnhancedAiChatInput } from "./EnhancedAiChatInput";
+import Loader from "./Loader";
 
 export default function ProcessingView({ phase }) {
   const { request } = useProcessingStore();
@@ -19,25 +20,8 @@ export default function ProcessingView({ phase }) {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 min-h-[70vh] py-4">
             {/* Center preview placeholder */}
             <div className="order-2 md:order-1 md:col-span-7 flex flex-col justify-end">
-              <div className="relative hidden md:block flex-1">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-28 w-28 rounded-full shadow-[0_0_100px_0_rgba(100,30,167,0.3)] flex items-center justify-center">
-                    <div className="h-40 w-40 rounded-full bg-gradient-to-br from-[#641ea7] to-[#b588e0] opacity-60" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom action bar */}
-              <div className="w-full flex items-center justify-center gap-4 mt-6">
-                <div className="flex-1 rounded-[15px] relative bg-[rgba(97,63,130,0.5)] px-4 py-3 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-[15px] border border-[#b588e0] pointer-events-none" />
-                  <div className="text-white text-[16px] font-medium font-[Montserrat]">
-                    Save to drafts
-                  </div>
-                </div>
-                <button className="flex-1 rounded-[15px] bg-[#641ea7] px-4 py-3 text-white text-[16px] font-medium font-[Montserrat]">
-                  Publish
-                </button>
+              <div className="w-full h-full flex items-center justify-center">
+                <Loader text="Creating Magic..." />
               </div>
             </div>
 

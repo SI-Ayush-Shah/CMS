@@ -3,17 +3,18 @@ import { lazy } from "react";
 import ErrorBoundary from "../components/ErrorBoundary";
 import LazyPageWrapper from "../components/LazyPageWrapper";
 import BaseLayout from "../layouts/BaseLayout";
+import ContentWizardPage from "../pages/ContentWizardPage";
+import ComponentsPage from "../pages/ComponentsPage";
 
 // Lazy load page components for code splitting
 const HomePage = lazy(() => import("../pages/HomePage"));
-const ComponentsPage = lazy(() => import("../pages/ComponentsPage"));
 const AboutPage = lazy(() => import("../pages/AboutPage"));
-const ContentWizardPage = lazy(() => import("../pages/ContentWizardPage"));
 const BlogPage = lazy(() => import("../pages/BlogPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
 const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
+const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
@@ -94,6 +95,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyPageWrapper>
             <AnalyticsPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "feed-manager",
+        element: (
+          <LazyPageWrapper>
+            <FeedManagerPage />
           </LazyPageWrapper>
         ),
       },
