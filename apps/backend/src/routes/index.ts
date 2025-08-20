@@ -1,18 +1,20 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyPluginAsync } from "fastify";
 
 const rootRoutes: FastifyPluginAsync = async (fastify) => {
   // GET /
-  fastify.get('/', async (request, reply) => {
+  fastify.get("/", async (request, reply) => {
     return {
-      hello: 'world',
-      message: 'Fastify with Functional Awilix DI and Autoload is running!',
+      hello: "world",
+      message: "Fastify with Functional Awilix DI and Autoload is running!",
       endpoints: {
-        health: '/health',
-        readiness: '/readiness', 
-        users: '/users'
-      }
-    }
-  })
-}
+        health: "/health",
+        readiness: "/readiness",
+        users: "/users",
+        generateContent: "/generate-content",
+        content: "/content",
+      },
+    };
+  });
+};
 
-export default rootRoutes
+export default rootRoutes;

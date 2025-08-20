@@ -152,6 +152,7 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
       const saved = await generatedContentRepository.create(toInsert);
 
       return {
+        blogId: saved.id,
         generatedContent: {
           ...result,
           bannerUrl,

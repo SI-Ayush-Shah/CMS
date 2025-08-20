@@ -22,7 +22,7 @@ export const fetchBlogPosts = async ({
   if (Array.isArray(tags)) tags.forEach((t) => params.append("tags", t));
   if (sort) params.append("sort", sort);
 
-  const url = `http://localhost:3001/content-studio/api/generate-content?${params.toString()}`;
+  const url = `/content-studio/api/content?${params.toString()}`;
   const { data } = await apiClient.get(url, { skipRetry: false });
   // API returns { success: boolean, data: { items, total, page, pageSize } }
   return data?.data || { items: [], total: 0, page, pageSize };
@@ -115,15 +115,7 @@ export const generateContentViaForm = async (text, images = []) => {
     }
   );
 
-  // Ensure response includes blogId for navigation
-  const responseData = response.data;
-  
-  // Mock blog ID for development - in production this will come from backend
-  if (responseData.success && responseData.data && !responseData.data.blogId) {
-    responseData.data.blogId = `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  return responseData;
+  return response.data;
 };
 
 /**
@@ -169,26 +161,12 @@ export const saveContent = async (content) => {
  * @returns {Promise<Object>} Content data
  */
 export const getContent = async (contentId) => {
-  // TODO: Replace with real API call
-  // const response = await apiClient.get(`/content/${contentId}`)
-  // return response.data
-
-  // Mock implementation
-  await mockDelay(500);
-
-  if (shouldSimulateError()) {
-    throw new Error("Failed to retrieve content");
-  }
-
-  return {
-    id: contentId,
-    text: "Sample content text",
-    imageIds: [],
-    metadata: {
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  };
+  const { data } = await apiClient.get(
+    `/content-studio/api/content/${contentId}`
+  );
+  if (!data?.success)
+    throw new Error(data?.error || "Failed to retrieve content");
+  return data.data;
 };
 
 /**
@@ -221,50 +199,10 @@ export const deleteContent = async (contentId) => {
  * @returns {Promise<Object>} Blog content data
  */
 export const getBlogContent = async (blogId) => {
-  // TODO: Replace with real API call when backend is ready
-  // const response = await apiClient.get(`/content-studio/api/generate-content/${blogId}`)
-  // return response.data
-  
-  // Mock implementation for development
-  await mockDelay(500);
-  
-  if (shouldSimulateError()) {
-    throw new Error("Failed to retrieve blog content");
-  }
-  
-  // Mock blog structure based on design document
-  return {
-    id: blogId,
-    title: "Sample Blog Title",
-    summary: "This is a sample blog summary for testing purposes.",
-    category: "Technology",
-    tags: ["react", "javascript", "frontend"],
-    bannerUrl: null,
-    images: [],
-    body: {
-      time: Date.now(),
-      blocks: [
-        {
-          id: "block1",
-          type: "header",
-          data: {
-            text: "Sample Blog Content",
-            level: 1
-          }
-        },
-        {
-          id: "block2", 
-          type: "paragraph",
-          data: {
-            text: "This is sample content for the blog editor. It demonstrates the Editor.js format that will be used for content refinement."
-          }
-        }
-      ],
-      version: "2.28.2"
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  const { data } = await apiClient.get(`/content-studio/api/content/${blogId}`);
+  if (!data?.success)
+    throw new Error(data?.error || "Failed to retrieve blog content");
+  return data.data;
 };
 
 /**
@@ -274,7 +212,11 @@ export const getBlogContent = async (blogId) => {
  * @param {string} refinementType - Type of refinement (optional)
  * @returns {Promise<Object>} Refinement response
  */
-export const refineContent = async (blogId, refinementPrompt, refinementType = 'custom') => {
+export const refineContent = async (
+  blogId,
+  refinementPrompt,
+  refinementType = "custom"
+) => {
   // TODO: Replace with real API call when backend is ready
   // const response = await apiClient.post('/content-studio/api/refine-content', {
   //   blogId,
@@ -282,14 +224,14 @@ export const refineContent = async (blogId, refinementPrompt, refinementType = '
   //   refinementType
   // })
   // return response.data
-  
+
   // Mock implementation for development
   await mockDelay(2000); // Simulate AI processing time
-  
+
   if (shouldSimulateError()) {
     throw new Error("Content refinement failed. Please try again.");
   }
-  
+
   // Mock refined content response
   return {
     success: true,
@@ -299,25 +241,25 @@ export const refineContent = async (blogId, refinementPrompt, refinementType = '
         blocks: [
           {
             id: "block1",
-            type: "header", 
+            type: "header",
             data: {
               text: "Refined Blog Content",
-              level: 1
-            }
+              level: 1,
+            },
           },
           {
             id: "block2",
             type: "paragraph",
             data: {
-              text: `Content refined based on: "${refinementPrompt}". This is the updated version with improvements applied.`
-            }
-          }
+              text: `Content refined based on: "${refinementPrompt}". This is the updated version with improvements applied.`,
+            },
+          },
         ],
-        version: "2.28.2"
+        version: "2.28.2",
       },
-      message: `Content successfully refined using ${refinementType} refinement`
+      message: `Content successfully refined using ${refinementType} refinement`,
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 };
 
@@ -328,29 +270,11 @@ export const refineContent = async (blogId, refinementPrompt, refinementType = '
  * @returns {Promise<Object>} Update response
  */
 export const updateBlogContent = async (blogId, updatedBody) => {
-  // TODO: Replace with real API call when backend is ready
-  // const response = await apiClient.patch(`/content-studio/api/generate-content/${blogId}`, {
-  //   body: updatedBody
-  // })
-  // return response.data
-  
-  // Mock implementation for development
-  await mockDelay(800);
-  
-  if (shouldSimulateError()) {
-    throw new Error("Failed to update blog content");
-  }
-  
-  // Log the updated body for development (will be used in real implementation)
-  console.log("Updating blog content:", { blogId, bodyBlocks: updatedBody?.blocks?.length || 0 });
-  
-  return {
-    success: true,
-    data: {
-      id: blogId,
-      updatedAt: new Date().toISOString()
-    }
-  };
+  const response = await apiClient.patch(
+    `/content-studio/api/content/${blogId}`,
+    { body: updatedBody }
+  );
+  return response.data;
 };
 
 /**
@@ -361,26 +285,29 @@ export const updateBlogContent = async (blogId, updatedBody) => {
  */
 export const rollbackBlogContent = async (blogId, previousBody) => {
   // TODO: Replace with real API call when backend is ready
-  // const response = await apiClient.post(`/content-studio/api/generate-content/${blogId}/rollback`, {
+  // const response = await apiClient.post(`/content-studio/api/content/${blogId}/rollback`, {
   //   body: previousBody
   // })
   // return response.data
-  
+
   // Mock implementation for development
   await mockDelay(600);
-  
+
   if (shouldSimulateError()) {
     throw new Error("Failed to rollback blog content");
   }
-  
-  console.log("Rolling back blog content:", { blogId, bodyBlocks: previousBody?.blocks?.length || 0 });
-  
+
+  console.log("Rolling back blog content:", {
+    blogId,
+    bodyBlocks: previousBody?.blocks?.length || 0,
+  });
+
   return {
     success: true,
     data: {
       id: blogId,
-      rolledBackAt: new Date().toISOString()
-    }
+      rolledBackAt: new Date().toISOString(),
+    },
   };
 };
 
