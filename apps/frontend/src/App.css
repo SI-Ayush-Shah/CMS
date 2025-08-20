@@ -153,3 +153,18 @@
 body{
     color: var(--color-main-medium);
   }
+
+/* Hide scrollbar for webkit browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Smooth transitions for compact chat input */
+.compact-chat-transition {
+  transition: all 0.2s ease-in-out;
+}
