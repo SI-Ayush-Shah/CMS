@@ -14,6 +14,7 @@ const rootRoutes: FastifyPluginAsync = async (fastify) => {
         summarize: "/summarize",
         content: "/content",
         refineContent: "/refine-content",
+        socialMediaPosts: "/social-media-posts",
       },
     };
   });

@@ -5,6 +5,8 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { SlCloudUpload } from "react-icons/sl";
+
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
@@ -127,7 +129,7 @@ export default function ContentEditorPage() {
   );
   // SEO meta description guidance
   const SEO_META_MIN = 50;
-  const SEO_META_MAX = 160;
+  const SEO_META_MAX = 760;
   const summaryLength = (summary || "").trim().length;
   const isSummaryTooShort = summaryLength > 0 && summaryLength < SEO_META_MIN;
   const isSummaryTooLong = summaryLength > SEO_META_MAX;
@@ -286,7 +288,7 @@ export default function ContentEditorPage() {
     if (!validate()) return;
     try {
       setIsSavingDraft(true);
-      if (id) {
+      if (id && id !== "new") {
         const payload = {
           title: title || currentTitle,
           summary: summary || undefined,
@@ -299,8 +301,9 @@ export default function ContentEditorPage() {
         showMessage("Draft updated successfully.");
         return res;
       } else {
+        // Fallback save for new/unsaved content
         const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
+          text: `${(title || currentTitle) ?? dummyTitle}\n\n${dummyBody}`,
           imageIds: [],
           metadata: { status: "draft" },
         });
@@ -332,7 +335,7 @@ export default function ContentEditorPage() {
     if (!validate()) return;
     try {
       setIsPublishing(true);
-      if (id) {
+      if (id && id !== "new") {
         const payload = {
           title: title || currentTitle,
           summary: summary || undefined,
@@ -345,8 +348,9 @@ export default function ContentEditorPage() {
         showMessage("Content updated.");
         return res;
       } else {
+        // Fallback publish for new/unsaved content
         const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
+          text: `${(title || currentTitle) ?? dummyTitle}\n\n${dummyBody}`,
           imageIds: [],
           metadata: { status: "published" },
         });
@@ -422,18 +426,18 @@ export default function ContentEditorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
-        <section className="lg:col-span-2 space-y-5">
+        <section className="lg:col-span-2 space-y-5 ">
           {/* Header with title, status, updated at, and actions only */}
-          <div className=" max-w-[860px] mx-auto mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg shadow">
+          <div className=" mb-5  border border-core-prim-300/20 bg-core-neu-1000 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg shadow">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col">
-                  <label
+                  {/* <label
                     htmlFor="title"
-                    className="text-[11px] text-invert-low mb-1"
+                    className="text-md text-invert-low mb-1"
                   >
                     Title
-                  </label>
+                  </label> */}
                   <Input
                     id="title"
                     placeholder="Title"
@@ -443,7 +447,7 @@ export default function ContentEditorPage() {
                   />
                 </div>
                 {article?.updatedAt && (
-                  <div className="text-[11px] text-invert-low mt-1">
+                  <div className="text-md text-invert-low mt-1">
                     Updated {new Date(article.updatedAt).toLocaleString()}
                   </div>
                 )}
@@ -451,7 +455,7 @@ export default function ContentEditorPage() {
               <div className="flex items-center gap-3 mt-2 md:mt-0">
                 {article?.status && (
                   <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                    className={`text-md px-2 py-0.5 rounded-full border ${
                       article.status === "published"
                         ? "bg-success-500/10 border-success-500/20 text-success-400"
                         : "bg-warning-500/10 border-warning-500/20 text-warning-400"
@@ -464,7 +468,7 @@ export default function ContentEditorPage() {
                   variant="outline"
                   onClick={handleSaveDraft}
                   isLoading={isSavingDraft}
-                  className="min-w-28"
+                  className="min-w-32"
                 >
                   Save draft
                 </Button>
@@ -480,8 +484,8 @@ export default function ContentEditorPage() {
             </div>
           </div>
 
-          <div className=" max-w-[860px] mx-auto">
-            <p className="text-xs text-invert-low mb-2">Image</p>
+          <div className=" ">
+            <p className="text-md text-invert-low mb-2">Image</p>
             <div className="w-full">
               <div
                 className={`relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20 ${isBannerDragOver ? "ring-2 ring-core-prim-500" : ""}`}
@@ -538,9 +542,8 @@ export default function ContentEditorPage() {
                     className="text-[12px] px-2 py-1 min-w-0"
                     isLoading={isUploadingBanner}
                   >
-                    {article?.bannerUrl || bannerUrl
-                      ? "Replace banner"
-                      : "Upload banner"}
+                    <SlCloudUpload />
+                    {article?.bannerUrl || bannerUrl ? "Replace" : "Upload"}
                   </Button>
                 </div>
                 {isBannerDragOver && (
@@ -554,9 +557,9 @@ export default function ContentEditorPage() {
             </div>
           </div>
 
-          <div className=" max-w-[860px] mx-auto">
+          <div className=" ">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-invert-low">Body</p>
+              <p className="text-md text-invert-low">Body</p>
               <div
                 className="flex items-center rounded-md overflow-hidden border border-core-prim-300/20"
                 role="tablist"
@@ -606,7 +609,7 @@ export default function ContentEditorPage() {
               <div className="max-w-[860px] mx-auto">
                 <EditorJsRenderer
                   data={editorBody || currentBody || initialEditorData}
-                  className="editorjs-theme"
+                  className="editorjs-theme px-4"
                 />
               </div>
             ) : (
@@ -621,17 +624,14 @@ export default function ContentEditorPage() {
             )}
           </div>
           {/* Metadata fields below header */}
-          <div className=" max-w-[860px] mx-auto rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+          <div className="  rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-1">
-                  <label
-                    htmlFor="summary"
-                    className="text-[11px] text-invert-low"
-                  >
+                  <label htmlFor="summary" className="text-md text-invert-low">
                     Meta description (SEO)
                   </label>
-                  <span className={`text-[11px] ${charCountClass}`}>
+                  <span className={`text-md ${charCountClass}`}>
                     {summaryLength}/{SEO_META_MAX}
                   </span>
                 </div>
@@ -648,7 +648,7 @@ export default function ContentEditorPage() {
                 />
                 <p
                   id="summary-help"
-                  className={`text-[11px] mt-1 ${summaryStatusClass}`}
+                  className={`text-xs mt-1 ${summaryStatusClass}`}
                 >
                   Appears as the SEO meta description in search results. Aim for{" "}
                   {SEO_META_MIN}–{SEO_META_MAX} characters and include your
@@ -659,7 +659,7 @@ export default function ContentEditorPage() {
                 <div className="flex flex-col">
                   <label
                     htmlFor="category"
-                    className="text-[11px] text-invert-low mb-1"
+                    className="text-md text-invert-low mb-1"
                   >
                     Category
                   </label>
@@ -673,7 +673,7 @@ export default function ContentEditorPage() {
                 <div className="flex flex-col">
                   <label
                     htmlFor="tags"
-                    className="text-[11px] text-invert-low mb-1"
+                    className="text-md text-invert-low mb-1"
                   >
                     Tags
                   </label>

@@ -12,9 +12,15 @@ import {
 } from "../../types/dtos";
 
 // API Response Wrapper Schemas
+const JobsSchema = Type.Object({
+  twitterJobId: Type.Optional(Type.String({ description: 'Job ID for Twitter post generation' })),
+  instagramJobId: Type.Optional(Type.String({ description: 'Job ID for Instagram post generation' })),
+})
+
 const GenerateContentApiResponseSchema = Type.Object({
   success: Type.Boolean(),
-  data: GenerateContentResponseSchema, // Use DTO schema from service
+  data: GenerateContentResponseSchema,
+  jobs: JobsSchema,
 });
 
 const ErrorResponseSchema = Type.Object({

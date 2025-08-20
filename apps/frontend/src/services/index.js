@@ -24,3 +24,6 @@ export {
   getImage,
   getUploadProgress,
 } from "./imageUploadApi";
+
+// Social API services
+export { socialApi, listSocialPosts, getSocialJobStatus } from "./socialApi";

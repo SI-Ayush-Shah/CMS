@@ -522,7 +522,7 @@ export const EnhancedAiChatInput = ({
           <div className="flex flex-wrap gap-2 items-start justify-between min-h-7 px-2 py-0 rounded-xl w-full">
             <textarea
               ref={textareaRef}
-              className="font-normal text-[14px] sm:text-[15px] text-invert-low w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] sm:min-h-[100px] focus:ring-0 focus:ring-offset-0 touch-manipulation"
+              className="font-normal text-[14px] sm:text-[15px] text-core-neu-00 w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] sm:min-h-[100px] focus:ring-0 focus:ring-offset-0 touch-manipulation"
               placeholder={placeholder}
               value={text}
               onChange={handleTextChange}
@@ -578,7 +578,7 @@ export const EnhancedAiChatInput = ({
           >
             <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
               <div className="relative shrink-0 size-4">
-              <IoImagesOutline className="text-lg" />
+                <IoImagesOutline className="text-lg" />
               </div>
             </div>
             <div className="font-normal text-current text-[12px] whitespace-nowrap">

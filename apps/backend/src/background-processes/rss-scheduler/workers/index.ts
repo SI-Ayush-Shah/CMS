@@ -4,9 +4,11 @@ import { XMLParser } from 'fast-xml-parser'
 import { asFunction, createContainer } from 'awilix'
 import { db } from '../../../db/connection'
 import { createRssFeedItemRepository } from '../../../repositories/RssFeedItemRepository'
+import { createSocialMediaPostRepository } from '../../../repositories/SocialMediaPostRepository'
 import axios from 'axios'
 import type { NewRssFeedItem } from '../../../db/schema'
 import { createGoogleGenaiModel } from '../../../llms/google-genai/model';
+import { createSocialMediaContentService } from '../../../services/SocialMediaContentService'
 import z from 'zod';
 
 
@@ -31,10 +33,12 @@ export function startRssSchedulerWorker(): Worker {
         const container = createContainer()
         container.register({
           db: asFunction(() => db).singleton(),
-          rssFeedItemRepository: asFunction(createRssFeedItemRepository).singleton()
+          rssFeedItemRepository: asFunction(createRssFeedItemRepository).singleton(),
+          socialMediaPostRepository: asFunction(createSocialMediaPostRepository).singleton(),
         })
         
         const rssFeedItemRepository = container.resolve('rssFeedItemRepository')
+        const socialMediaPostRepository = container.resolve('socialMediaPostRepository')
         
         // Fetch and parse the feed
         const response = await axios.get(feedSourceUrl, { responseType: 'text' })
@@ -122,10 +126,85 @@ export function startRssSchedulerWorker(): Worker {
 
         console.log('New items===========>', newItems)
 
-        // Save new items to database
+        // Generate social media content for each new item
         if (result.length > 0) {
-          const savedItems = await rssFeedItemRepository.createMany(newItems)
+          // Register social media content service in the container
+          container.register({
+            socialMediaContentService: asFunction(createSocialMediaContentService).singleton()
+          })
+          
+          const socialMediaContentService = container.resolve('socialMediaContentService')
+          
+          // Process each item to generate social media content
+          for (const item of result) {
+            try {
+              // Only generate for items with sufficient content
+              if (item.content && item.title) {
+                console.log(`Generating social media content for: ${item.title}`)
+                
+                const socialMediaContent = await socialMediaContentService.generateContent({
+                  title: item.title,
+                  content: item.content,
+                  summary: item.summary || '',
+                  link: item.link,
+                  platform: 'instagram'
+                })
+                
+                // Add social media content to the item
+                item.imageUrl = socialMediaContent.imageUrl
+                // Using type assertion since we're augmenting the objects returned from the LLM
+                (item as any).socialMediaCaption = socialMediaContent.caption
+                (item as any).socialMediaHashtags = socialMediaContent.hashtags
+                
+                console.log(`Generated social media content for: ${item.title}`)
+                console.log(`Image URL: ${socialMediaContent.imageUrl}`)
+              }
+            } catch (error) {
+              // Log error but continue with other items
+              console.error(`Failed to generate social media content for item: ${item.title}`, error)
+            }
+          }
+          
+          // Map items to proper database format
+          const itemsToSave = result.map(item => {
+            // Type assertion for the augmented properties
+            const augmentedItem = item as any
+            return {
+              feedId: id,
+              guid: item.guid,
+              title: item.title,
+              link: item.link || '',
+              summary: item.summary || '',
+              content: item.content || '',
+              author: item.author || '',
+              categories: item.categories || [],
+              imageUrl: item.imageUrl,
+              socialMediaCaption: augmentedItem.socialMediaCaption,
+              socialMediaHashtags: augmentedItem.socialMediaHashtags ? JSON.stringify(augmentedItem.socialMediaHashtags) : null,
+              publishedAt: undefined // RSS items don't have publishedAt from the LLM response
+            }
+          })
+          
+          const savedItems = await rssFeedItemRepository.createMany(itemsToSave)
           console.log(`Added ${savedItems.length} new items to feed`, { id, feedName })
+
+          // Persist social media posts for each saved item
+          for (let i = 0; i < savedItems.length; i++) {
+            const saved = savedItems[i]
+            const original = result[i] as any
+
+            // Instagram post if imageUrl exists
+            if (original.imageUrl) {
+              await socialMediaPostRepository.create({
+                platform: 'instagram',
+                text: original.socialMediaCaption || '',
+                imageUrl: original.imageUrl,
+                hashtags: Array.isArray(original.socialMediaHashtags) ? original.socialMediaHashtags : [],
+                link: original.link || undefined,
+                feedItemId: saved.id,
+              })
+            }
+          }
           return { added: savedItems.length }
         } else {
           console.log('No new items to add', { id, feedName })

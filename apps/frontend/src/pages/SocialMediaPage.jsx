@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MagicBento, { BentoCard } from "../components/MagicBento";
 import InstagramCard from "../components/InstagramCard";
 import TwitterCard from "../components/TwitterCard";
@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import Masonry from "react-masonry-css";
 import { FaTwitter } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
+import { listSocialPosts } from "../services";
 
 // Custom CSS for masonry layout
 const masonryStyles = `
@@ -30,142 +31,92 @@ const masonryStyles = `
 const SocialMediaPage = () => {
   const [activeTab, setActiveTab] = useState("instagram"); // instagram | twitter
 
-  // Mock data for demonstration
-  const instagramPosts = useMemo(() => [
-    {
-      id: 1,
-      username: "devexplorer",
-      date: "15 Nov",
-      image: "https://images.unsplash.com/photo-1522252234503-e356532cafd5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      title: "Building responsive UIs with modern frameworks",
-      hashtags: ["webdev", "programming", "reactjs", "frontend"],
-      likes: 123,
-      comments: 20
-    },
-    {
-      id: 2,
-      username: "codeartist",
-      date: "14 Nov",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      title: "Late night coding session. Working on a new project!",
-      hashtags: ["coding", "developer", "nightowl", "javascript"],
-      likes: 87,
-      comments: 12
-    },
-    {
-      id: 3,
-      username: "designninja",
-      date: "13 Nov",
-      image: "https://images.unsplash.com/photo-1607799279861-4dd421887fb3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      title: "Color palettes that will make your design pop!",
-      hashtags: ["design", "uidesign", "colors", "creative"],
-      likes: 215,
-      comments: 34
-    },
-    {
-      id: 4,
-      username: "techguru",
-      date: "12 Nov",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      title: "The future of AI in web development",
-      hashtags: ["ai", "webdev", "future", "technology"],
-      likes: 176,
-      comments: 28
-    }
-  ], []);
+  // Data state per platform
+  const [instagramData, setInstagramData] = useState({
+    items: [],
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [twitterData, setTwitterData] = useState({
+    items: [],
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const twitterPosts = useMemo(() => [
-    {
-      id: 1,
-      username: "Dev Explorer",
-      handle: "devexplorer",
-      date: "15 Nov",
-      content: "Just launched a new feature on our platform! Check out how we implemented real-time collaboration using WebSockets and React. #webdev #javascript #reactjs",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      likes: 123,
-      retweets: 45,
-      comments: 12
+  const fetchPosts = useCallback(
+    async (platform, page = 1, pageSize = 10, append = false) => {
+      try {
+        setIsError(false);
+        setIsLoading(true);
+        const result = await listSocialPosts({ platform, page, pageSize });
+        if (platform === "instagram") {
+          setInstagramData((prev) => ({
+            items: append ? [...prev.items, ...result.items] : result.items,
+            page: result.page,
+            pageSize: result.pageSize,
+            total: result.total,
+          }));
+        } else {
+          setTwitterData((prev) => ({
+            items: append ? [...prev.items, ...result.items] : result.items,
+            page: result.page,
+            pageSize: result.pageSize,
+            total: result.total,
+          }));
+        }
+      } catch (e) {
+        setIsError(true);
+        if (import.meta.env.VITE_NODE_ENV === "development") {
+          console.error("Failed to fetch social posts", e);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     },
-    {
-      id: 2,
-      username: "Code Artist",
-      handle: "codeartist",
-      date: "14 Nov",
-      content: "Spent the weekend refactoring our codebase. Reduced bundle size by 40% and improved load times by 2.5x. Worth every minute! 🚀\n\n#performance #optimization #javascript",
-      likes: 87,
-      retweets: 23,
-      comments: 5
-    },
-    {
-      id: 3,
-      username: "Design Ninja",
-      handle: "designninja",
-      date: "13 Nov",
-      content: "Design tip: Always ensure sufficient contrast between text and background. Your users' eyes will thank you! Here's a tool I use to check contrast ratios: contrast-ratio.com #a11y #uidesign #accessibility",
-      image: "https://images.unsplash.com/photo-1607799279861-4dd421887fb3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      likes: 215,
-      retweets: 78,
-      comments: 18
-    },
-    {
-      id: 4,
-      username: "Tech Guru",
-      handle: "techguru",
-      date: "12 Nov",
-      content: "Hot take: TypeScript isn't just about types. It's about creating a better developer experience and catching errors before they reach production. If you're not using it yet, you're missing out.",
-      likes: 342,
-      retweets: 112,
-      comments: 43
-    },
-    {
-      id: 5,
-      username: "Frontend Wizard",
-      handle: "frontendwiz",
-      date: "11 Nov",
-      content: "Short tweet.",
-      likes: 56,
-      retweets: 12,
-      comments: 3
-    },
-    {
-      id: 6,
-      username: "UX Researcher",
-      handle: "uxresearcher",
-      date: "10 Nov",
-      content: "Just finished analyzing our latest user research study. Key findings:\n\n1. Users struggle with the current navigation structure\n2. The checkout process has too many steps\n3. Mobile users often miss the search functionality\n4. Error messages need to be more descriptive\n\nNext step: Presenting these insights to the product team and brainstorming solutions. #UXResearch #UserTesting",
-      likes: 189,
-      retweets: 42,
-      comments: 23
-    },
-    {
-      id: 7,
-      username: "AI Developer",
-      handle: "aidev",
-      date: "9 Nov",
-      content: "Experimenting with different LLM architectures for our new NLP project. The results so far are promising!",
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      likes: 231,
-      retweets: 67,
-      comments: 19
-    },
-    {
-      id: 8,
-      username: "Security Expert",
-      handle: "securityexpert",
-      date: "8 Nov",
-      content: "IMPORTANT: If you're using npm packages X, Y, or Z, update immediately. Critical vulnerability discovered that could allow remote code execution. Details in the thread below. #cybersecurity #infosec",
-      likes: 512,
-      retweets: 328,
-      comments: 47
-    }
-  ], []);
+    []
+  );
 
-  // Determine which posts to display based on active tab
-  const displayPosts = activeTab === "instagram" ? instagramPosts : twitterPosts;
-  
-  // Loading state (would be replaced with actual data fetching)
-  const isLoading = false;
-  const isError = false;
+  // Initial load and on tab change
+  useEffect(() => {
+    if (activeTab === "instagram" && instagramData.items.length === 0) {
+      fetchPosts("instagram", 1, instagramData.pageSize);
+    }
+    if (activeTab === "twitter" && twitterData.items.length === 0) {
+      fetchPosts("twitter", 1, twitterData.pageSize);
+    }
+  }, [
+    activeTab,
+    fetchPosts,
+    instagramData.items.length,
+    instagramData.pageSize,
+    twitterData.items.length,
+    twitterData.pageSize,
+  ]);
+
+  const displayPosts =
+    activeTab === "instagram" ? instagramData.items : twitterData.items;
+  const canLoadMore =
+    activeTab === "instagram"
+      ? instagramData.items.length < instagramData.total
+      : twitterData.items.length < twitterData.total;
+  const handleLoadMore = () => {
+    if (activeTab === "instagram") {
+      const nextPage = instagramData.page + 1;
+      fetchPosts("instagram", nextPage, instagramData.pageSize, true);
+    } else {
+      const nextPage = twitterData.page + 1;
+      fetchPosts("twitter", nextPage, twitterData.pageSize, true);
+    }
+  };
+  const handleRefresh = () => {
+    if (activeTab === "instagram")
+      fetchPosts("instagram", 1, instagramData.pageSize, false);
+    else fetchPosts("twitter", 1, twitterData.pageSize, false);
+  };
 
   return (
     <>
@@ -180,7 +131,7 @@ const SocialMediaPage = () => {
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
       />
-      
+
       {/* Masonry CSS */}
       <style dangerouslySetInnerHTML={{ __html: masonryStyles }} />
 
@@ -191,7 +142,16 @@ const SocialMediaPage = () => {
             <h1 className="text-white text-[28px] font-semibold mb-4">
               Social Media Feed
             </h1>
-            <Tabs active={activeTab} onChange={setActiveTab} />
+            <div className="flex items-center gap-3">
+              <Tabs active={activeTab} onChange={setActiveTab} />
+              <button
+                className="px-3 h-8 inline-flex items-center justify-center rounded-md text-xs font-medium bg-border-main-default/30 text-invert-high"
+                onClick={handleRefresh}
+                type="button"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
         </section>
 
@@ -221,11 +181,11 @@ const SocialMediaPage = () => {
                     Failed to load posts. Please try again.
                   </div>
                 )}
-                
+
                 {activeTab === "instagram" ? (
                   // Instagram posts - regular grid layout
                   <div className="card-responsive grid gap-6 w-full">
-                    {instagramPosts.map((post) => (
+                    {displayPosts.map((post) => (
                       <BentoCard
                         key={post.id}
                         enableTilt={false}
@@ -234,13 +194,15 @@ const SocialMediaPage = () => {
                         className="w-full rounded-[15px]"
                       >
                         <InstagramCard
-                          image={post.image}
-                          username={post.username}
-                          date={post.date}
-                          title={post.title}
-                          hashtags={post.hashtags}
-                          likes={post.likes}
-                          comments={post.comments}
+                          image={post.imageUrl}
+                          username={"CMS Bot"}
+                          date={new Date(post.createdAt).toLocaleDateString()}
+                          title={post.text}
+                          hashtags={
+                            Array.isArray(post.hashtags) ? post.hashtags : []
+                          }
+                          likes={0}
+                          comments={0}
                         />
                       </BentoCard>
                     ))}
@@ -255,12 +217,12 @@ const SocialMediaPage = () => {
                         1280: 3,
                         1024: 2,
                         768: 2,
-                        640: 1
+                        640: 1,
                       }}
                       className="masonry-grid"
                       columnClassName="masonry-grid-column"
                     >
-                      {twitterPosts.map((post) => (
+                      {displayPosts.map((post) => (
                         <div key={post.id} className="masonry-card">
                           <BentoCard
                             enableTilt={false}
@@ -269,14 +231,16 @@ const SocialMediaPage = () => {
                             className="w-full rounded-[15px]"
                           >
                             <TwitterCard
-                              username={post.username}
-                              handle={post.handle}
-                              date={post.date}
-                              content={post.content}
-                              image={post.image}
-                              likes={post.likes}
-                              retweets={post.retweets}
-                              comments={post.comments}
+                              username={"CMS Bot"}
+                              handle={"cmsbot"}
+                              date={new Date(
+                                post.createdAt
+                              ).toLocaleDateString()}
+                              content={post.text}
+                              image={post.imageUrl}
+                              likes={0}
+                              retweets={0}
+                              comments={0}
                             />
                           </BentoCard>
                         </div>
@@ -284,11 +248,31 @@ const SocialMediaPage = () => {
                     </Masonry>
                   </div>
                 )}
-                
-                {!isLoading && (
-                  activeTab === "instagram" ? 
-                    (instagramPosts.length === 0 && <div className="text-invert-low">No Instagram posts found.</div>) :
-                    (twitterPosts.length === 0 && <div className="text-invert-low">No Twitter posts found.</div>)
+
+                {!isLoading &&
+                  (activeTab === "instagram"
+                    ? displayPosts.length === 0 && (
+                        <div className="text-invert-low">
+                          No Instagram posts found.
+                        </div>
+                      )
+                    : displayPosts.length === 0 && (
+                        <div className="text-invert-low">
+                          No Twitter posts found.
+                        </div>
+                      ))}
+
+                {/* Load more */}
+                {!isLoading && displayPosts.length > 0 && canLoadMore && (
+                  <div className="w-full flex justify-center mt-6">
+                    <button
+                      className="px-4 h-9 inline-flex items-center justify-center rounded-lg text-sm font-medium bg-border-main-default/30 text-invert-high"
+                      onClick={handleLoadMore}
+                      type="button"
+                    >
+                      Load more
+                    </button>
+                  </div>
                 )}
               </div>
             </MagicBento>
