@@ -591,13 +591,13 @@ export default function ContentWizardPage() {
                   />
                 </div>
                 <div className="w-full h-full flex gap-3  items-center mt-3">
-                  <button className="border-2 border-core-prim-100 rounded-md px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
                     Blog
                   </button>
-                  <button className="border-2 border-core-prim-100 rounded-md px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
                     Instagram
                   </button>
-                  <button className="border-2 border-core-prim-100 rounded-md px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
                     Twitter
                   </button>
                 </div>
