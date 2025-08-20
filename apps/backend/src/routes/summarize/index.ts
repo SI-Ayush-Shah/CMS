@@ -9,9 +9,15 @@ import {
 } from "../../types/dtos";
 import "../../types/container";
 
+const JobsSchema = Type.Object({
+  twitterJobId: Type.Optional(Type.String({ description: 'Job ID for Twitter post generation' })),
+  instagramJobId: Type.Optional(Type.String({ description: 'Job ID for Instagram post generation' })),
+})
+
 const SummarizeApiResponseSchema = Type.Object({
   success: Type.Boolean(),
   data: GenerateContentResponseSchema,
+  jobs: JobsSchema,
 });
 
 const ErrorResponseSchema = Type.Object({
