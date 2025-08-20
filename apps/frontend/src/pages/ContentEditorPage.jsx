@@ -33,7 +33,7 @@ export default function ContentEditorPage() {
 
   // Read-only dummy content for the editor preview (LHS)
   const dummyTitle = "Virat Kohli: A Career Unforgettable—and Unfulfilled";
-  const dummyBody = `Virat Kohli\'s retirement from Tests has left Indian cricket beleaguered and the sporting world gasping in surprise.\n\nComing on the heels of captain Rohit Sharma quitting a few days earlier, it adds up to a double whammy for India who embark on a tough tour of England for a five-Test series come June without their two most experienced batters.\n\nLike Sharma, Kohli took to Instagram, where he commands more than 270 million followers, to make his retirement public. \"As I step away from this format, it\'s not easy – but it feels right...\" he explained to his disconsolate fans.\n\nTributes for Kohli have come in a deluge since: from fellow cricketers, past and present, old and young, and also legends from other disciplines like tennis ace Novak Djokovic and football star Harry Kane, which highlights the sweep and heft of Kohli\'s global appeal.\n\nLeading India to victory in the Under-19 World Cup in 2008, Kohli was fast tracked into international cricket by the then-chairman of selectors, former India captain Dilip Vengsarkar, against the judgement of others in the cricket establishment.`;
+  const dummyBody = `Virat Kohli's retirement from Tests has left Indian cricket beleaguered and the sporting world gasping in surprise.\n\nComing on the heels of captain Rohit Sharma quitting a few days earlier, it adds up to a double whammy for India who embark on a tough tour of England for a five-Test series come June without their two most experienced batters.\n\nLike Sharma, Kohli took to Instagram, where he commands more than 270 million followers, to make his retirement public. "As I step away from this format, it's not easy – but it feels right..." he explained to his disconsolate fans.\n\nTributes for Kohli have come in a deluge since: from fellow cricketers, past and present, old and young, and also legends from other disciplines like tennis ace Novak Djokovic and football star Harry Kane, which highlights the sweep and heft of Kohli's global appeal.\n\nLeading India to victory in the Under-19 World Cup in 2008, Kohli was fast tracked into international cricket by the then-chairman of selectors, former India captain Dilip Vengsarkar, against the judgement of others in the cricket establishment.`;
   const dummyImageUrl = useMemo(
     () =>
       "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1600&auto=format&fit=crop",
@@ -109,11 +109,10 @@ export default function ContentEditorPage() {
       {/* Message */}
       {message && (
         <div
-          className={`mb-4 p-3 rounded-lg text-sm ${
-            messageType === "success"
-              ? "bg-success-500/10 border border-success-500/20 text-success-500"
-              : "bg-error-500/10 border border-error-500/20 text-error-400"
-          }`}
+          className={`mb-4 p-3 rounded-lg text-sm ${messageType === "success"
+            ? "bg-success-500/10 border border-success-500/20 text-success-500"
+            : "bg-error-500/10 border border-error-500/20 text-error-400"
+            }`}
         >
           {message}
         </div>

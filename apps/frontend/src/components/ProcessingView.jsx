@@ -34,17 +34,13 @@ export default function ProcessingView({ phase }) {
               </div>
 
               {/* Common chat input */}
-              <div className="rounded-[15px] bg-black/70 border border-[#5f2e9f]/50 backdrop-blur-md">
-                <div className="px-3 py-3">
-                  <EnhancedAiChatInput
-                    disabled
-                    placeholder={
-                      request?.text?.slice(0, 80) ||
-                      "Your blog crafting experience starts here..."
-                    }
-                  />
-                </div>
-              </div>
+              <EnhancedAiChatInput
+                disabled
+                placeholder={
+                  request?.text?.slice(0, 80) ||
+                  "Your blog crafting experience starts here..."
+                }
+              />
             </div>
           </div>
         </div>

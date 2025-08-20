@@ -1,15 +1,17 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { EnhancedAiChatInput } from "../components/EnhancedAiChatInput";
 import { useContentSubmission } from "../hooks/useContentSubmission";
 import ContentWizardErrorBoundary from "../components/ContentWizardErrorBoundary";
 import LoadingProgress from "../components/LoadingProgress";
-import { SubmissionLoadingIndicator } from "../components/LoadingIndicator";
 import ProcessingView from "../components/ProcessingView";
 import { useProcessingStore } from "../store/processingStore";
 import ContentEditorView from "../components/ContentEditorView";
 
 // Main Content Wizard Screen component
 export default function ContentWizardPage() {
+  const navigate = useNavigate();
+
   // State for success/error feedback
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackType, setFeedbackType] = useState(""); // 'success' | 'error' | ''
@@ -19,28 +21,43 @@ export default function ContentWizardPage() {
 
   const { submit, isLoading, loadingState } = useContentSubmission({
     onSuccess: (result) => {
-      // Normalize API to editor view props
-      const payload = result?.generatedContent;
-      const gc =
-        payload?.data?.generatedContent || payload?.generatedContent || payload;
-      const normalized = {
-        title: gc?.title,
-        summary: gc?.summary,
-        category: gc?.category,
-        tags: gc?.tags || [],
-        bannerUrl: gc?.bannerUrl,
-        images: gc?.images || [],
-        body: gc?.body,
-      };
-      setArticle(normalized);
-      setFeedbackMessage("Content generated successfully!");
-      setFeedbackType("success");
+      // Extract blog ID from response for navigation
+      const blogId = result?.generatedContent?.data?.blogId ||
+        result?.generatedContent?.blogId ||
+        result?.data?.blogId;
 
-      // Clear feedback after 5 seconds
-      setTimeout(() => {
-        setFeedbackMessage("");
-        setFeedbackType("");
-      }, 5000);
+      if (blogId) {
+        setFeedbackMessage("Content generated successfully! Redirecting to editor...");
+        setFeedbackType("success");
+
+        // Navigate to editor page after short delay for user feedback
+        setTimeout(() => {
+          navigate(`/editor/${blogId}`);
+        }, 1500);
+      } else {
+        // Fallback to current behavior if no blog ID
+        const payload = result?.generatedContent;
+        const gc =
+          payload?.data?.generatedContent || payload?.generatedContent || payload;
+        const normalized = {
+          title: gc?.title,
+          summary: gc?.summary,
+          category: gc?.category,
+          tags: gc?.tags || [],
+          bannerUrl: gc?.bannerUrl,
+          images: gc?.images || [],
+          body: gc?.body,
+        };
+        setArticle(normalized);
+        setFeedbackMessage("Content generated successfully!");
+        setFeedbackType("success");
+
+        // Clear feedback after 5 seconds
+        setTimeout(() => {
+          setFeedbackMessage("");
+          setFeedbackType("");
+        }, 5000);
+      }
     },
     onError: (error) => {
       setFeedbackMessage(
@@ -92,24 +109,23 @@ export default function ContentWizardPage() {
           isLoading={loadingState?.phase && loadingState.phase !== "idle"}
         />
         <div className="flex flex-col w-full gap-4 h-full justify-center ">
-          {/* Title - responsive design */}
-          <div className="font-semibold text-invert-high text-2xl sm:text-3xl lg:text-[36px] text-center px-4">
+          {/* Title - responsive design with improved mobile spacing */}
+          <div className="font-semibold text-invert-high text-xl sm:text-2xl md:text-3xl lg:text-[36px] text-center px-4 sm:px-6">
             What's on your mind today?
           </div>
 
-          {/* Subtitle - responsive design */}
-          <div className="font-normal text-invert-low text-sm text-center px-4">
+          {/* Subtitle - responsive design with better mobile readability */}
+          <div className="font-normal text-invert-low text-sm sm:text-base text-center px-4 sm:px-6">
             Type it. Dream it. Watch it appear!
           </div>
 
           {/* Feedback message */}
           {feedbackMessage && (
             <div
-              className={`max-w-[600px] mx-auto  p-3 rounded-lg text-center text-sm font-medium transition-all duration-300 mx-4 sm:mx-auto ${
-                feedbackType === "success"
-                  ? "bg-green-500/10 border border-green-500/20 text-green-400"
-                  : "bg-error-500/10 border border-error-500/20 text-error-400"
-              }`}
+              className={`max-w-[600px] mx-auto p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-300 mx-4 sm:mx-auto ${feedbackType === "success"
+                ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                : "bg-error-500/10 border border-error-500/20 text-error-400"
+                }`}
             >
               <div className="flex items-center justify-center gap-2">
                 {feedbackType === "success" ? (
@@ -546,7 +562,7 @@ export default function ContentWizardPage() {
               }
             />
           ) : (
-            <div className="w-full max-w-[600px] mx-auto min-h-[175px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-4 sm:px-0">
+            <div className="w-full max-w-[600px] mx-auto min-h-[175px] sm:min-h-[200px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-2 sm:px-4 md:px-0">
               <EnhancedAiChatInput
                 onSubmit={handleContentSubmit}
                 placeholder="Your blog crafting experience starts here..."

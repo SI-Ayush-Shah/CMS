@@ -13,6 +13,7 @@ const BlogPage = lazy(() => import("../pages/BlogPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
+const EditorPage = lazy(() => import("../pages/EditorPage"));
 const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
 const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
 
@@ -37,6 +38,15 @@ export const router = createBrowserRouter([
         element: (
           <LazyPageWrapper>
             <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "editor/:blogId",
+        element: (
+          <LazyPageWrapper>
+            <EditorPage />
           </LazyPageWrapper>
         ),
         errorElement: <ErrorBoundary />,

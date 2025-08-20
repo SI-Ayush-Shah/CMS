@@ -512,7 +512,7 @@ export const EnhancedAiChatInput = ({
           <div className="flex flex-wrap gap-2 items-start justify-between min-h-7 px-2 py-0 rounded-xl w-full">
             <textarea
               ref={textareaRef}
-              className="font-normal text-[14px] text-invert-low w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] focus:ring-0 focus:ring-offset-0"
+              className="font-normal text-[14px] sm:text-[15px] text-invert-low w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-invert-low min-h-[80px] sm:min-h-[100px] focus:ring-0 focus:ring-offset-0 touch-manipulation"
               placeholder={placeholder}
               value={text}
               onChange={handleTextChange}
@@ -530,13 +530,12 @@ export const EnhancedAiChatInput = ({
           <div className="px-2">
             <div
               id="character-count"
-              className={`text-xs text-right ${
-                isAtLimit
-                  ? "text-error-500"
-                  : isAtWarning
-                    ? "text-warning-500"
-                    : "text-invert-low"
-              }`}
+              className={`text-xs text-right ${isAtLimit
+                ? "text-error-500"
+                : isAtWarning
+                  ? "text-warning-500"
+                  : "text-invert-low"
+                }`}
               aria-live="polite"
               role="status"
               aria-label={`Character count: ${characterCount} of ${maxLength} characters used${warningMessage ? `. ${warningMessage}` : ""}`}
@@ -557,11 +556,10 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={openFileDialog}
             disabled={disabled || isSubmitting}
-            className={`flex gap-2 items-center justify-center min-h-7 min-w-7 p-[4px] rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${"hover:bg-core-prim-500/10"} ${
-              disabled || isSubmitting
-                ? "opacity-50 cursor-not-allowed"
-                : "cursor-pointer"
-            }`}
+            className={`flex gap-2 items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-7 sm:min-w-7 p-2 sm:p-[4px] rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 touch-manipulation ${"hover:bg-core-prim-500/10"} ${disabled || isSubmitting
+              ? "opacity-50 cursor-not-allowed"
+              : "cursor-pointer"
+              }`}
             aria-label={`Add photos. Opens file picker. Press Alt+I as shortcut.`}
             aria-describedby="image-upload-help"
             type="button"
@@ -595,11 +593,10 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`bg-core-prim-500 text-invert-high flex gap-1 items-center justify-center px-3 py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 ${
-              canSubmit
-                ? "hover:bg-core-prim-600 active:bg-core-prim-700 cursor-pointer"
-                : "opacity-50 cursor-not-allowed"
-            }`}
+            className={`bg-core-prim-500 text-invert-high flex gap-1 items-center justify-center px-4 py-3 sm:px-3 sm:py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 min-h-[44px] sm:min-h-auto touch-manipulation ${canSubmit
+              ? "hover:bg-core-prim-600 active:bg-core-prim-700 cursor-pointer"
+              : "opacity-50 cursor-not-allowed"
+              }`}
             aria-label={`Generate content${isSubmitting ? " (submitting...)" : canSubmit ? ". Press Ctrl+Enter as shortcut." : " (form incomplete)"}`}
             aria-describedby="submit-help"
             type="submit"
