@@ -241,7 +241,7 @@ export const refineContent = async (
  * @returns {Promise<Object>} Update response
  */
 export const updateBlogContent = async (blogId, updatedBody) => {
-  const response = await apiClient.patch(
+  const response = await apiClient.put(
     `/content-studio/api/content/${blogId}`,
     { body: updatedBody }
   );

@@ -27,13 +27,6 @@ const start = async (): Promise<void> => {
       origin: true,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "Accept",
-        "Origin",
-        "X-Requested-With",
-      ],
       exposedHeaders: ["Content-Length", "Content-Type"],
       maxAge: 86400,
     });
