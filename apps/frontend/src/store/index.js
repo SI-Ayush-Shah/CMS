@@ -9,6 +9,9 @@ export { useProcessingStore } from './processingStore';
 export { useBlogStore } from './blogStore';
 export { useRefinementStore } from './refinementStore';
 
+// Export auth store
+export { default as useAuthStore } from './authStore';
+
 // Store utilities and helpers
 export const storeUtils = {
   // Helper to reset all refinement-related stores

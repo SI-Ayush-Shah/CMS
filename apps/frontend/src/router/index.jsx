@@ -5,6 +5,8 @@ import LazyPageWrapper from "../components/LazyPageWrapper";
 import BaseLayout from "../layouts/BaseLayout";
 import ContentWizardPage from "../pages/ContentWizardPage";
 import ComponentsPage from "../pages/ComponentsPage";
+import ProtectedRoute from "../components/ProtectedRoute";
+import LoginWrapper from "../components/LoginWrapper";
 
 // Lazy load page components for code splitting
 const HomePage = lazy(() => import("../pages/HomePage"));
@@ -27,73 +29,90 @@ export const router = createBrowserRouter([
       {
         path: "editor",
         element: (
-          <LazyPageWrapper>
-            <ContentEditorPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <ContentEditorPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
         errorElement: <ErrorBoundary />,
       },
       {
         path: "editor/:id",
         element: (
-          <LazyPageWrapper>
-            <ContentEditorPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <ContentEditorPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
         errorElement: <ErrorBoundary />,
       },
       {
         path: "editor/:blogId",
         element: (
-          <LazyPageWrapper>
-            <EditorPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <EditorPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
         errorElement: <ErrorBoundary />,
       },
       {
         path: "/wizard",
         element: (
-          <LazyPageWrapper>
-            <ContentWizardPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <ContentWizardPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
         errorElement: <ErrorBoundary />,
       },
       {
-        path: "/wizard",
-        element: <Navigate to="/creative-wizard" replace />,
+        path: "/creative-wizard",
+        element: (
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <ContentWizardPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
+        ),
+        errorElement: <ErrorBoundary />,
       },
       {
         index: true,
-        element: (
-          <LazyPageWrapper>
-            <HomePage />
-          </LazyPageWrapper>
-        ),
+        element: <Navigate to="/wizard" replace />,
       },
       {
         path: "components",
         element: (
-          <LazyPageWrapper>
-            <ComponentsPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <ComponentsPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
       },
       {
         path: "about",
         element: (
-          <LazyPageWrapper>
-            <AboutPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <AboutPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
       },
       {
         path: "content-hub",
         element: (
-          <LazyPageWrapper>
-            <BlogPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <BlogPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
       },
       {
@@ -103,17 +122,21 @@ export const router = createBrowserRouter([
       {
         path: "analytics",
         element: (
-          <LazyPageWrapper>
-            <AnalyticsPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <AnalyticsPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
       },
       {
         path: "feed-manager",
         element: (
-          <LazyPageWrapper>
-            <FeedManagerPage />
-          </LazyPageWrapper>
+          <ProtectedRoute>
+            <LazyPageWrapper>
+              <FeedManagerPage />
+            </LazyPageWrapper>
+          </ProtectedRoute>
         ),
       },
       {
@@ -130,7 +153,7 @@ export const router = createBrowserRouter([
     path: "login",
     element: (
       <LazyPageWrapper>
-        <LoginPage />
+        <LoginWrapper />
       </LazyPageWrapper>
     ),
   },
