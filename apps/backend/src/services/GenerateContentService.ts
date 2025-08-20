@@ -42,7 +42,7 @@ export function createGenerateContentService({
           "warning",
           "linkTool",
         ]),
-        data: z.any(), // Flexible data object for any block type - Gemini compatible
+        data: z.any(), 
       });
 
       const editorJsSchema = z.object({
@@ -56,7 +56,7 @@ export function createGenerateContentService({
         summary: z.string(),
         category: z.string(),
         tags: z.array(z.string()),
-        body: editorJsSchema, // Always Editor.js format
+        body: editorJsSchema, 
       });
 
       const model = createGoogleGenaiModel({
@@ -143,6 +143,7 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
 
       // persist
       // Normalize tables to ensure 2D arrays and merge consecutive table rows
+      
       const normalizedBody = normalizeEditorJsBody(
         result.body as any
       ) as unknown as Record<string, unknown>;

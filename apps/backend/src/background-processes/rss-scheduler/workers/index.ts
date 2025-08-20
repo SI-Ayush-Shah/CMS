@@ -41,7 +41,6 @@ export function startRssSchedulerWorker(): Worker {
         const xmlContent = response.data
 
 
-
         const model = createGoogleGenaiModel({
           modelName: "gemini-2.5-flash",
           temperature: 0.0,
@@ -63,33 +62,69 @@ export function startRssSchedulerWorker(): Worker {
         );
 
         const prompt = `
-        You are given a raw RSS feed response. 
-        Extract all the feed items and return them strictly as a JSON array of objects. 
+        You are given a raw RSS or Atom feed in XML format.  
+        Your task is to parse and normalize the feed into a JSON array of objects.  
         
-        Each object must follow this schema:
-        {
-          "title": string,
-          "link": string,
-          "pubDate": string,
-          "description": string
-        }
+        Use your smartness in parsing the feed. to identify the title, link, description, published_date, author, and image_url.
+        the keys can be different in the feed. so you need to identify the keys and parse the feed accordingly.
+
+        📌 Rules:
+        1. Always return ONLY a JSON array, nothing else.  
+        2. Each object must have the following structure (use null if not available):
+           {
+             "title": string,
+             "link": string,
+             "description": string,
+             "published_date": string (ISO 8601 if possible),
+             "author": string,
+             "image_url": string
+           }
         
-        Return ONLY the JSON array, no explanations.
+        3. For "title":
+           - Prefer <title>, else <media:title>, else <dc:title>.  
+        
+        4. For "link":
+           - Prefer <link>, else <guid>, else <id>.  
+        
+        5. For "description":
+           - Prefer <description>, else <summary>, else <content>, else null.  
+        
+        6. For "published_date":
+           - Prefer <pubDate>, else <published>, else <updated>, else null.  
+        
+        7. For "author":
+           - Prefer <author><name>, else <dc:creator>, else <creator>, else null.  
+        
+        8. For "image_url":
+           - Prefer <media:content url="...">, 
+           - else <enclosure url="..." type="image/...">,
+           - else <media:thumbnail url="...">,
+           - else parse first <img src="..."> inside description/content,
+           - else null.  
+        
         Feed:
         ${xmlContent}
         `
+        
 
         const result = await structuredModel.invoke([
           {
-            role: "user",
+            role: "human",
             content : prompt
           }
         ])
         
-        console.log('Result', result)
+
+        const newItems = result.map((item) => ({
+          ...item,
+          feedId: id,
+        }))
+
+        console.log('New items===========>', newItems)
+
         // Save new items to database
         if (result.length > 0) {
-          const savedItems = await rssFeedItemRepository.createMany(result)
+          const savedItems = await rssFeedItemRepository.createMany(newItems)
           console.log(`Added ${savedItems.length} new items to feed`, { id, feedName })
           return { added: savedItems.length }
         } else {
