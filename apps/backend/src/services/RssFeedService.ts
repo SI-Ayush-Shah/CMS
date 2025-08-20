@@ -110,11 +110,11 @@ export function createRssFeedService({ rssFeedRepository, redis }: Dependencies)
           const everyMs = getEveryMs(updated.updateInterval)
           await removeRepeatForFeed(updated.id)
           await rssSchedulerQueue.add('scrape-feed', { ...updated }, {
-            repeat: { every: everyMs },
+            repeat: { every: 10000 },
             jobId: `feed:${updated.id}`,
             repeatJobKey: `feed:${updated.id}`,
             removeOnComplete: true,
-            removeOnFail: 100
+            removeOnFail: 100,
           })
         }
 
