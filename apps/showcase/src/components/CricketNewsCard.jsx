@@ -1,9 +1,9 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { FaCalendarAlt, FaShare } from "react-icons/fa";
 import { IoShareSocial } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-const CricketNewsCard = ({ id, title, date, imageUrl, description }) => {
+const CricketNewsCard = forwardRef(({ id, title, date, imageUrl, description }, ref) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -12,6 +12,7 @@ const CricketNewsCard = ({ id, title, date, imageUrl, description }) => {
 
   return (
     <div 
+      ref={ref}
       className="w-[270px] h-[250px] bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
       onClick={handleCardClick}
     >
@@ -53,6 +54,8 @@ const CricketNewsCard = ({ id, title, date, imageUrl, description }) => {
       </div>
     </div>
   );
-};
+});
+
+CricketNewsCard.displayName = 'CricketNewsCard';
 
 export default CricketNewsCard;
