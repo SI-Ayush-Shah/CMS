@@ -73,7 +73,7 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
               return (
                 <div
                   key={box.id}
-                  className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 overflow-hidden w-[80%] ${
+                  className={`rounded-2xl bg-button-filled-main-default  border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 overflow-hidden w-[80%] ${
                     expandedBoxes[box.id]
                       ? "h-auto"
                       : isShortContent
@@ -86,7 +86,7 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
                   }}
                 >
                   <p
-                    className={`text-[12px] text-invert-low leading-relaxed ${
+                    className={`text-[12px] text-invert-high leading-relaxed ${
                       !expandedBoxes[box.id] && !isShortContent
                         ? "line-clamp-8"
                         : ""
