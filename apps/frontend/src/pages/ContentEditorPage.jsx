@@ -313,9 +313,34 @@ export default function ContentEditorPage() {
                   }
                 />
               </div>
+          {/* Header with actions */}
+          <div className="flex items-center justify-between mb-5 rounded-md border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-2 sticky top-2 z-10 backdrop-blur-lg">
+            <div className="text-[20px] flex flex-col font-semibold text-invert-high">
+              Creative Wizard{" "}
+              {id && (
+                <span className="text-[12px] text-invert-low">#{id}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleSaveDraft}
+                isLoading={isSavingDraft}
+                className="min-w-40"
+              >
+                Save to drafts
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handlePublish}
+                isLoading={isPublishing}
+                className="min-w-36"
+              >
+                Publish
+              </Button>
             </div>
           </div>
-          <div>
+          <div className="px-3">
             <p className="text-xs text-invert-low mb-2">Image</p>
             <div className="w-full">
               <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
@@ -354,6 +379,8 @@ export default function ContentEditorPage() {
                 </button>
               </div>
             </div>
+          <div className="px-3">
+            <p className="text-xs text-invert-low mb-2">Body</p>
             <div className="">
               {/* Keep editor mounted for state retention; toggle visibility */}
               <div className={viewMode === "edit" ? "block" : "hidden"}>

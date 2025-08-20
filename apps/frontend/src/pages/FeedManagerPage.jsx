@@ -569,7 +569,7 @@ const FeedManagerPage = () => {
                 WebkitBackdropFilter: 'blur(4px)'
               }}
             ></div>
-            <div className="relative w-96 bg-[#0E0A14] rounded-lg overflow-hidden border border-gray-800 m-4 mt-16 mr-8 shadow-xl animate-fadeIn transition-all duration-300">
+            <div className="relative w-96 bg-[#0E0A14] rounded-lg overflow-visible border border-gray-800 m-4 mt-16 mr-8 shadow-xl animate-fadeIn transition-all duration-300">
               {/* Modal Header */}
               <div className="flex justify-between items-center p-5">
                 <h2 className="text-xl font-semibold text-white">Feed Fetch</h2>
@@ -621,7 +621,7 @@ const FeedManagerPage = () => {
                   <label htmlFor="updateInterval" className="block text-sm text-white">
                     Update Interval
                   </label>
-                  <div className="relative">
+                  <div className="relative ">
                     <button
                       type="button"
                       className="w-full px-4 py-2.5 bg-[#1A1625] border border-gray-800 rounded-md text-left text-white flex justify-between items-center"
@@ -637,7 +637,7 @@ const FeedManagerPage = () => {
                     
                     {/* Dropdown Menu */}
                     {isDropdownOpen && (
-                      <div className="absolute z-10 mt-1 w-full bg-[#1A1625] border border-gray-800 rounded-md shadow-lg">
+                      <div className="absolute z-[60] mt-1 w-full bg-[#1A1625] border border-gray-800 rounded-md shadow-lg">
                         <ul className="py-1 max-h-60 overflow-auto">
                           {["5_minutes", "15_minutes", "30_minutes", "1_hour", "6_hours", "12_hours", "24_hours"].map((interval) => (
                             <li key={interval}>

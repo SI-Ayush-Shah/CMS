@@ -1,38 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { FaGoogle } from "react-icons/fa";
+import useAuthStore from "../store/authStore";
 
 const SignInForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+
+  // Redirect to intended page or wizard page after successful login
+  useEffect(() => {
+    if (isAuthenticated) {
+      const intendedPath = location.state?.from || '/wizard';
+      navigate(intendedPath, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  // Clear error when user starts typing
+  useEffect(() => {
+    if (email || password) {
+      clearError();
+    }
+  }, [email, password, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate login API call
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // Handle successful login here
+    
+    const result = await login(email, password);
+    
+    if (result.success) {
+      // Login successful - useEffect will handle redirect
       console.log("Login successful");
-    } catch (error) {
-      console.error("Login failed:", error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      // Error is already set in the store
+      console.error("Login failed:", result.error);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // Handle Google Sign In
-    console.log("Google Sign In clicked");
+  const handleGoogleSignIn = async () => {
+    // Use dummy admin credentials for Google sign-in as well
+    const result = await login('admin@dummy.com', '12345678');
+    
+    if (result.success) {
+      console.log("Google Sign In successful");
+    } else {
+      console.error("Google Sign In failed:", result.error);
+    }
   };
 
   return (
     <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
       {/* Sign In Card */}
-      <div className="backdrop-blur-[50px] bg-black/70 rounded-[20px] p-12 w-full max-w-md relative z-10">
+      <div className="backdrop-blur-[50px] bg-black/70 rounded-2xl p-12 w-full max-w-md relative z-10 border border-core-prim-300/10">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 mb-8">
           <h1 className="font-['Montserrat'] font-semibold text-2xl text-white text-center">
@@ -41,11 +65,18 @@ const SignInForm = () => {
           <p className="font-['Montserrat'] font-normal text-sm text-invert-low">
             Your Social Accounts
           </p>
+          
+          {/* Error Display */}
+          {error && (
+            <div className="w-full p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+          )}
         </div>
 
         {/* Google Sign In Button */}
         <div className="mb-8">
-          <button className="w-full flex items-center justify-center gap-2 h-10 bg-button-filled-main-default text-white rounded-lg text-[14px] font-normal cursor-pointer">
+          <button className="w-full flex items-center justify-center gap-2 h-10 bg-button-filled-main-default text-white rounded-xl text-[14px] font-normal cursor-pointer">
             <svg
               width="24"
               height="25"
@@ -123,25 +154,14 @@ const SignInForm = () => {
             type="submit"
             disabled={isLoading}
             variant="solid"
-            className="w-full rounded-[10px] text-base"
+            className="w-full rounded-xl text-base"
             isLoading={isLoading}
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
-        {/* Sign Up Link */}
-        {/* <div className="text-center mt-8">
-          <p className="font-['Montserrat'] font-medium text-sm">
-            <span className="text-invert-low">Not a Member yet?</span>
-            <Button
-              variant="link"
-              className="font-['Montserrat'] font-medium text-sm text-core-prim-300 hover:text-core-prim-100 bg-transparent p-0 h-auto ml-1"
-            >
-              Sign Up
-            </Button>
-          </p>
-        </div> */}
+      
       </div>
     </div>
   );
