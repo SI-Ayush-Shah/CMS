@@ -12,10 +12,13 @@ import Loader from "../components/Loader";
 const BlogPage = () => {
   // Function to handle summarize button click
   const handleSummarize = (item) => {
-    // For now, just log the item - this would be expanded later
-    console.log("Summarize clicked for:", item);
-    // Here you would implement the summarization functionality
-    // e.g., open a modal, navigate to a detail page, or call an API
+    // Navigate to content editor page with RSS item data in state
+    navigate('/editor/new', { 
+      state: { 
+        rssFeedItem: item,
+        mode: 'summarize' 
+      } 
+    });
   };
   const formatDate = (input) => {
     if (!input) return "";
@@ -26,13 +29,16 @@ const BlogPage = () => {
     return `${mm}-${dd}-${yyyy}`;
   };
 
-  const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState("custom"); // custom | ai | published
   const status = useMemo(
     () => (activeTab === "published" ? "published" : "draft"),
     [activeTab]
   );
-  const pageSize = 8;
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const pageSize = rowsPerPage;
   
   // Query for blog posts (custom and published tabs)
   const { 
@@ -41,9 +47,9 @@ const BlogPage = () => {
     isFetching: isBlogFetching, 
     isError: isBlogError 
   } = useQuery({
-    queryKey: ["blogPosts", { page, pageSize, status }],
+    queryKey: ["blogPosts", { page: currentPage, pageSize, status }],
     queryFn: () =>
-      contentApi.fetchBlogPosts({ page, pageSize, status, sort: "desc" }),
+      contentApi.fetchBlogPosts({ page: currentPage, pageSize, status, sort: "desc" }),
     keepPreviousData: true,
     enabled: activeTab !== "ai"
   });
@@ -55,14 +61,20 @@ const BlogPage = () => {
     isFetching: isRssFetching, 
     isError: isRssError 
   } = useQuery({
-    queryKey: ["rssItems", { page, pageSize }],
-    queryFn: () => contentApi.fetchRssItems({ page, pageSize }),
+    queryKey: ["rssItems", { page: currentPage, pageSize }],
+    queryFn: () => contentApi.fetchRssItems({ page: currentPage, pageSize }),
     keepPreviousData: true,
     enabled: activeTab === "ai"
   });
   
   const blogPosts = blogData?.items || [];
   const rssItems = rssData?.items || [];
+  
+  // Get total counts for pagination
+  const totalBlogPosts = blogData?.total || 0;
+  const totalRssItems = rssData?.total || 0;
+  const totalItems = activeTab === "ai" ? totalRssItems : totalBlogPosts;
+  const totalPages = Math.ceil(totalItems / pageSize);
   
   // Determine which loading and error states to use based on active tab
   const isLoading = activeTab === "ai" ? isRssLoading : isBlogLoading;
@@ -167,6 +179,79 @@ const BlogPage = () => {
                 )}
               </div>
             </MagicBento>
+            
+            {/* Pagination - only show when not loading and we have content */}
+            {!isLoading && !isFetching && totalItems > 0 && (
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400 mr-2">Rows Per Page:</span>
+                  <select 
+                    className="bg-gray-800/80 text-white rounded-md px-2 py-1 text-sm border border-gray-700"
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1); // Reset to first page when changing page size
+                    }}
+                  >
+                    <option value={8}>8</option>
+                    <option value={16}>16</option>
+                    <option value={24}>24</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <button 
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800/80 text-white hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:hover:bg-gray-800/80"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Previous page"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button 
+                        key={pageNum}
+                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${currentPage === pageNum ? 'bg-purple-600 text-white' : 'bg-gray-800/80 text-white hover:bg-gray-700/80'}`}
+                        onClick={() => setCurrentPage(pageNum)}
+                        aria-label={`Page ${pageNum}`}
+                        aria-current={currentPage === pageNum ? 'page' : undefined}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  
+                  {totalPages > 5 && (
+                    <>
+                      <span className="text-white">...</span>
+                      <button 
+                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${currentPage === totalPages ? 'bg-purple-600 text-white' : 'bg-gray-800/80 text-white hover:bg-gray-700/80'}`}
+                        onClick={() => setCurrentPage(totalPages)}
+                        aria-label={`Page ${totalPages}`}
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+                  
+                  <button 
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800/80 text-white hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:hover:bg-gray-800/80"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    aria-label="Next page"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </div>

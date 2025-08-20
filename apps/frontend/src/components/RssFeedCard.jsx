@@ -1,7 +1,13 @@
-import { useState } from 'react';
 import { Button } from './Button';
 
-const RssFeedCard = ({ image, title, date, summary, onSummarizeClick }) => {
+const RssFeedCard = ({ 
+  image, 
+  title, 
+  date, 
+  summary, 
+  onSummarizeClick,
+  summarizeText = "Summarize" 
+}) => {
   const formatDate = (input) => {
     if (!input) return "";
     const d = new Date(input);
@@ -41,15 +47,15 @@ const RssFeedCard = ({ image, title, date, summary, onSummarizeClick }) => {
           {summary}
         </p>
         
-        {/* Summarize button */}
-        <div className="mt-auto">
+        {/* Summarize button styled like Read More */}
+        <div className="flex gap-2 items-center justify-start w-full max-w-max mt-auto">
           <Button 
-            variant="secondary"
-            size="sm"
-            onClick={onSummarizeClick}
-            className="w-full"
+            variant="solid" 
+            size="md" 
+            onClick={() => onSummarizeClick()} 
+            className="!rounded-lg"
           >
-            Summarize
+            {summarizeText}
           </Button>
         </div>
       </div>

@@ -314,6 +314,27 @@ export const fetchRssItems = async ({
   return data?.data || { items: [], total: 0, page, pageSize };
 };
 
+/**
+ * Summarize RSS feed item content
+ * @param {Object} content - The RSS feed item to summarize
+ * @param {string} bannerUrl - Optional banner URL for the content
+ * @returns {Promise<Object>} Summarized content response
+ */
+export const summarizeContent = async (content, bannerUrl) => {
+  const payload = {
+    content,
+    bannerUrl
+  };
+  
+  const { data } = await apiClient.post(
+    "/content-studio/api/summarize",
+    payload,
+    { skipRetry: false }
+  );
+  
+  return data;
+};
+
 // Export all functions as a service object
 export const contentApi = {
   generateContent,
@@ -328,4 +349,5 @@ export const contentApi = {
   patchContent,
   rollbackBlogContent,
   fetchRssItems,
+  summarizeContent,
 };
