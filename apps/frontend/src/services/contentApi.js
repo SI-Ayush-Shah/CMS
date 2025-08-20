@@ -215,52 +215,21 @@ export const getBlogContent = async (blogId) => {
 export const refineContent = async (
   blogId,
   refinementPrompt,
+  body,
   refinementType = "custom"
 ) => {
-  // TODO: Replace with real API call when backend is ready
-  // const response = await apiClient.post('/content-studio/api/refine-content', {
-  //   blogId,
-  //   refinementPrompt,
-  //   refinementType
-  // })
-  // return response.data
-
-  // Mock implementation for development
-  await mockDelay(2000); // Simulate AI processing time
-
-  if (shouldSimulateError()) {
-    throw new Error("Content refinement failed. Please try again.");
-  }
-
-  // Mock refined content response
-  return {
-    success: true,
-    data: {
-      updatedBody: {
-        time: Date.now(),
-        blocks: [
-          {
-            id: "block1",
-            type: "header",
-            data: {
-              text: "Refined Blog Content",
-              level: 1,
-            },
-          },
-          {
-            id: "block2",
-            type: "paragraph",
-            data: {
-              text: `Content refined based on: "${refinementPrompt}". This is the updated version with improvements applied.`,
-            },
-          },
-        ],
-        version: "2.28.2",
-      },
-      message: `Content successfully refined using ${refinementType} refinement`,
-    },
-    timestamp: new Date().toISOString(),
+  const payload = {
+    blogId,
+    prompt: refinementPrompt,
+    body,
+    refinementType,
   };
+  const { data } = await apiClient.post(
+    "/content-studio/api/refine-content",
+    payload,
+    { skipRetry: false }
+  );
+  return data;
 };
 
 /**

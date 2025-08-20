@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
 import { contentApi } from "../services/contentApi";
 import EditorJsRenderer from "../components/EditorJsRenderer";
 import RightPanel from "../components/RightPanel";
+import { normalizeEditorJsBody } from "../utils";
 
 /**
  * Content Editor Page
@@ -55,6 +56,10 @@ export default function ContentEditorPage() {
   const currentTitle = article?.title || dummyTitle;
   const currentBanner = article?.bannerUrl || dummyImageUrl;
   const currentBody = article?.body;
+  const [editorBody, setEditorBody] = useState(currentBody || null);
+  useEffect(() => {
+    setEditorBody(currentBody || null);
+  }, [currentBody]);
 
   const validate = useCallback(() => {
     if (!currentTitle.trim()) {
@@ -104,15 +109,35 @@ export default function ContentEditorPage() {
     }
   }, [validate, dummyTitle, dummyBody, showMessage]);
 
+  const handleRefinementApplied = useCallback(
+    async (updatedBody) => {
+      try {
+        const blogId = article?.id;
+        const normalized = normalizeEditorJsBody(updatedBody);
+        setEditorBody(normalized);
+        if (blogId) {
+          await contentApi.updateBlogContent(blogId, normalized);
+          showMessage("Refinement saved.");
+        } else {
+          showMessage("Refinement applied to preview.");
+        }
+      } catch (err) {
+        showMessage(err?.message || "Failed to save refinement.", "error");
+      }
+    },
+    [article?.id, showMessage]
+  );
+
   return (
     <div className="w-full h-full">
       {/* Message */}
       {message && (
         <div
-          className={`mb-4 p-3 rounded-lg text-sm ${messageType === "success"
-            ? "bg-success-500/10 border border-success-500/20 text-success-500"
-            : "bg-error-500/10 border border-error-500/20 text-error-400"
-            }`}
+          className={`mb-4 p-3 rounded-lg text-sm ${
+            messageType === "success"
+              ? "bg-success-500/10 border border-success-500/20 text-success-500"
+              : "bg-error-500/10 border border-error-500/20 text-error-400"
+          }`}
         >
           {message}
         </div>
@@ -124,7 +149,8 @@ export default function ContentEditorPage() {
           {/* Header with actions */}
           <div className="flex items-center justify-between mb-5 rounded-2xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
             <div className="text-[20px] font-semibold text-invert-high">
-              Creative Wizard {id && (
+              Creative Wizard{" "}
+              {id && (
                 <span className="ml-2 text-[12px] text-invert-low">#{id}</span>
               )}
             </div>
@@ -161,17 +187,10 @@ export default function ContentEditorPage() {
           </div>
 
           <div>
-            <p className="text-xs text-invert-low mb-2">Title</p>
-            <h1 className="font-semibold text-invert-high text-[22px] sm:text-[24px] lg:text-[26px] leading-8">
-              {currentTitle}
-            </h1>
-          </div>
-
-          <div>
             <p className="text-xs text-invert-low mb-2">Body</p>
             <div className="">
-              {currentBody ? (
-                <EditorJsRenderer data={currentBody} />
+              {editorBody ? (
+                <EditorJsRenderer data={editorBody} />
               ) : (
                 dummyBody.split("\n").map((para, idx) => (
                   <p
@@ -187,7 +206,11 @@ export default function ContentEditorPage() {
         </section>
 
         {/* Right Panel */}
-        <RightPanel />
+        <RightPanel
+          blogId={article?.id}
+          body={editorBody || currentBody}
+          onRefinement={handleRefinementApplied}
+        />
       </div>
     </div>
   );

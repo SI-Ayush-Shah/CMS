@@ -12,6 +12,7 @@ const rootRoutes: FastifyPluginAsync = async (fastify) => {
         users: "/users",
         generateContent: "/generate-content",
         content: "/content",
+        refineContent: "/refine-content",
       },
     };
   });

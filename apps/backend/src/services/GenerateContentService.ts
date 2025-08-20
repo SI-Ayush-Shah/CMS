@@ -142,12 +142,16 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
       ]);
 
       // persist
+      // Normalize tables to ensure 2D arrays and merge consecutive table rows
+      const normalizedBody = normalizeEditorJsBody(
+        result.body as any
+      ) as unknown as Record<string, unknown>;
       const toInsert: NewGeneratedContent = {
         title: result.title,
         summary: result.summary,
         category: result.category,
         tags: result.tags,
-        body: result.body as unknown as Record<string, unknown>,
+        body: normalizedBody,
       };
       const saved = await generatedContentRepository.create(toInsert);
 
@@ -155,6 +159,7 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
         blogId: saved.id,
         generatedContent: {
           ...result,
+          body: normalizedBody as any,
           bannerUrl,
           images: imagesList,
         },
@@ -163,4 +168,52 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
       };
     },
   };
+}
+
+// Normalize Editor.js body data to ensure tables are single blocks with 2D content
+function normalizeEditorJsBody(body: any) {
+  if (!body || !Array.isArray(body.blocks)) return body;
+
+  const to2D = (content: any): any[] => {
+    if (!Array.isArray(content)) return [];
+    if (Array.isArray(content[0])) return content; // already 2D
+    return [content]; // wrap single row
+  };
+
+  const mergedBlocks: any[] = [];
+  let pendingTable: any | null = null;
+
+  for (const block of (body as any).blocks) {
+    if (block?.type === "table") {
+      const content2D = to2D(block?.data?.content);
+      const withHeadings = !!block?.data?.withHeadings;
+
+      if (pendingTable) {
+        pendingTable.data = pendingTable.data || {};
+        const existing = to2D(pendingTable.data.content);
+        pendingTable.data.content = [...existing, ...content2D];
+        if (withHeadings) pendingTable.data.withHeadings = true;
+      } else {
+        pendingTable = {
+          ...block,
+          data: {
+            ...(block.data || {}),
+            content: content2D,
+          },
+        };
+        if (withHeadings) pendingTable.data.withHeadings = true;
+      }
+      continue;
+    }
+
+    if (pendingTable) {
+      mergedBlocks.push(pendingTable);
+      pendingTable = null;
+    }
+    mergedBlocks.push(block);
+  }
+
+  if (pendingTable) mergedBlocks.push(pendingTable);
+
+  return { ...body, blocks: mergedBlocks };
 }

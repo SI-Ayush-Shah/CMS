@@ -12,8 +12,8 @@ export {
   ALLOWED_FILE_TYPES,
   ALLOWED_FILE_EXTENSIONS,
   MAX_FILE_SIZE,
-  MAX_IMAGES
-} from './fileValidation'
+  MAX_IMAGES,
+} from "./fileValidation";
 
 // Image processing utilities
 export {
@@ -23,5 +23,8 @@ export {
   createThumbnail,
   calculateThumbnailDimensions,
   revokeObjectUrls,
-  getImageDimensions
-} from './imageProcessing'
+  getImageDimensions,
+} from "./imageProcessing";
+
+// Editor.js helpers
+export { normalizeEditorJsBody } from "./sanitizeEditorJs";
