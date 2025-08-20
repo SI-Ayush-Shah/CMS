@@ -2,8 +2,10 @@ import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
+import { Input } from "../components/Input";
 import { contentApi } from "../services/contentApi";
 import EditorJsRenderer from "../components/EditorJsRenderer";
+import EditorJsEditor from "../components/EditorJsEditor";
 import RightPanel from "../components/RightPanel";
 import { normalizeEditorJsBody } from "../utils";
 
@@ -31,6 +33,7 @@ export default function ContentEditorPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' | 'error'
+  const [viewMode, setViewMode] = useState("edit"); // 'edit' | 'preview'
 
   // Read-only dummy content for the editor preview (LHS)
   const dummyTitle = "Virat Kohli: A Career Unforgettable—and Unfulfilled";
@@ -57,57 +60,144 @@ export default function ContentEditorPage() {
   const currentBanner = article?.bannerUrl || dummyImageUrl;
   const currentBody = article?.body;
   const [editorBody, setEditorBody] = useState(currentBody || null);
+  const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState("");
+  const [category, setCategory] = useState("");
+  const [tags, setTags] = useState([]);
   useEffect(() => {
     setEditorBody(currentBody || null);
-  }, [currentBody]);
+    setTitle(article?.title || "");
+    setSummary(article?.summary || "");
+    setCategory(article?.category || "");
+    setTags(Array.isArray(article?.tags) ? article.tags : []);
+  }, [
+    currentBody,
+    article?.title,
+    article?.summary,
+    article?.category,
+    article?.tags,
+  ]);
+
+  const initialEditorData = useMemo(() => {
+    if (editorBody) return editorBody;
+    if (currentBody) return currentBody;
+    const blocks = dummyBody
+      .split("\n")
+      .filter(Boolean)
+      .map((p) => ({
+        id: Math.random().toString(36).slice(2),
+        type: "paragraph",
+        data: { text: p },
+      }));
+    return { time: Date.now(), blocks, version: "2.30.7" };
+  }, [editorBody, currentBody, dummyBody]);
+
+  const handleEditorChange = useCallback((data) => {
+    const normalized = normalizeEditorJsBody(data);
+    setEditorBody(normalized);
+  }, []);
 
   const validate = useCallback(() => {
-    if (!currentTitle.trim()) {
+    if (!(title || currentTitle).trim()) {
       showMessage("Please add a title.", "error");
       return false;
     }
-    if (!currentBody && !dummyBody.trim()) {
+    const hasEditorBlocks =
+      Array.isArray(editorBody?.blocks) && editorBody.blocks.length > 0;
+    if (!hasEditorBlocks && !dummyBody.trim()) {
       showMessage("Please write the body content.", "error");
       return false;
     }
     return true;
-  }, [currentTitle, currentBody, dummyBody, showMessage]);
+  }, [title, currentTitle, editorBody, dummyBody, showMessage]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!validate()) return;
     try {
       setIsSavingDraft(true);
-      const res = await contentApi.saveContent({
-        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
-        imageIds: [],
-        metadata: { status: "draft" },
-      });
-      showMessage("Saved to drafts successfully.");
-      return res;
+      if (id) {
+        const payload = {
+          title: title || currentTitle,
+          summary: summary || undefined,
+          category: category || undefined,
+          tags: tags.length ? tags : undefined,
+          body: editorBody || currentBody,
+        };
+        const res = await contentApi.patchContent(id, payload);
+        showMessage("Draft updated successfully.");
+        return res;
+      } else {
+        const res = await contentApi.saveContent({
+          text: `${dummyTitle}\n\n${dummyBody}`,
+          imageIds: [],
+          metadata: { status: "draft" },
+        });
+        showMessage("Saved to drafts successfully.");
+        return res;
+      }
     } catch (err) {
       showMessage(err?.message || "Failed to save draft.", "error");
     } finally {
       setIsSavingDraft(false);
     }
-  }, [validate, dummyTitle, dummyBody, showMessage]);
+  }, [
+    validate,
+    dummyTitle,
+    dummyBody,
+    showMessage,
+    id,
+    editorBody,
+    title,
+    summary,
+    category,
+    tags,
+    currentTitle,
+    currentBody,
+  ]);
 
   const handlePublish = useCallback(async () => {
     if (!validate()) return;
     try {
       setIsPublishing(true);
-      const res = await contentApi.saveContent({
-        text: article ? currentTitle : `${dummyTitle}\n\n${dummyBody}`,
-        imageIds: [],
-        metadata: { status: "published" },
-      });
-      showMessage("Published successfully.");
-      return res;
+      if (id) {
+        const payload = {
+          title: title || currentTitle,
+          summary: summary || undefined,
+          category: category || undefined,
+          tags: tags.length ? tags : undefined,
+          body: editorBody || currentBody,
+        };
+        const res = await contentApi.patchContent(id, payload);
+        showMessage("Content updated.");
+        return res;
+      } else {
+        const res = await contentApi.saveContent({
+          text: `${dummyTitle}\n\n${dummyBody}`,
+          imageIds: [],
+          metadata: { status: "published" },
+        });
+        showMessage("Published successfully.");
+        return res;
+      }
     } catch (err) {
       showMessage(err?.message || "Failed to publish.", "error");
     } finally {
       setIsPublishing(false);
     }
-  }, [validate, dummyTitle, dummyBody, showMessage]);
+  }, [
+    validate,
+    dummyTitle,
+    dummyBody,
+    showMessage,
+    id,
+    editorBody,
+    title,
+    summary,
+    category,
+    tags,
+    currentTitle,
+    currentBody,
+  ]);
 
   const handleRefinementApplied = useCallback(
     async (updatedBody) => {
@@ -146,31 +236,83 @@ export default function ContentEditorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
         <section className="lg:col-span-2 space-y-5">
-          {/* Header with actions */}
-          <div className="flex items-center justify-between mb-5 rounded-md border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-2 sticky top-2 z-10 backdrop-blur-lg">
-            <div className="text-[20px] font-semibold text-invert-high">
-              Creative Wizard{" "}
-              {id && (
-                <span className="ml-2 text-[12px] text-invert-low">#{id}</span>
-              )}
+          {/* Header with title, status, updated at, and actions only */}
+          <div className="mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="flex-1 min-w-0">
+                <Input
+                  placeholder="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="text-[18px] font-semibold"
+                />
+                {article?.updatedAt && (
+                  <div className="text-[11px] text-invert-low mt-1">
+                    Updated {new Date(article.updatedAt).toLocaleString()}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-2 md:mt-0">
+                {article?.status && (
+                  <span
+                    className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                      article.status === "published"
+                        ? "bg-success-500/10 border-success-500/20 text-success-400"
+                        : "bg-warning-500/10 border-warning-500/20 text-warning-400"
+                    }`}
+                  >
+                    {article.status}
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  isLoading={isSavingDraft}
+                  className="min-w-28"
+                >
+                  Save draft
+                </Button>
+                <Button
+                  variant="solid"
+                  onClick={handlePublish}
+                  isLoading={isPublishing}
+                  className="min-w-24"
+                >
+                  Publish
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={handleSaveDraft}
-                isLoading={isSavingDraft}
-                className="min-w-40"
-              >
-                Save to drafts
-              </Button>
-              <Button
-                variant="solid"
-                onClick={handlePublish}
-                isLoading={isPublishing}
-                className="min-w-36"
-              >
-                Publish
-              </Button>
+          </div>
+
+          {/* Metadata fields below header */}
+          <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+            <div className="flex flex-col gap-3">
+              <textarea
+                placeholder="Summary"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                rows={3}
+                className="w-full rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  placeholder="Category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                />
+                <Input
+                  placeholder="Tags (comma-separated)"
+                  value={tags.join(", ")}
+                  onChange={(e) =>
+                    setTags(
+                      e.target.value
+                        .split(",")
+                        .map((t) => t.trim())
+                        .filter(Boolean)
+                    )
+                  }
+                />
+              </div>
             </div>
           </div>
           <div>
@@ -187,19 +329,44 @@ export default function ContentEditorPage() {
           </div>
 
           <div>
-            <p className="text-xs text-invert-low mb-2">Body</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-invert-low">Body</p>
+              <div className="flex items-center rounded-md overflow-hidden border border-core-prim-300/20">
+                <button
+                  className={`px-3 py-1.5 text-[12px] ${
+                    viewMode === "edit"
+                      ? "bg-core-prim-500/20 text-invert-high"
+                      : "bg-transparent text-invert-low"
+                  }`}
+                  onClick={() => setViewMode("edit")}
+                >
+                  Edit
+                </button>
+                <button
+                  className={`px-3 py-1.5 text-[12px] ${
+                    viewMode === "preview"
+                      ? "bg-core-prim-500/20 text-invert-high"
+                      : "bg-transparent text-invert-low"
+                  }`}
+                  onClick={() => setViewMode("preview")}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
             <div className="">
-              {editorBody ? (
-                <EditorJsRenderer data={editorBody} />
-              ) : (
-                dummyBody.split("\n").map((para, idx) => (
-                  <p
-                    key={idx}
-                    className="text-main-medium text-[14px] leading-7 mb-2 last:mb-0"
-                  >
-                    {para}
-                  </p>
-                ))
+              {/* Keep editor mounted for state retention; toggle visibility */}
+              <div className={viewMode === "edit" ? "block" : "hidden"}>
+                <EditorJsEditor
+                  initialData={initialEditorData}
+                  onChange={handleEditorChange}
+                  className="mx-auto max-w-[860px]"
+                />
+              </div>
+              {viewMode === "preview" && (
+                <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
+                  <EditorJsRenderer data={editorBody || currentBody} />
+                </div>
               )}
             </div>
           </div>
