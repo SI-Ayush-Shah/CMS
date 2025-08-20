@@ -138,7 +138,7 @@ export function Leftpanel() {
               {item.icon}
             </span>
             {isExpanded && (
-              <span className="font-medium truncate">{item.label}</span>
+              <span className="truncate">{item.label}</span>
             )}
           </button>
         ))}
@@ -164,7 +164,7 @@ export function Leftpanel() {
           {isExpanded && (
             <button
               onClick={handleLogout}
-              className="w-full  text-[14px] font-normal text-text-invert-low hover:text-invert-high cursor-pointer"
+              className="w-full  text-[14px] font-normal text-core-prim-300 hover:text-invert-high cursor-pointer"
             >
               <PiSignOutLight className="text-[20px]" />
             </button>

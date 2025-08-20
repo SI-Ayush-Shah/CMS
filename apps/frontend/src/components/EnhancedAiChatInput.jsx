@@ -17,6 +17,8 @@ import { useImageUpload } from "../hooks/useImageUpload";
 import { useValidation } from "../hooks/useValidation";
 import { useAutoResize } from "../hooks/useAutoResize";
 import { useAccessibility } from "../hooks/useAccessibility";
+import { PiRocketLaunch } from "react-icons/pi";
+import { IoImagesOutline } from "react-icons/io5";
 
 /**
  * Enhanced AI Chat Input Component
@@ -538,12 +540,13 @@ export const EnhancedAiChatInput = ({
           <div className="px-2">
             <div
               id="character-count"
-              className={`text-xs text-right ${isAtLimit
-                ? "text-error-500"
-                : isAtWarning
-                  ? "text-warning-500"
-                  : "text-invert-low"
-                }`}
+              className={`text-xs text-right ${
+                isAtLimit
+                  ? "text-error-500"
+                  : isAtWarning
+                    ? "text-warning-500"
+                    : "text-invert-low"
+              }`}
               aria-live="polite"
               role="status"
               aria-label={`Character count: ${characterCount} of ${maxLength} characters used${warningMessage ? `. ${warningMessage}` : ""}`}
@@ -564,31 +567,21 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={openFileDialog}
             disabled={disabled || isSubmitting}
-            className={`flex gap-2 items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-7 sm:min-w-7 p-2 sm:p-[4px] rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 touch-manipulation ${"hover:bg-core-prim-500/10"} ${disabled || isSubmitting
-              ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer"
-              }`}
+            className={`flex gap-2 items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-7 sm:min-w-7 p-2 sm:p-[4px] rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 touch-manipulation ${"hover:bg-core-prim-500/10"} ${
+              disabled || isSubmitting
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer"
+            }`}
             aria-label={`Add photos. Opens file picker. Press Alt+I as shortcut.`}
             aria-describedby="image-upload-help"
             type="button"
           >
             <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
               <div className="relative shrink-0 size-4">
-                <svg
-                  className="w-full h-full text-current"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  />
-                </svg>
+              <IoImagesOutline className="text-lg" />
               </div>
             </div>
             <div className="font-normal text-current text-[12px] whitespace-nowrap">
-              Add Photos
               {imageCount > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 bg-core-prim-500 text-white text-[10px] rounded-full">
                   {imageCount}
@@ -601,10 +594,11 @@ export const EnhancedAiChatInput = ({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`bg-core-prim-500 text-invert-high flex gap-1 items-center justify-center px-4 py-3 sm:px-3 sm:py-2 rounded-2xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 min-h-[44px] sm:min-h-auto touch-manipulation ${canSubmit
-              ? "hover:bg-core-prim-600 active:bg-core-prim-700 cursor-pointer"
-              : "opacity-50 cursor-not-allowed"
-              }`}
+            className={`bg-core-prim-500 text-invert-high flex gap-1 items-center justify-center px-4 py-3 sm:px-3 sm:py-2 rounded-xl shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-core-prim-500 focus:ring-offset-2 min-h-[44px] sm:min-h-auto touch-manipulation ${
+              canSubmit
+                ? "hover:bg-core-prim-600 active:bg-core-prim-700 cursor-pointer"
+                : "opacity-50 cursor-not-allowed"
+            }`}
             aria-label={`Generate content${isSubmitting ? " (submitting...)" : canSubmit ? ". Press Ctrl+Enter as shortcut." : " (form incomplete)"}`}
             aria-describedby="submit-help"
             type="submit"
@@ -620,15 +614,8 @@ export const EnhancedAiChatInput = ({
               </>
             ) : (
               <>
-                <div className="flex items-center justify-center p-0 rounded-lg shrink-0">
-                  <div className="relative shrink-0 size-4">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="font-normal text-invert-high text-[14px]">
-                  Generate
+                <div className="flex items-center gap-2 font-normal text-invert-high text-[14px]">
+                  <PiRocketLaunch className="text-lg" />
                 </div>
               </>
             )}

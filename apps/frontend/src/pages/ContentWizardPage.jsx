@@ -786,7 +786,7 @@ export default function ContentWizardPage() {
                   <button
                     type="button"
                     aria-pressed="true"
-                    className="rounded-2xl px-5 py-2 border-2 border-core-prim-200 bg-core-prim-500/30 text-invert-high shadow-[0_0_0_1px_rgba(255,255,255,0.06)] cursor-default"
+                    className="rounded-2xl px-5 py-2 border border-core-prim-200 bg-core-prim-500/30 text-invert-high shadow-[0_0_0_1px_rgba(255,255,255,0.06)] cursor-default"
                   >
                     Blog
                   </button>
@@ -796,7 +796,7 @@ export default function ContentWizardPage() {
                     onClick={() => setInstagramSelected((v) => !v)}
                     className={`rounded-2xl px-5 py-2  transition-colors ${
                       instagramSelected
-                        ? "border-core-prim-200 border-2 bg-core-prim-500/20 text-invert-high"
+                        ? "border-core-prim-200 border bg-core-prim-500/20 text-invert-high"
                         : "border-core-neu-700 border hover:bg-core-prim-500/20 hover:text-invert-high text-invert-medium"
                     }`}
                   >
@@ -808,7 +808,7 @@ export default function ContentWizardPage() {
                     onClick={() => setTwitterSelected((v) => !v)}
                     className={`rounded-2xl px-5 py-2   transition-colors ${
                       twitterSelected
-                        ? "border-core-prim-200 border-2 bg-core-prim-500/20 text-invert-high"
+                        ? "border-core-prim-200 border bg-core-prim-500/20 text-invert-high"
                         : "border-core-neu-700 border hover:bg-core-prim-500/20 hover:text-invert-high text-invert-medium"
                     }`}
                   >
