@@ -23,9 +23,7 @@ const ContentCard = ({
   };
 
   return (
-    <div
-      className={`flex flex-col h-full ${className}`}
-    >
+    <div className={`flex flex-col h-full p-2 pb-0 ${className}`}>
       {/* Part 1: Image (Top) */}
       <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px] mb-4">
         {image && (
@@ -100,5 +98,3 @@ const ContentCard = ({
 };
 
 export default ContentCard;
-
-

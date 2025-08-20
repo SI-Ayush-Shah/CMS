@@ -25,8 +25,11 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
     <div className="w-full bg-black h-full p-2 max-h-screen sticky top-0">
       <div className="flex flex-col h-full">
         {/* Scrollable chat/messages area */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="flex flex-col gap-2 pb-4">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto scrollbar-hide mt-4"
+        >
+          <div className="flex flex-col gap-4 pb-4">
             {messages && messages.length > 0 ? (
               messages.map((msg) => (
                 <div
@@ -40,10 +43,10 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
                   <div
                     className={
                       msg.type === "user"
-                        ? "rounded-2xl bg-core-prim-500/20 border border-core-prim-300/30 p-2 text-[12px] text-invert-high"
+                        ? "rounded-2xl bg-core-prim-500/20 border border-core-prim-300/30 p-2 text-md text-invert-high"
                         : msg.status === "error"
-                          ? "rounded-2xl bg-error-500/10 border border-error-500/20 p-2 text-[12px] text-error-400"
-                          : "rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 text-[12px] text-invert-high"
+                          ? "rounded-2xl bg-error-500/10 border border-error-500/20 p-2 text-md text-error-400"
+                          : "rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 text-md text-invert-high"
                     }
                   >
                     {msg.content}

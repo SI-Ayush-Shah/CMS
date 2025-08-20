@@ -23,11 +23,9 @@ const BlogCard = ({
       return value;
     }
   };
-  
+
   return (
-    <div
-      className={`flex flex-col h-full ${className}`}
-    >
+    <div className={`flex flex-col h-full ${className}`}>
       {/* Part 1: Image (Top) */}
       <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[10px] mb-4">
         {image && (
@@ -93,7 +91,12 @@ const BlogCard = ({
 
       {/* Part 3: Button (Bottom) */}
       <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4 px-2">
-        <Button variant="solid" size="sm" onClick={onCtaClick} className="!rounded-lg">
+        <Button
+          variant="solid"
+          size="sm"
+          onClick={onCtaClick}
+          className="!rounded-lg"
+        >
           {ctaText}
         </Button>
       </div>
@@ -102,5 +105,3 @@ const BlogCard = ({
 };
 
 export default BlogCard;
-
-

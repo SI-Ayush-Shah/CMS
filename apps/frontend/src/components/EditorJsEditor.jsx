@@ -231,7 +231,7 @@ export default function EditorJsEditor({
 
   return (
     <div
-      className={`editorjs-theme px-18 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
+      className={`editorjs-theme px-18 rounded-xl border border-core-prim-300/20  p-3 ${className}`}
       style={style}
     >
       <div ref={holderRef} className="min-h-[560px]" />
