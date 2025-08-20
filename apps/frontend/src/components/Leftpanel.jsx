@@ -47,13 +47,13 @@ export function Leftpanel() {
         icon: <IoShareSocialOutline />,
         path: "/social-media",
       },
-      {
-        id: "analytics",
-        label: "Analytics",
-        icon: <PiChartLineUp />,
-        path: "/analytics",
-        matchPaths: ["/analytics", "/components"],
-      },
+      // {
+      //   id: "analytics",
+      //   label: "Analytics",
+      //   icon: <PiChartLineUp />,
+      //   path: "/analytics",
+      //   matchPaths: ["/analytics", "/components"],
+      // },
     ],
     []
   );

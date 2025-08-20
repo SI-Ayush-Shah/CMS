@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { FaHeart, FaComment, FaShare } from 'react-icons/fa';
+import { HiOutlineSparkles } from 'react-icons/hi';
+import {Button} from './Button';
 
 const InstagramCard = ({ image, username, date, title, hashtags, likes, comments }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -70,6 +72,18 @@ const InstagramCard = ({ image, username, date, title, hashtags, likes, comments
         {/* Comments count */}
         <p className="text-gray-400 text-xs">Read more ...</p>
       </div>
+
+      <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4">
+          <Button 
+          variant="solid" 
+          size="sm" 
+          onClick={() => {}} 
+          className="!rounded-lg py-1"
+        >
+          <HiOutlineSparkles className="text-lg" />
+          Publish
+        </Button>
+        </div>
     </div>
   );
 };

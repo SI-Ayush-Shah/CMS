@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { FaRetweet, FaRegComment, FaHeart, FaShare } from 'react-icons/fa';
+import { HiOutlineSparkles } from 'react-icons/hi';
+import {Button} from './Button';
 
 const TwitterCard = ({ username, handle, date, content, image, likes, retweets, comments }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -66,6 +68,18 @@ const TwitterCard = ({ username, handle, date, content, image, likes, retweets, 
               <FaShare />
             </button>
           </div>
+
+          <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4">
+          <Button 
+          variant="solid" 
+          size="sm" 
+          onClick={() => {}} 
+          className="!rounded-lg py-1"
+        >
+          <HiOutlineSparkles className="text-lg" />
+          Publish
+        </Button>
+        </div>
         </div>
       </div>
     </div>
