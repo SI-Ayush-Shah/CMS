@@ -280,6 +280,27 @@ export const rollbackBlogContent = async (blogId, previousBody) => {
   };
 };
 
+/**
+ * Fetch RSS feed items
+ * @param {Object} options - Options for fetching RSS feed items
+ * @param {number} options.page - Page number
+ * @param {number} options.pageSize - Number of items per page
+ * @returns {Promise<Object>} RSS feed items response
+ */
+export const fetchRssItems = async ({
+  page = 1,
+  pageSize = 10,
+} = {}) => {
+  const params = new URLSearchParams();
+  if (page) params.append("page", String(page));
+  if (pageSize) params.append("pageSize", String(pageSize));
+
+  const url = `/content-studio/api/rss-items?${params.toString()}`;
+  const { data } = await apiClient.get(url, { skipRetry: false });
+  // API returns { success: boolean, data: { items, total, page, pageSize } }
+  return data?.data || { items: [], total: 0, page, pageSize };
+};
+
 // Export all functions as a service object
 export const contentApi = {
   generateContent,
@@ -292,4 +313,5 @@ export const contentApi = {
   refineContent,
   updateBlogContent,
   rollbackBlogContent,
+  fetchRssItems,
 };
