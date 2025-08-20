@@ -16,7 +16,7 @@ export const generatedContents = pgTable("generated_contents", {
   summary: varchar("summary", { length: 1024 }).notNull(),
   category: varchar("category", { length: 128 }).notNull(),
   tags: jsonb("tags").$type<string[]>().notNull().default([]),
-  // bannerUrl: varchar("banner_url", { length: 255 }),
+  // bannerUrl: varchar("banner", { length: 255 }),
   // images: jsonb("images").$type<string[]>().notNull().default([]),
   // Editor.js body stored as JSON
   body: jsonb("body").$type<Record<string, unknown>>().notNull(),
