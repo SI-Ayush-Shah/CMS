@@ -148,10 +148,10 @@ export default function ContentEditorPage() {
         <section className="lg:col-span-2 space-y-5">
           {/* Header with actions */}
           <div className="flex items-center justify-between mb-5 rounded-md border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-2 sticky top-2 z-10 backdrop-blur-lg">
-            <div className="text-[20px] font-semibold text-invert-high">
+            <div className="text-[20px] flex flex-col font-semibold text-invert-high">
               Creative Wizard{" "}
               {id && (
-                <span className="ml-2 text-[12px] text-invert-low">#{id}</span>
+                <span className="text-[12px] text-invert-low">#{id}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function ContentEditorPage() {
               </Button>
             </div>
           </div>
-          <div>
+          <div className="px-3">
             <p className="text-xs text-invert-low mb-2">Image</p>
             <div className="w-full">
               <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
@@ -186,7 +186,7 @@ export default function ContentEditorPage() {
             </div>
           </div>
 
-          <div>
+          <div className="px-3">
             <p className="text-xs text-invert-low mb-2">Body</p>
             <div className="">
               {editorBody ? (

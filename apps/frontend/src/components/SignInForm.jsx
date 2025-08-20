@@ -32,7 +32,7 @@ const SignInForm = () => {
   return (
     <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
       {/* Sign In Card */}
-      <div className="backdrop-blur-[50px] bg-black/70 rounded-[20px] p-12 w-full max-w-md relative z-10">
+      <div className="backdrop-blur-[50px] bg-black/70 rounded-2xl p-12 w-full max-w-md relative z-10 border border-core-prim-300/10">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 mb-8">
           <h1 className="font-['Montserrat'] font-semibold text-2xl text-white text-center">
@@ -45,7 +45,7 @@ const SignInForm = () => {
 
         {/* Google Sign In Button */}
         <div className="mb-8">
-          <button className="w-full flex items-center justify-center gap-2 h-10 bg-button-filled-main-default text-white rounded-lg text-[14px] font-normal cursor-pointer">
+          <button className="w-full flex items-center justify-center gap-2 h-10 bg-button-filled-main-default text-white rounded-xl text-[14px] font-normal cursor-pointer">
             <svg
               width="24"
               height="25"
@@ -123,7 +123,7 @@ const SignInForm = () => {
             type="submit"
             disabled={isLoading}
             variant="solid"
-            className="w-full rounded-[10px] text-base"
+            className="w-full rounded-xl text-base"
             isLoading={isLoading}
           >
             {isLoading ? "Signing In..." : "Sign In"}
