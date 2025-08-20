@@ -8,7 +8,9 @@ import { type NewGeneratedContent } from "../db/schema";
 import { createGoogleGenaiModel } from "../llms/google-genai/model";
 
 export interface SummarizeContentService {
-  summarize(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto>;
+  summarize(
+    request: GenerateContentRequestDto
+  ): Promise<GenerateContentResponseDto>;
 }
 
 interface Dependencies {
@@ -19,7 +21,9 @@ export function createSummarizeContentService({
   generatedContentRepository,
 }: Dependencies): SummarizeContentService {
   return {
-    async summarize(request: GenerateContentRequestDto): Promise<GenerateContentResponseDto> {
+    async summarize(
+      request: GenerateContentRequestDto
+    ): Promise<GenerateContentResponseDto> {
       const editorJsBlockSchema = z.object({
         id: z.string(),
         type: z.enum([
@@ -63,7 +67,8 @@ export function createSummarizeContentService({
       // Support content as string or object (feed item payload)
       const payload: any = request as any;
       const input = payload?.content;
-      const isObjectInput = input && typeof input === "object" && !Array.isArray(input);
+      const isObjectInput =
+        input && typeof input === "object" && !Array.isArray(input);
 
       const bannerUrl = payload?.bannerUrl as string | undefined;
       const bannerDirective = bannerUrl
@@ -98,27 +103,79 @@ export function createSummarizeContentService({
 - Image/Banner → Do NOT add body images. ${bannerUrl ? "Use only the banner in metadata, not as an image block." : "No images should be included."}`
         : "";
 
-      const contentPrompt = `Summarize into a comprehensive, well-structured sports article using Editor.js blocks.
+      const contentPrompt = `
+      You are a professional sports journalist and content creator.  
+Your task is to generate a comprehensive, well-structured long-form article for: ${request.content}  
 
-${inputHeader}
-${feedContext}
+---
 
-RULES:
-1. Keep the article focused on sports. If the input is not sports-related, clearly state the topic is out of scope for sports content.
-2. Length target: 30-60 lines across blocks, and at least 20 blocks. Use multiple sections with sub-headers. Avoid one-line paragraphs; expand narrative and context.
-3. Use Editor.js blocks only: paragraph, header, list, table, quote, delimiter, checklist, warning, image, embed, linkTool, code (sparingly if absolutely necessary).
-4. Do NOT include any body images. ${bannerUrl ? "Use only the provided banner URL contextually in the article header/meta (not as an image block)." : "No images should be included."}
-5. Paragraphs should be substantial: 2-4 sentences each (roughly 40-80 words). Close with a short summary (about 60-100 words) at the end.
-6. Use tables only for factual data; ensure table data is a 2D array.
-7. Each block must have a unique id.
+## CRITICAL RULES:
+- The article **must strictly relate to sports** (games, players, events, rules, training, comparisons, analysis, news, or history).  
+- ❌ If the topic is NOT related to sports, respond ONLY with this JSON:  
+{
+  "blocks": [
+    {
+      "id": "error_msg",
+      "type": "paragraph",
+      "data": { "text": "Sorry, I can only generate content related to sports." }
+    }
+  ]
+}  
+
+---
+
+## ARTICLE REQUIREMENTS:
+1. **Length**: ~100–200 lines (balanced between short and long blocks).  
+2. **Format**: JSON in **Editor.js block format**.  
+   - Allowed blocks: '"paragraph"', '"header"', '"list"', '"table"', '"quote"', '"image"', '"embed"'.  
+   - ❌ Forbidden blocks: '"delimiter"'.  
+3. **Block IDs**: Every block must have a **unique, descriptive id** (e.g., '"intro_header"', '"history_para1"', '"pros_table"').  
+4. **Content Variety**: Use a mix of block types (paragraphs, lists, tables, quotes) for scannability.  
+5. **Summary**: End with a summary paragraph (~100 words) under block id '"summary_para"'.  
+
+---
+
+## SPECIAL FORMATTING RULES:
+- **Tables**:  
+  - Must be valid 2D arrays ('array of arrays').  
+  - First row = headers.  
+  - Example:  
+    [ ["Player", "Matches", "Goals"], ["Messi", "1000", "800"], ["Ronaldo", "1200", "850"] ]  
+- **Headers**: Clearly mark sections (e.g., '"History"', '"Key Players"', '"Tactics"', '"Future Outlook"').  
+- **Images**:  
+  - Use ONLY user-provided images.  
+  - ❌ If no images are provided, do not insert image blocks.  
+- **Quotes**: Should be attributed to **real athletes, coaches, or sports analysts**.  
+
+---
+
+## ADAPTATION GUIDELINES:
+- **Tutorials/Guides** → headers + paragraphs + ordered lists  
+- **Comparisons** → tables + headers + paragraphs  
+- **News** → headers + paragraphs + quotes  
+- **Reviews** → headers + checklists + images  
+- **Opinion pieces** → headers + quotes + paragraphs  
+
+---
+
+## OUTPUT RULES:
+- Return **valid JSON ONLY** in Editor.js format (no explanations, no markdown, no extra text).  
+- Before returning, **verify**:  
+  - ✅ Is the content strictly sports-related?  
+  - ✅ Are all block IDs unique and descriptive?  
+  - ✅ Are all tables valid 2D arrays?  
+  - ✅ Are adaptation rules followed based on content type?  
+
+---
+
+${inputHeader}  
+${feedContext}  
+
+Each block must have a unique id.  
 ${fieldMappingGuidance}
 
-IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
-${bannerDirective}
-CORRECT TABLE: "content": [["Header1", "Header2"], ["Row1Col1", "Row1Col2"]]
-WRONG TABLE: "content": ["Header1", "Header2", "Row1Col1", "Row1Col2"]
 
-Return JSON ONLY in Editor.js format, no extra explanation.`;
+      `;
 
       const result = await structuredModel.invoke([
         {
@@ -201,5 +258,3 @@ function normalizeEditorJsBody(body: any) {
 
   return { ...body, blocks: mergedBlocks };
 }
-
-
