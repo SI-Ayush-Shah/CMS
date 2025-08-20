@@ -381,66 +381,6 @@ export default function ContentEditorPage() {
             </div>
           </div>
 
-          {/* Metadata fields below header */}
-          <div className=" max-w-[860px] mx-auto rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col">
-                <label
-                  htmlFor="summary"
-                  className="text-[11px] text-invert-low mb-1"
-                >
-                  Summary
-                </label>
-                <textarea
-                  id="summary"
-                  ref={summaryRef}
-                  placeholder="Summary"
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                  rows={5}
-                  className="w-full resize-none rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="category"
-                    className="text-[11px] text-invert-low mb-1"
-                  >
-                    Category
-                  </label>
-                  <Input
-                    id="category"
-                    placeholder="Category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="tags"
-                    className="text-[11px] text-invert-low mb-1"
-                  >
-                    Tags
-                  </label>
-                  <Input
-                    id="tags"
-                    placeholder="Tags (comma-separated)"
-                    value={tags.join(", ")}
-                    onChange={(e) =>
-                      setTags(
-                        e.target.value
-                          .split(",")
-                          .map((t) => t.trim())
-                          .filter(Boolean)
-                      )
-                    }
-                    hint="Separate with commas"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
           <div className=" max-w-[860px] mx-auto">
             <p className="text-xs text-invert-low mb-2">Image</p>
             <div className="w-full">
@@ -519,6 +459,66 @@ export default function ContentEditorPage() {
                 />
               </div>
             )}
+          </div>
+          {/* Metadata fields below header */}
+          <div className=" max-w-[860px] mx-auto rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col">
+                <label
+                  htmlFor="summary"
+                  className="text-[11px] text-invert-low mb-1"
+                >
+                  Summary
+                </label>
+                <textarea
+                  id="summary"
+                  ref={summaryRef}
+                  placeholder="Summary"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  rows={5}
+                  className="w-full resize-none rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="category"
+                    className="text-[11px] text-invert-low mb-1"
+                  >
+                    Category
+                  </label>
+                  <Input
+                    id="category"
+                    placeholder="Category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="tags"
+                    className="text-[11px] text-invert-low mb-1"
+                  >
+                    Tags
+                  </label>
+                  <Input
+                    id="tags"
+                    placeholder="Tags (comma-separated)"
+                    value={tags.join(", ")}
+                    onChange={(e) =>
+                      setTags(
+                        e.target.value
+                          .split(",")
+                          .map((t) => t.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    hint="Separate with commas"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
