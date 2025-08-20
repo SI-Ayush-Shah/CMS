@@ -5,6 +5,8 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { SlCloudUpload } from "react-icons/sl";
+
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
@@ -286,7 +288,7 @@ export default function ContentEditorPage() {
     if (!validate()) return;
     try {
       setIsSavingDraft(true);
-      if (id) {
+      if (id && id !== "new") {
         const payload = {
           title: title || currentTitle,
           summary: summary || undefined,
@@ -299,8 +301,9 @@ export default function ContentEditorPage() {
         showMessage("Draft updated successfully.");
         return res;
       } else {
+        // Fallback save for new/unsaved content
         const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
+          text: `${(title || currentTitle) ?? dummyTitle}\n\n${dummyBody}`,
           imageIds: [],
           metadata: { status: "draft" },
         });
@@ -332,7 +335,7 @@ export default function ContentEditorPage() {
     if (!validate()) return;
     try {
       setIsPublishing(true);
-      if (id) {
+      if (id && id !== "new") {
         const payload = {
           title: title || currentTitle,
           summary: summary || undefined,
@@ -345,8 +348,9 @@ export default function ContentEditorPage() {
         showMessage("Content updated.");
         return res;
       } else {
+        // Fallback publish for new/unsaved content
         const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
+          text: `${(title || currentTitle) ?? dummyTitle}\n\n${dummyBody}`,
           imageIds: [],
           metadata: { status: "published" },
         });
@@ -422,7 +426,7 @@ export default function ContentEditorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
-        <section className="lg:col-span-2 space-y-5">
+        <section className="lg:col-span-2 space-y-5 ">
           {/* Header with title, status, updated at, and actions only */}
           <div className=" max-w-[860px] mx-auto mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg shadow">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -464,7 +468,7 @@ export default function ContentEditorPage() {
                   variant="outline"
                   onClick={handleSaveDraft}
                   isLoading={isSavingDraft}
-                  className="min-w-28"
+                  className="min-w-32"
                 >
                   Save draft
                 </Button>
@@ -538,9 +542,8 @@ export default function ContentEditorPage() {
                     className="text-[12px] px-2 py-1 min-w-0"
                     isLoading={isUploadingBanner}
                   >
-                    {article?.bannerUrl || bannerUrl
-                      ? "Replace banner"
-                      : "Upload banner"}
+                    <SlCloudUpload />
+                    {article?.bannerUrl || bannerUrl ? "Replace" : "Upload"}
                   </Button>
                 </div>
                 {isBannerDragOver && (
@@ -606,7 +609,7 @@ export default function ContentEditorPage() {
               <div className="max-w-[860px] mx-auto">
                 <EditorJsRenderer
                   data={editorBody || currentBody || initialEditorData}
-                  className="editorjs-theme"
+                  className="editorjs-theme px-4"
                 />
               </div>
             ) : (

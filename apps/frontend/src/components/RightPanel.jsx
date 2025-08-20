@@ -1,102 +1,60 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import EnhancedAiChatInput from "./EnhancedAiChatInput";
 import { contentApi } from "../services/contentApi";
 import { normalizeEditorJsBody } from "../utils";
+import { useRefinementStore } from "../store/refinementStore";
 
 const RightPanel = ({ blogId, body, onRefinement }) => {
-  const [expandedBoxes, setExpandedBoxes] = useState({});
-  const [messages, setMessages] = useState([]);
-  const [isRefining, setIsRefining] = useState(false);
+  const {
+    messages,
+    isProcessing,
+    startRefinement,
+    completeRefinement,
+    failRefinement,
+    addUserMessage,
+  } = useRefinementStore();
 
-  const toggleBoxExpansion = (boxId) => {
-    setExpandedBoxes((prev) => ({
-      ...prev,
-      [boxId]: !prev[boxId],
-    }));
-  };
+  const scrollRef = useRef(null);
 
-  const contentBoxes = [
-    {
-      id: 1,
-      content: `Write a 500–700 word professional sports news article on the
-        chosen topic. Include a strong headline, introduction, match
-        highlights, statistics, and realistic quotes (not fabricated)
-        in an engaging yet objective tone. Provide contextual analysis
-        of impact on team momentum and the ongoing tournament.
-        Structure with a clear beginning, middle, and conclusionWrite a 500–700 word professional sports news article on the
-        chosen topic. Include a strong headline, introduction, match
-        highlights, statistics, and realistic quotes (not fabricated)
-        in an engaging yet objective tone. Provide contextual analysis
-        of impact on team momentum and the ongoing tournament.
-        Structure with a clear beginning, middle, and conclusion.`,
-    },
-    {
-      id: 2,
-      content: `Create engaging social media content that drives engagement.
-        Focus on trending topics, use relevant hashtags, and include
-        compelling visuals. Keep the tone conversational and encourage
-        user interaction through questions and calls-to-action.`,
-    },
-    {
-      id: 3,
-      content: `Develop a comprehensive marketing strategy for product launch.
-        Include target audience analysis, competitive positioning,
-        messaging framework, and multi-channel distribution plan.
-        Focus on measurable KPIs and ROI optimization.`,
-    },
-    {
-      id: 4,
-      content: `Write compelling email newsletter content that increases open rates.
-        Use personalized subject lines, engaging preview text, and
-        clear value propositions. Include actionable insights and
-        maintain consistent branding throughout.`,
-    },
-    {
-      id: 5,
-      content: `Create a technical blog post explaining complex concepts simply.
-        Use clear examples, code snippets where relevant, and
-        step-by-step explanations. Include practical applications
-        and real-world use cases for better understanding.`,
-    },
-  ];
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
 
   return (
     <div className="w-full bg-black h-full p-2 max-h-screen sticky top-0">
       <div className="flex flex-col h-full">
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="flex flex-col items-end gap-2 pb-4">
-            {contentBoxes.map((box) => {
-              // Check if content height is less than 164px (approximately 8 lines)
-              const isShortContent = box.content.length < 200; // Rough estimate for short content
-
-              return (
+        {/* Scrollable chat/messages area */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
+          <div className="flex flex-col gap-2 pb-4">
+            {messages && messages.length > 0 ? (
+              messages.map((msg) => (
                 <div
-                  key={box.id}
-                  className={`rounded-2xl bg-button-filled-main-default  border border-core-prim-300/20 p-2 cursor-pointer transition-all duration-200 overflow-hidden w-[80%] ${
-                    expandedBoxes[box.id]
-                      ? "h-auto"
-                      : isShortContent
-                        ? "h-auto"
-                        : "max-h-[164px]"
-                  }`}
-                  onClick={() => {
-                    // Toggle between expanded and collapsed states
-                    toggleBoxExpansion(box.id);
-                  }}
+                  key={msg.id}
+                  className={
+                    msg.type === "user"
+                      ? "self-end max-w-[80%]"
+                      : "self-start max-w-[80%]"
+                  }
                 >
-                  <p
-                    className={`text-[12px] text-invert-high leading-relaxed ${
-                      !expandedBoxes[box.id] && !isShortContent
-                        ? "line-clamp-8"
-                        : ""
-                    }`}
+                  <div
+                    className={
+                      msg.type === "user"
+                        ? "rounded-2xl bg-core-prim-500/20 border border-core-prim-300/30 p-2 text-[12px] text-invert-high"
+                        : msg.status === "error"
+                          ? "rounded-2xl bg-error-500/10 border border-error-500/20 p-2 text-[12px] text-error-400"
+                          : "rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-2 text-[12px] text-invert-high"
+                    }
                   >
-                    {box.content}
-                  </p>
+                    {msg.content}
+                  </div>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <div className="text-[12px] text-invert-low p-2">
+                Start a refinement conversation using the prompt box below.
+              </div>
+            )}
           </div>
         </div>
 
@@ -111,12 +69,23 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
               images: { required: false, maxImages: 0 },
             }}
             onSubmit={async ({ text }) => {
-              if (!body || !Array.isArray(body?.blocks)) return;
-              const normalized = normalizeEditorJsBody(body);
-              const userMsg = { role: "user", content: text };
-              setMessages((prev) => [...prev, userMsg]);
-              setIsRefining(true);
+              // Always store user's message
+              addUserMessage(text);
+
               try {
+                startRefinement(text);
+                const normalized = normalizeEditorJsBody(body);
+
+                // Require a valid Editor.js body with blocks; blogId is optional per backend schema
+                if (
+                  !normalized ||
+                  !Array.isArray(normalized?.blocks) ||
+                  normalized.blocks.length === 0
+                ) {
+                  failRefinement("Cannot refine: body missing or invalid.");
+                  return;
+                }
+
                 const res = await contentApi.refineContent(
                   blogId,
                   text,
@@ -127,26 +96,16 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
                 if (updated && onRefinement) {
                   onRefinement(updated);
                 }
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    role: "assistant",
-                    content: res?.data?.message || "Refinement applied.",
-                  },
-                ]);
+                const assistantMsg =
+                  res?.data?.message || "Refinement applied.";
+                completeRefinement(assistantMsg);
               } catch (err) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    role: "assistant",
-                    content: err?.message || "Failed to refine content.",
-                  },
-                ]);
-              } finally {
-                setIsRefining(false);
+                const errorMessage =
+                  err?.message || "Failed to refine content.";
+                failRefinement(errorMessage);
               }
             }}
-            disabled={isRefining}
+            disabled={isProcessing}
           />
         </div>
       </div>
