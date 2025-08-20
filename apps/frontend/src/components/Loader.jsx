@@ -17,7 +17,6 @@ export function AnimatedSVG() {
       shape-rendering="geometricPrecision"
       style={{
         width: "100%",
-        backgroundColor: "black",
         height: "100%",
       }}
       text-rendering="geometricPrecision"

@@ -7,6 +7,7 @@ import { contentApi } from "../services/contentApi";
 import EditorJsRenderer from "../components/EditorJsRenderer";
 import EditorJsEditor from "../components/EditorJsEditor";
 import RightPanel from "../components/RightPanel";
+import Loader from "../components/Loader";
 import { normalizeEditorJsBody } from "../utils";
 
 /**
@@ -294,16 +295,7 @@ export default function ContentEditorPage() {
         </div>
       )}
 
-      {/* Show loader overlay when summarizing */}
-      {isSummarizing && (
-        <div className="fixed inset-0 bg-core-neu-1000/70 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-surface-main-default p-6 rounded-xl shadow-lg flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-core-prim-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-invert-high text-lg font-medium">Summarizing content...</p>
-            <p className="text-invert-low text-sm mt-2">This may take a few moments</p>
-          </div>
-        </div>
-      )}
+      {/* Removed full-screen overlay */}
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
@@ -426,24 +418,33 @@ export default function ContentEditorPage() {
                 </button>
               </div>
             </div>
-            <div className="">
-              {/* Keep editor mounted for state retention; toggle visibility */}
-              <div className={viewMode === "edit" ? "block" : "hidden"}>
-                <EditorJsEditor
-                  key={editorMountKey}
-                  initialData={initialEditorData}
-                  onChange={handleEditorChange}
-                  className="mx-auto max-w-[860px]"
-                />
+            
+            {/* Show loader in LHS when summarizing */}
+            {isSummarizing ? (
+              <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px] flex flex-col items-center justify-center" style={{ minHeight: "300px" }}>
+                <Loader text="Summarizing content..." size={120} />
+                <p className="text-invert-low text-sm mt-4">This may take a few moments</p>
               </div>
-              {viewMode === "preview" && (
-                <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
-                  <EditorJsRenderer
-                    data={editorBody || currentBody || initialEditorData}
+            ) : (
+              <div className="">
+                {/* Keep editor mounted for state retention; toggle visibility */}
+                <div className={viewMode === "edit" ? "block" : "hidden"}>
+                  <EditorJsEditor
+                    key={editorMountKey}
+                    initialData={initialEditorData}
+                    onChange={handleEditorChange}
+                    className="mx-auto max-w-[860px]"
                   />
                 </div>
-              )}
-            </div>
+                {viewMode === "preview" && (
+                  <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
+                    <EditorJsRenderer
+                      data={editorBody || currentBody || initialEditorData}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
