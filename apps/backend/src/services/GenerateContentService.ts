@@ -111,6 +111,8 @@ Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
    - image
    - embed
    - linkTool
+4. The article should be releted to sports, and if user asks for a topic that is not related to sports, you should say that you are not able to generate content for that topic.
+5. Make sure to use the images provided by the user, and if its not there then generate your own images.
 
 ### Adaptation rules:
 - Tutorials/Guides → headers + paragraphs + ordered lists + code blocks
