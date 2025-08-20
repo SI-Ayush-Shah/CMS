@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { PiSignOutLight } from "react-icons/pi";
 import { PiChartLineUp, PiMagicWand, PiNotePencilThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import { MdRssFeed } from "react-icons/md";
+import useAuthStore from "../store/authStore";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuthStore();
 
   const navigationItems = [
     {
@@ -52,6 +55,11 @@ export function Leftpanel() {
   const handleNavItemClick = (itemId, path) => {
     setActiveItemId(itemId);
     if (path) navigate(path);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   // Highlight active item based on current route
@@ -121,7 +129,7 @@ export function Leftpanel() {
       </nav>
 
       {/* User Profile Section */}
-      <div className="p-3">
+      <div className=" flex items-center justify-between p-4">
         <div className="flex items-center justify-center gap-3">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
             <FaUser />
@@ -129,10 +137,24 @@ export function Leftpanel() {
           {isExpanded && (
             <div className="flex-1 min-w-0">
               <p className="text-invert-high text-[14px] font-normal truncate">
-                John Doe
+                {user?.name || 'Admin User'}
               </p>
+              
             </div>
           )}
+        </div>
+        
+        <div>
+        {/* Logout Button */}
+        {isExpanded && (
+          <button
+            onClick={handleLogout}
+            className="w-full  text-[14px] font-normal text-text-invert-low hover:text-invert-high cursor-pointer"
+          >
+    <PiSignOutLight className="text-[20px]" />
+           
+          </button>
+        )}
         </div>
       </div>
     </div>
