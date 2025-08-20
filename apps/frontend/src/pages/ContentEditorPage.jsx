@@ -5,9 +5,11 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { contentApi } from "../services/contentApi";
 import EditorJsEditor from "../components/EditorJsEditor";
+import EditorJsRenderer from "../components/EditorJsRenderer";
 import RightPanel from "../components/RightPanel";
 import Loader from "../components/Loader";
 import { normalizeEditorJsBody } from "../utils";
+import { useAutoResize } from "../hooks/useAutoResize";
 
 /**
  * Content Editor Page
@@ -76,6 +78,11 @@ export default function ContentEditorPage() {
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState([]);
+  // Auto-resize for summary textarea
+  const { textareaRef: summaryRef } = useAutoResize(summary, {
+    minHeight: 120,
+    maxHeight: 400,
+  });
   // Effect to handle RSS feed item summarization
   useEffect(() => {
     const processSummarization = async () => {
@@ -298,11 +305,15 @@ export default function ContentEditorPage() {
       {/* Message */}
       {message && (
         <div
-          className={`mb-4 p-3 rounded-lg text-sm ${
+          className={`mb-4 p-3 rounded-lg text-sm border ${
             messageType === "success"
-              ? "bg-success-500/10 border border-success-500/20 text-success-500"
-              : "bg-error-500/10 border border-error-500/20 text-error-400"
+              ? "bg-success-500/10 border-success-500/20 text-success-500"
+              : messageType === "error"
+                ? "bg-error-500/10 border-error-500/20 text-error-400"
+                : "bg-core-prim-500/10 border-core-prim-500/20 text-core-prim-400"
           }`}
+          role="status"
+          aria-live={messageType === "error" ? "assertive" : "polite"}
         >
           {message}
         </div>
@@ -314,15 +325,24 @@ export default function ContentEditorPage() {
         {/* Editor column */}
         <section className="lg:col-span-2 space-y-5">
           {/* Header with title, status, updated at, and actions only */}
-          <div className="mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg">
+          <div className=" max-w-[860px] mx-auto mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg shadow">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex-1 min-w-0">
-                <Input
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="text-[18px] font-semibold"
-                />
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="title"
+                    className="text-[11px] text-invert-low mb-1"
+                  >
+                    Title
+                  </label>
+                  <Input
+                    id="title"
+                    placeholder="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="text-[18px] font-semibold"
+                  />
+                </div>
                 {article?.updatedAt && (
                   <div className="text-[11px] text-invert-low mt-1">
                     Updated {new Date(article.updatedAt).toLocaleString()}
@@ -362,37 +382,66 @@ export default function ContentEditorPage() {
           </div>
 
           {/* Metadata fields below header */}
-          <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
+          <div className=" max-w-[860px] mx-auto rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
             <div className="flex flex-col gap-3">
-              <textarea
-                placeholder="Summary"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                rows={3}
-                className="w-full rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
-              />
+              <div className="flex flex-col">
+                <label
+                  htmlFor="summary"
+                  className="text-[11px] text-invert-low mb-1"
+                >
+                  Summary
+                </label>
+                <textarea
+                  id="summary"
+                  ref={summaryRef}
+                  placeholder="Summary"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  rows={5}
+                  className="w-full resize-none rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  placeholder="Category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
-                <Input
-                  placeholder="Tags (comma-separated)"
-                  value={tags.join(", ")}
-                  onChange={(e) =>
-                    setTags(
-                      e.target.value
-                        .split(",")
-                        .map((t) => t.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="category"
+                    className="text-[11px] text-invert-low mb-1"
+                  >
+                    Category
+                  </label>
+                  <Input
+                    id="category"
+                    placeholder="Category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="tags"
+                    className="text-[11px] text-invert-low mb-1"
+                  >
+                    Tags
+                  </label>
+                  <Input
+                    id="tags"
+                    placeholder="Tags (comma-separated)"
+                    value={tags.join(", ")}
+                    onChange={(e) =>
+                      setTags(
+                        e.target.value
+                          .split(",")
+                          .map((t) => t.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    hint="Separate with commas"
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div>
+          <div className=" max-w-[860px] mx-auto">
             <p className="text-xs text-invert-low mb-2">Image</p>
             <div className="w-full">
               <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
@@ -405,12 +454,19 @@ export default function ContentEditorPage() {
             </div>
           </div>
 
-          <div>
+          <div className=" max-w-[860px] mx-auto">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-invert-low">Body</p>
-              <div className="flex items-center rounded-md overflow-hidden border border-core-prim-300/20">
+              <div
+                className="flex items-center rounded-md overflow-hidden border border-core-prim-300/20"
+                role="tablist"
+                aria-label="Editor mode"
+              >
                 <button
-                  className={`px-3 py-1.5 text-[12px] ${
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === "edit"}
+                  className={`px-3 py-1.5 text-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-core-prim-500 ${
                     viewMode === "edit"
                       ? "bg-core-prim-500/20 text-invert-high"
                       : "bg-transparent text-invert-low"
@@ -420,7 +476,10 @@ export default function ContentEditorPage() {
                   Edit
                 </button>
                 <button
-                  className={`px-3 py-1.5 text-[12px] ${
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === "preview"}
+                  className={`px-3 py-1.5 text-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-core-prim-500 ${
                     viewMode === "preview"
                       ? "bg-core-prim-500/20 text-invert-high"
                       : "bg-transparent text-invert-low"
@@ -443,14 +502,20 @@ export default function ContentEditorPage() {
                   This may take a few moments
                 </p>
               </div>
+            ) : viewMode === "preview" ? (
+              <div className="max-w-[860px] mx-auto">
+                <EditorJsRenderer
+                  data={editorBody || currentBody || initialEditorData}
+                  className="editorjs-theme"
+                />
+              </div>
             ) : (
               <div className="">
                 <EditorJsEditor
                   key={editorMountKey}
                   initialData={initialEditorData}
                   onChange={handleEditorChange}
-                  className="mx-auto max-w-[860px]"
-                  readOnly={viewMode === "preview"}
+                  className="mx-auto  "
                 />
               </div>
             )}

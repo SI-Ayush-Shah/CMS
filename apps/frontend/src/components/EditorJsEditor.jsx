@@ -206,10 +206,23 @@ export default function EditorJsEditor({
     const instance = editorRef.current;
     if (!instance) return;
     try {
+      if (!instance.readOnly) return;
       if (readOnly) {
-        instance.readOnly && instance.readOnly.on && instance.readOnly.on();
+        if (typeof instance.readOnly.enable === "function") {
+          instance.readOnly.enable();
+        } else if (typeof instance.readOnly.toggle === "function") {
+          instance.readOnly.toggle(true);
+        } else if (typeof instance.readOnly.on === "function") {
+          instance.readOnly.on();
+        }
       } else {
-        instance.readOnly && instance.readOnly.off && instance.readOnly.off();
+        if (typeof instance.readOnly.disable === "function") {
+          instance.readOnly.disable();
+        } else if (typeof instance.readOnly.toggle === "function") {
+          instance.readOnly.toggle(false);
+        } else if (typeof instance.readOnly.off === "function") {
+          instance.readOnly.off();
+        }
       }
     } catch (err) {
       console.warn("Failed to toggle readOnly state", err);
