@@ -8,6 +8,13 @@
       "when": 1755692352185,
       "tag": "0000_bright_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755702548256,
+      "tag": "0001_stale_silver_surfer",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { XMLParser } from 'fast-xml-parser'
 import { asFunction, createContainer } from 'awilix'
 import { db } from '../../../db/connection'
 import { createRssFeedItemRepository } from '../../../repositories/RssFeedItemRepository'
+import { createSocialMediaPostRepository } from '../../../repositories/SocialMediaPostRepository'
 import axios from 'axios'
 import type { NewRssFeedItem } from '../../../db/schema'
 import { createGoogleGenaiModel } from '../../../llms/google-genai/model';
@@ -32,10 +33,12 @@ export function startRssSchedulerWorker(): Worker {
         const container = createContainer()
         container.register({
           db: asFunction(() => db).singleton(),
-          rssFeedItemRepository: asFunction(createRssFeedItemRepository).singleton()
+          rssFeedItemRepository: asFunction(createRssFeedItemRepository).singleton(),
+          socialMediaPostRepository: asFunction(createSocialMediaPostRepository).singleton(),
         })
         
         const rssFeedItemRepository = container.resolve('rssFeedItemRepository')
+        const socialMediaPostRepository = container.resolve('socialMediaPostRepository')
         
         // Fetch and parse the feed
         const response = await axios.get(feedSourceUrl, { responseType: 'text' })
@@ -143,7 +146,8 @@ export function startRssSchedulerWorker(): Worker {
                   title: item.title,
                   content: item.content,
                   summary: item.summary || '',
-                  link: item.link
+                  link: item.link,
+                  platform: 'instagram'
                 })
                 
                 // Add social media content to the item
@@ -183,6 +187,24 @@ export function startRssSchedulerWorker(): Worker {
           
           const savedItems = await rssFeedItemRepository.createMany(itemsToSave)
           console.log(`Added ${savedItems.length} new items to feed`, { id, feedName })
+
+          // Persist social media posts for each saved item
+          for (let i = 0; i < savedItems.length; i++) {
+            const saved = savedItems[i]
+            const original = result[i] as any
+
+            // Instagram post if imageUrl exists
+            if (original.imageUrl) {
+              await socialMediaPostRepository.create({
+                platform: 'instagram',
+                text: original.socialMediaCaption || '',
+                imageUrl: original.imageUrl,
+                hashtags: Array.isArray(original.socialMediaHashtags) ? original.socialMediaHashtags : [],
+                link: original.link || undefined,
+                feedItemId: saved.id,
+              })
+            }
+          }
           return { added: savedItems.length }
         } else {
           console.log('No new items to add', { id, feedName })
