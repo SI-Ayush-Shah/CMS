@@ -18,6 +18,9 @@ export default function ContentWizardPage() {
 
   // Content submission hook
   const [article, setArticle] = useState(null);
+  // Platform selection state – Blog is always selected
+  const [instagramSelected, setInstagramSelected] = useState(false);
+  const [twitterSelected, setTwitterSelected] = useState(false);
 
   const { submit, isLoading, loadingState } = useContentSubmission({
     onSuccess: (result) => {
@@ -88,12 +91,15 @@ export default function ContentWizardPage() {
       try {
         await submit(text, images, {
           saveContent: true, // Save the content after generation
+          // Platform flags for backend query params
+          instagram: instagramSelected,
+          twitter: twitterSelected,
         });
       } catch (error) {
         console.error("Content submission failed:", error);
       }
     },
-    [submit]
+    [submit, instagramSelected, twitterSelected]
   );
 
   /**
@@ -591,13 +597,36 @@ export default function ContentWizardPage() {
                   />
                 </div>
                 <div className="w-full h-full flex gap-3  items-center mt-3">
-                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  {/* Blog is always selected and cannot be unchecked */}
+                  <button
+                    type="button"
+                    aria-pressed="true"
+                    className="rounded-2xl px-5 py-2 border-2 border-core-prim-200 bg-core-prim-500/30 text-invert-high shadow-[0_0_0_1px_rgba(255,255,255,0.06)] cursor-default"
+                  >
                     Blog
                   </button>
-                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  <button
+                    type="button"
+                    aria-pressed={instagramSelected}
+                    onClick={() => setInstagramSelected((v) => !v)}
+                    className={`rounded-2xl px-5 py-2  transition-colors ${
+                      instagramSelected
+                        ? "border-core-prim-200 border-2 bg-core-prim-500/20 text-invert-high"
+                        : "border-core-neu-700 border hover:bg-core-prim-500/20 hover:text-invert-high text-invert-medium"
+                    }`}
+                  >
                     Instagram
                   </button>
-                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                  <button
+                    type="button"
+                    aria-pressed={twitterSelected}
+                    onClick={() => setTwitterSelected((v) => !v)}
+                    className={`rounded-2xl px-5 py-2   transition-colors ${
+                      twitterSelected
+                        ? "border-core-prim-200 border-2 bg-core-prim-500/20 text-invert-high"
+                        : "border-core-neu-700 border hover:bg-core-prim-500/20 hover:text-invert-high text-invert-medium"
+                    }`}
+                  >
                     Twitter
                   </button>
                 </div>

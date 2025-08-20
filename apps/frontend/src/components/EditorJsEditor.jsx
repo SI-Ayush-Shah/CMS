@@ -5,12 +5,13 @@ import List from "@editorjs/list";
 import Table from "@editorjs/table";
 import Code from "@editorjs/code";
 import Quote from "@editorjs/quote";
-import Delimiter from "@editorjs/delimiter";
+// Delimiter intentionally disabled to avoid injecting separators
 import Checklist from "@editorjs/checklist";
 import Warning from "@editorjs/warning";
 import Embed from "@editorjs/embed";
 import ImageTool from "@editorjs/image";
 import { imageUploadApi } from "../services/imageUploadApi";
+import "./editorjs-theme.css";
 
 /**
  * EditorJsEditor
@@ -23,6 +24,7 @@ export default function EditorJsEditor({
   onChange,
   className = "",
   style,
+  readOnly = false,
 }) {
   const holderRef = useRef(null);
   const editorRef = useRef(null);
@@ -65,9 +67,10 @@ export default function EditorJsEditor({
 
     const editor = new EditorJS({
       holder: holderEl,
-      autofocus: true,
+      autofocus: !readOnly,
       placeholder: "Start writing your article...",
       data: normalizeInitialData(initialData) || { blocks: [] },
+      readOnly,
       tools: {
         header: {
           class: Header,
@@ -91,7 +94,7 @@ export default function EditorJsEditor({
             captionPlaceholder: "Quote author",
           },
         },
-        delimiter: Delimiter,
+        // delimiter: Delimiter,
         checklist: {
           class: Checklist,
           inlineToolbar: true,
@@ -130,6 +133,7 @@ export default function EditorJsEditor({
         },
       },
       onChange: async () => {
+        if (readOnly) return; // no-op in preview mode
         try {
           const data = await editor.save();
           if (onChange) onChange(data);
@@ -143,6 +147,32 @@ export default function EditorJsEditor({
     initializedRef.current = true;
     if (typeof window !== "undefined") {
       window.__cmsEditorInstance = editor;
+    }
+
+    // After the editor is ready, ensure only a single DOM root exists
+    // Some dev-mode/StrictMode flows or fast remounts can transiently leave
+    // multiple codex-editor roots; prune older ones deterministically.
+    try {
+      editor.isReady
+        .then(() => {
+          if (!holderEl) return;
+          const roots = holderEl.querySelectorAll(".codex-editor");
+          if (roots.length > 1) {
+            for (let i = 0; i < roots.length - 1; i += 1) {
+              const node = roots[i];
+              try {
+                node.remove();
+              } catch {
+                /* no-op */
+              }
+            }
+          }
+        })
+        .catch(() => {
+          /* no-op */
+        });
+    } catch {
+      /* no-op */
     }
 
     return () => {
@@ -171,9 +201,37 @@ export default function EditorJsEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Toggle readOnly state without re-initializing
+  useEffect(() => {
+    const instance = editorRef.current;
+    if (!instance) return;
+    try {
+      if (!instance.readOnly) return;
+      if (readOnly) {
+        if (typeof instance.readOnly.enable === "function") {
+          instance.readOnly.enable();
+        } else if (typeof instance.readOnly.toggle === "function") {
+          instance.readOnly.toggle(true);
+        } else if (typeof instance.readOnly.on === "function") {
+          instance.readOnly.on();
+        }
+      } else {
+        if (typeof instance.readOnly.disable === "function") {
+          instance.readOnly.disable();
+        } else if (typeof instance.readOnly.toggle === "function") {
+          instance.readOnly.toggle(false);
+        } else if (typeof instance.readOnly.off === "function") {
+          instance.readOnly.off();
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to toggle readOnly state", err);
+    }
+  }, [readOnly]);
+
   return (
     <div
-      className={`rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
+      className={`editorjs-theme rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
       style={style}
     >
       <div ref={holderRef} className="min-h-[560px]" />

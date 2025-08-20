@@ -125,7 +125,8 @@ export const classifyNetworkError = (error) => {
 // Create axios instance with default configuration
 // TODO: Update baseURL when backend API is available
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001",
+  // Use relative base by default to leverage Vite dev proxy and avoid CORS in development
+  baseURL: import.meta.env.VITE_API_BASE_URL || "",
   timeout: import.meta.env.VITE_API_TIMEOUT || 60000,
 });
 

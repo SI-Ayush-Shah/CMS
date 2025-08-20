@@ -303,7 +303,8 @@ export const useContentSubmission = (options = {}) => {
         try {
           generationResult = await contentApi.generateContentViaForm(
             text,
-            images
+            images,
+            submissionOptions
           );
           generationOperation.complete(generationResult);
           processingStore.setPhase("saving", "Saving content...");

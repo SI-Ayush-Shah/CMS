@@ -60,7 +60,8 @@ export function createRefineContentService(): RefineContentService {
           content: `You are refining an existing Editor.js article body according to a human prompt. 
 Apply edits conservatively to improve clarity, grammar, structure, and incorporate the user's intent. 
 Preserve existing block types and IDs where possible; when adding new blocks, generate descriptive IDs. 
-Do not produce code blocks unless the source body already contained them and the prompt requires them. 
+Do not produce code blocks unless the source body already contained them and the prompt requires them.
+Do not use delimiter blocks at all; use clear headers to separate sections.
 CRITICAL TABLE RULES: Each table block must contain data.content as a 2D array (array of row arrays). If the input contains 
 multiple table rows as separate blocks or a 1D content array, merge/fix them into a single table block with 2D content.
 
@@ -73,7 +74,7 @@ Return ONLY JSON with { updatedBody, message }.`,
         },
       ]);
 
-      // As an extra safety, normalize tables again
+      // As an extra safety, normalize and strip unwanted blocks
       const normalized = normalizeEditorJsBody(result.updatedBody as any);
       return {
         updatedBody: normalized as any,
@@ -97,6 +98,10 @@ function normalizeEditorJsBody(body: any) {
   let pendingTable: any | null = null;
 
   for (const block of body.blocks) {
+    // Strip delimiter blocks
+    if (block?.type === "delimiter") {
+      continue;
+    }
     if (block?.type === "table") {
       const content2D = to2D(block?.data?.content);
       const withHeadings = !!block?.data?.withHeadings;

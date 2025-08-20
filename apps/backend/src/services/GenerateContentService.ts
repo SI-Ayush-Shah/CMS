@@ -42,7 +42,7 @@ export function createGenerateContentService({
           "warning",
           "linkTool",
         ]),
-        data: z.any(), 
+        data: z.any(),
       });
 
       const editorJsSchema = z.object({
@@ -56,7 +56,7 @@ export function createGenerateContentService({
         summary: z.string(),
         category: z.string(),
         tags: z.array(z.string()),
-        body: editorJsSchema, 
+        body: editorJsSchema,
       });
 
       const model = createGoogleGenaiModel({
@@ -77,72 +77,66 @@ export function createGenerateContentService({
       const result = await structuredModel.invoke([
         {
           role: "human",
-          content: `Generate a comprehensive, well-structured long-form article for: ${request.content}
+          content: `
+          
+          You are a professional sports journalist and content creator.  
+Your task is to generate a comprehensive, well-structured long-form article for: ${request.content}  
 
-CRITICAL: All table blocks must have content as a 2D array (array of arrays)!
-Example: [ [\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"] ]
+CRITICAL: The article **must strictly relate to sports** (games, players, events, rules, training, comparisons, analysis, news, or history).  
+❌ If the topic is not related to sports, respond only with:  
+{ "blocks": [ { "id": "error_msg", "type": "paragraph", "data": { "text": "Sorry, I can only generate content related to sports." } } ] }  
 
-### Instructions:
-1. Article length: ~100-200 lines.
-2. Cover the topic from multiple angles:
-   - Introduction
-   - Background/History
-   - Key Concepts/Features
-   - Current Trends
-   - Comparisons or Alternatives
-   - Case Studies / Real Examples
-   - Statistics or Data Tables
-   - Expert Opinions or Quotes
-   - Practical Applications / How-to steps
-   - Pros & Cons
-   - FAQs
-   - Future Outlook
-   - Conclusion
-3. Use **Editor.js block format**. Available blocks:
-   - paragraph
-   - header
-   - list
-   - table
-   - code
-   - quote
-   - delimiter
-   - checklist
-   - warning
-   - image
-   - embed
-   - linkTool
-4. The article should be releted to sports, and if user asks for a topic that is not related to sports, you should say that you are not able to generate content for that topic.
-5. Make sure to use the images provided by the user, and if its not there then generate your own images.
+---
 
-### Adaptation rules:
-- Tutorials/Guides → headers + paragraphs + ordered lists + code blocks
-- Comparisons → tables + headers + paragraphs
-- Technical docs → code + headers + warning blocks
-- News → headers + paragraphs + quotes
-- Reviews → headers + paragraphs + checklists + images
-- Opinion pieces → headers + quotes + paragraphs
+### Article Requirements:
+1. Length: ~100–200 lines (mix of short + long blocks).  
+2. Format: **Editor.js JSON** with valid blocks.  
+   - Allowed blocks: 'paragraph', 'header', 'list', 'table', 'quote', 'image', 'embed'.  
+   - ❌ No 'delimiter' blocks.  
+3. Every block must have a **unique descriptive id** (e.g., '"intro_header"', '"history_para1"', '"pros_table"').  
+4. Use multiple block types for scannability (paragraphs, lists, tables, quotes).  
+5. End with a **summary paragraph (~100 words)** under block id '"summary_para"'.  
 
-### Requirements:
-- Each block must have a unique descriptive id (e.g., \"intro_header\", \"history_para1\", \"pros_table\").
-- Use delimiter to separate major sections.
-- Headers must clearly mark new sections.
-- Mix block types (not just paragraphs).
-- Make content scannable (lists, tables, quotes).
-- short summary of the article should be 100 words in the end.
-- never show any code in the article, it should be a pure text article.
+---
 
-IMPORTANT: For table blocks, content MUST be a 2D array where each row is an array!
-(Banner image URL provided separately: ${bannerUrl ?? "N/A"}; do not duplicate banner as a body image block)
-${imagesSection}
-CORRECT TABLE: \"content\": [[\"Header1\", \"Header2\"], [\"Row1Col1\", \"Row1Col2\"]]
-WRONG TABLE: \"content\": [\"Header1\", \"Header2\", \"Row1Col1\", \"Row1Col2\"]
+### Special Formatting Rules:
+- **Table blocks**:  
+  - Content must be a **2D array (array of arrays)**.  
+  - First row = headers. Example:  
+    '[ ["Player", "Matches", "Goals"], ["Messi", "1000", "800"], ["Ronaldo", "1200", "850"] ]'
+- **Headers**: must clearly indicate sections (e.g., '"History"', '"Key Players"', '"Tactics"', '"Future Outlook"').  
+- **Images**:  
+  - If user provides, use only those.  
+  - If not, generate appropriate sports-related placeholder images.  
+- **Quotes**: should come from famous athletes, coaches, or sports analysts.  
 
-Return JSON ONLY in Editor.js format, no extra explanation.`,
+---
+
+### Adaptation Guidelines:
+- Tutorials/Guides → headers + paragraphs + ordered lists  
+- Comparisons → tables + headers + paragraphs  
+- News → headers + paragraphs + quotes  
+- Reviews → headers + checklists + images  
+- Opinion pieces → headers + quotes + paragraphs  
+
+---
+
+### Output Rules:
+- Return **valid JSON ONLY** in Editor.js format (no explanations, no markdown).  
+- Ensure all blocks strictly follow the required schema.  
+- Verify before output:  
+  - Is the content sports-related?  
+  - Are all block IDs unique and descriptive?  
+  - Are all tables valid 2D arrays?  
+
+  
+          `,
         },
       ]);
 
       // persist
       // Normalize tables to ensure 2D arrays and merge consecutive table rows
+
       const normalizedBody = normalizeEditorJsBody(
         result.body as any
       ) as unknown as Record<string, unknown>;
@@ -184,6 +178,10 @@ function normalizeEditorJsBody(body: any) {
   let pendingTable: any | null = null;
 
   for (const block of (body as any).blocks) {
+    // Strip delimiter blocks
+    if (block?.type === "delimiter") {
+      continue;
+    }
     if (block?.type === "table") {
       const content2D = to2D(block?.data?.content);
       const withHeadings = !!block?.data?.withHeadings;
