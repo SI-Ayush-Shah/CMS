@@ -4,6 +4,7 @@ import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
 import { Checkbox } from '../components/Checkbox';
 import { Tabs } from '../components/Tabs';
+import { Leftpanel } from '../components/Leftpanel';
 
 const ComponentsPage = () => {
   const [inputValue, setInputValue] = useState('');
@@ -20,8 +21,8 @@ const ComponentsPage = () => {
       id: 'overview',
       label: 'Overview',
       panel: (
-        <div className="p-4 border border-default rounded-lg">
-          <p className="text-body leading-body text-main-medium">
+        <div className="p-4 border border-invert-high rounded-lg">
+          <p className="text-body leading-body text-invert-high">
             This tab contains an overview of the component library. Each component is built with accessibility in mind and follows modern React patterns.
           </p>
         </div>
@@ -31,8 +32,8 @@ const ComponentsPage = () => {
       id: 'usage',
       label: 'Usage',
       panel: (
-        <div className="p-4 border border-default rounded-lg">
-          <p className="text-body leading-body text-main-medium">
+        <div className="p-4 border border-invert-high rounded-lg">
+          <p className="text-body leading-body text-invert-high">
             All components are designed to be easily imported and used in your React applications. They support TypeScript and include proper prop validation.
           </p>
         </div>
@@ -42,8 +43,8 @@ const ComponentsPage = () => {
       id: 'examples',
       label: 'Examples',
       panel: (
-        <div className="p-4 border border-default rounded-lg">
-          <p className="text-body leading-body text-main-medium">
+        <div className="p-4 border border-invert-high rounded-lg">
+          <p className="text-body leading-body text-invert-high">
             Check out the examples below to see how each component can be used in different scenarios and configurations.
           </p>
         </div>
@@ -54,7 +55,7 @@ const ComponentsPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-12">
-        <h1 className="text-h1 leading-h1 font-bold text-main-high mb-4">
+        <h1 className="text-h1 leading-h1 font-bold text-invert-high mb-4">
           Component Library
         </h1>
         <p className="text-body leading-body text-main-medium max-w-3xl">
@@ -65,35 +66,28 @@ const ComponentsPage = () => {
 
       {/* Buttons Section */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Buttons
         </h2>
         <div className="space-y-8">
           <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
               Button Variants
             </h3>
             <div className="flex flex-wrap gap-4 p-6 bg-surface-low rounded-lg">
-              <Button variant="solid">Solid Button</Button>
-              <Button variant="outline">Outline Button</Button>
-              <Button variant="ghost">Ghost Button</Button>
-              <Button variant="link">Link Button</Button>
+              <div className="w-1/2">
+                <Button variant="solid">Solid Button</Button>
+              </div>
+              <div className="w-1/2">
+                <Button variant="outline">Outline Button</Button>
+              </div>
             </div>
           </div>
           
-          <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
-              Button Sizes
-            </h3>
-            <div className="flex flex-wrap items-center gap-4 p-6 bg-surface-low rounded-lg">
-              <Button size="sm">Small</Button>
-              <Button size="md">Medium</Button>
-              <Button size="lg">Large</Button>
-            </div>
-          </div>
+       
           
           <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
               Button States
             </h3>
             <div className="flex flex-wrap gap-4 p-6 bg-surface-low rounded-lg">
@@ -104,18 +98,32 @@ const ComponentsPage = () => {
               </Button>
             </div>
           </div>
+          
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
+              Dark Theme Variants
+            </h3>
+            <div className="flex flex-wrap gap-4 p-6 bg-gray-900 rounded-lg">
+              <Button variant="dark">Dark Primary</Button>
+              <Button variant="dark-secondary">Dark Secondary</Button>
+              <Button variant="dark" disabled>Dark Disabled</Button>
+              <Button variant="dark" isLoading={isLoading} onClick={handleLoadingDemo}>
+                {isLoading ? 'Loading...' : 'Dark Loading'}
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Inputs Section */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Input Fields
         </h2>
         <div className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6 p-6 bg-surface-low rounded-lg">
             <div>
-              <label className="block text-sm font-medium text-main-high mb-2">
+              <label className="block text-sm font-medium text-invert-high mb-2">
                 Basic Input
               </label>
               <Input 
@@ -126,7 +134,7 @@ const ComponentsPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-main-high mb-2">
+              <label className="block text-sm font-medium text-invert-high mb-2">
                 Input with Hint
               </label>
               <Input 
@@ -137,7 +145,7 @@ const ComponentsPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-main-high mb-2">
+              <label className="block text-sm font-medium text-invert-high mb-2">
                 Input with Error
               </label>
               <Input 
@@ -149,7 +157,7 @@ const ComponentsPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-main-high mb-2">
+              <label className="block text-sm font-medium text-invert-high mb-2">
                 Disabled Input
               </label>
               <Input 
@@ -159,17 +167,73 @@ const ComponentsPage = () => {
               />
             </div>
           </div>
+          
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
+              Dark Theme Inputs
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6 p-6 bg-gray-900 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input
+                </label>
+                <Input 
+                  placeholder="Dark themed input..."
+                  variant="dark"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input with Hint
+                </label>
+                <Input 
+                  placeholder="Email address"
+                  hint="This is a dark themed hint"
+                  variant="dark"
+                  type="email"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Input with Error
+                </label>
+                <Input 
+                  placeholder="Password"
+                  error="This is a dark themed error message"
+                  variant="dark"
+                  invalid
+                  type="password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Dark Disabled Input
+                </label>
+                <Input 
+                  placeholder="Disabled dark input"
+                  variant="dark"
+                  disabled
+                  value="Cannot edit this"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Badges Section */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Badges
         </h2>
         <div className="space-y-6">
           <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+                  <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
               Badge Variants
             </h3>
             <div className="flex flex-wrap gap-4 p-6 bg-surface-low rounded-lg">
@@ -182,7 +246,7 @@ const ComponentsPage = () => {
           </div>
           
           <div>
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-4">
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
               Usage Examples
             </h3>
             <div className="flex flex-wrap gap-4 p-6 bg-surface-low rounded-lg">
@@ -198,7 +262,7 @@ const ComponentsPage = () => {
 
       {/* Checkboxes Section */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Checkboxes
         </h2>
         <div className="space-y-6">
@@ -219,7 +283,7 @@ const ComponentsPage = () => {
 
       {/* Tabs Section */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Tabs
         </h2>
         <div className="p-6 bg-surface-low rounded-lg">
@@ -227,14 +291,50 @@ const ComponentsPage = () => {
         </div>
       </section>
 
+      {/* Leftpanel Section */}
+      <section className="mb-16">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
+          Left Panel Navigation
+        </h2>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-4">
+              Interactive Navigation Panel
+            </h3>
+            <p className="text-body leading-body text-main-medium mb-6">
+              A responsive left navigation panel that can be toggled between expanded and collapsed states. 
+              Features smooth animations, active state highlighting, and user profile section.
+            </p>
+            <div className="flex gap-6 p-6 bg-surface-low rounded-lg overflow-hidden">
+              <div className="flex-shrink-0">
+                <Leftpanel />
+              </div>
+              <div className="flex-1 p-4">
+                <h4 className="text-h3 leading-h3 font-semibold text-invert-high mb-3">
+                  Features
+                </h4>
+                <ul className="space-y-2 text-body leading-body text-main-medium">
+                  <li>• Toggle between expanded (256px) and collapsed (64px) states</li>
+                  <li>• Smooth width transitions with CSS animations</li>
+                  <li>• Active state highlighting with purple accent colors</li>
+                  <li>• Responsive navigation items with hover effects</li>
+                  <li>• User profile section with avatar</li>
+                  <li>• Dark theme with proper contrast ratios</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Usage Guidelines */}
       <section className="mb-16">
-        <h2 className="text-h2 leading-h2 font-bold text-main-high mb-6">
+        <h2 className="text-h2 leading-h2 font-bold text-invert-high mb-6">
           Usage Guidelines
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="p-6 border border-default rounded-lg">
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-3">
+            <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-3">
               Accessibility
             </h3>
             <ul className="space-y-2 text-body leading-body text-main-medium">
@@ -246,7 +346,7 @@ const ComponentsPage = () => {
           </div>
           
           <div className="p-6 border border-default rounded-lg">
-            <h3 className="text-h3 leading-h3 font-semibold text-main-high mb-3">
+                <h3 className="text-h3 leading-h3 font-semibold text-invert-high mb-3">
               Best Practices
             </h3>
             <ul className="space-y-2 text-body leading-body text-main-medium">

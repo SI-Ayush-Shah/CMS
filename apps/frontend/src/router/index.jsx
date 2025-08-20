@@ -1,22 +1,59 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { lazy } from 'react';
-import ErrorBoundary from '../components/ErrorBoundary';
-import LazyPageWrapper from '../components/LazyPageWrapper';
-import BaseLayout from '../layouts/BaseLayout';
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { lazy } from "react";
+import ErrorBoundary from "../components/ErrorBoundary";
+import LazyPageWrapper from "../components/LazyPageWrapper";
+import BaseLayout from "../layouts/BaseLayout";
+import ContentWizardPage from "../pages/ContentWizardPage";
+import ComponentsPage from "../pages/ComponentsPage";
 
 // Lazy load page components for code splitting
-const HomePage = lazy(() => import('../pages/HomePage'));
-const ComponentsPage = lazy(() => import('../pages/ComponentsPage'));
-const AboutPage = lazy(() => import('../pages/AboutPage'));
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const HomePage = lazy(() => import("../pages/HomePage"));
+const AboutPage = lazy(() => import("../pages/AboutPage"));
+const BlogPage = lazy(() => import("../pages/BlogPage"));
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
+const LoginPage = lazy(() => import("../pages/LoginPage"));
+const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
+const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
+const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <BaseLayout />,
     errorElement: <ErrorBoundary />,
     children: [
+      {
+        path: "editor",
+        element: (
+          <LazyPageWrapper>
+            <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "editor/:id",
+        element: (
+          <LazyPageWrapper>
+            <ContentEditorPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "/wizard",
+        element: (
+          <LazyPageWrapper>
+            <ContentWizardPage />
+          </LazyPageWrapper>
+        ),
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "/wizard",
+        element: <Navigate to="/creative-wizard" replace />,
+      },
       {
         index: true,
         element: (
@@ -26,7 +63,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'components',
+        path: "components",
         element: (
           <LazyPageWrapper>
             <ComponentsPage />
@@ -34,7 +71,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'about',
+        path: "about",
         element: (
           <LazyPageWrapper>
             <AboutPage />
@@ -42,7 +79,35 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
+        path: "content-hub",
+        element: (
+          <LazyPageWrapper>
+            <BlogPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "blog",
+        element: <Navigate to="/content-hub" replace />,
+      },
+      {
+        path: "analytics",
+        element: (
+          <LazyPageWrapper>
+            <AnalyticsPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "feed-manager",
+        element: (
+          <LazyPageWrapper>
+            <FeedManagerPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "*",
         element: (
           <LazyPageWrapper>
             <NotFoundPage />
@@ -50,6 +115,14 @@ export const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: "login",
+    element: (
+      <LazyPageWrapper>
+        <LoginPage />
+      </LazyPageWrapper>
+    ),
   },
 ]);
 

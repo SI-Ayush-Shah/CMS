@@ -9,10 +9,10 @@ export const Checkbox = React.forwardRef(function Checkbox(
       <input
         ref={ref}
         type="checkbox"
-        className="appearance-none size-4 rounded border border-default bg-surface checked:bg-core-prim-500 checked:border-core-prim-500 grid place-content-center"
+        className="appearance-none size-4 rounded border border-default bg-surface checked:bg-core-prim-500  checked:text-text-invert-high grid place-content-center"
         {...props}
       />
-      <span className="text-main-high text-[14px] leading-[20px]">{label}</span>
+      <span className="text-text-invert-high text-[14px] leading-[20px]">{label}</span>
     </label>
   );
 });

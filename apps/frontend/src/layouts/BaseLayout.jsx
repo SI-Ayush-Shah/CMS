@@ -1,36 +1,43 @@
-import { Outlet, useNavigation } from 'react-router-dom';
-import Navigation from '../components/Navigation';
-import Breadcrumb from '../components/Breadcrumb';
-import LoadingProgress from '../components/LoadingProgress';
+import { Outlet, useNavigation, useLocation } from "react-router-dom";
+import LoadingProgress from "../components/LoadingProgress";
+import { Leftpanel } from "../components/Leftpanel";
+import Aurora from "../components/Aurora";
 
 const BaseLayout = () => {
   const navigation = useNavigation();
-  const isLoading = navigation.state === 'loading';
+  const location = useLocation();
+  const isLoading = navigation.state === "loading";
+
+  // Hide left panel for login page
+  const shouldShowLeftPanel = location.pathname !== "/login";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen  flex isolate relative">
+      <div className="fixed inset-0 z-0">
+        <Aurora
+          colorStops={["#3c1264", "#280c43", "#140621"]}
+          blend={1}
+          amplitude={1}
+          speed={0.5}
+        />
+      </div>
       <LoadingProgress isLoading={isLoading} />
-      {/* Header with Navigation */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Navigation />
-        </div>
-      </header>
+
+      {/* Global Left Panel - Conditionally rendered */}
+      {shouldShowLeftPanel && (
+        <aside className="relative z-20">
+          <div className="p-2 sticky top-0 h-screen">
+            <Leftpanel />
+          </div>
+        </aside>
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumb />
+      <main
+        className={`relative min-h-screen ${shouldShowLeftPanel ? "flex-1" : "w-full"}`}
+      >
         <Outlet />
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center text-sm text-gray-600">
-            <p>&copy; 2025 React Component Library. Built with React & Tailwind CSS.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -10,18 +10,14 @@ export function Button({
   onClick,
 }) {
   const base =
-    "inline-flex items-center justify-center rounded-2xl font-medium gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex w-full h-10 items-center justify-center rounded-2xl font-medium gap-2 transition-colors disabled:bg-button-filled-main-default disabled:text-text-invert-disabled disabled:cursor-not-allowed";
 
   function variantClasses(v) {
     switch (v) {
       case "solid":
-        return "bg-core-prim-500 hover:bg-core-prim-600 text-invert-high";
+        return "bg-core-prim-500 hover:bg-core-prim-700 text-invert-high ";
       case "outline":
-        return "border border-core-prim-500 text-core-prim-500 hover:bg-core-prim-50";
-      case "ghost":
-        return "bg-transparent hover:bg-card text-main-high";
-      case "link":
-        return "bg-transparent text-core-prim-500 hover:text-core-prim-600 underline underline-offset-2";
+        return "bg-border-main-default/60 text-invert-high border  border-core-prim-100 text-border-main-default hover:bg-border-main-default/80 ";
       default:
         return "";
     }

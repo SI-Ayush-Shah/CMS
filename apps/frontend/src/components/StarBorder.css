@@ -1,0 +1,133 @@
+.star-border-container {
+  display: block;
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.border-gradient-bottom {
+  position: absolute;
+  width: 300%;
+  height: 50%;
+  opacity: 1;
+  bottom: -1px;
+  right: -250%;
+  border-radius: 50%;
+  animation: star-movement-bottom linear infinite alternate;
+  z-index: 0;
+}
+
+.border-gradient-top {
+  position: absolute;
+  opacity: 1;
+  width: 300%;
+  height: 50%;
+  top: -1px;
+  left: -250%;
+  border-radius: 50%;
+  animation: star-movement-top linear infinite alternate;
+  z-index: 0;
+}
+
+.inner-content {
+  position: relative;
+  border: 0.5px solid var(--color-core-prim-600);
+  background: transparent;
+  color: white;
+  border-radius: 15px;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+}
+
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 1;
+  }
+}
+
+/* Premium rotating gradient border (modular) */
+.star-border-container.rotating-premium-border {
+  /* Customizable CSS variables */
+  --premium-border-width: 2px;
+  --premium-rotation-duration: 6s;
+  --premium-gradient: conic-gradient(
+    from 0deg,
+    #8b5cf6 0%,
+    /* violet-500 */ #06b6d4 20%,
+    /* cyan-500 */ #22c55e 40%,
+    /* emerald-500 */ #fde047 60%,
+    /* yellow-300 */ #f472b6 80%,
+    /* pink-400 */ #8b5cf6 100%
+  );
+}
+
+/* Hide legacy star gradients when premium border is active */
+.star-border-container.rotating-premium-border .border-gradient-top,
+.star-border-container.rotating-premium-border .border-gradient-bottom {
+  display: none;
+}
+
+.star-border-container.rotating-premium-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--premium-border-width);
+  background: var(--premium-gradient);
+  /* Cut out the middle so only the border ring shows */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: premium-rotate var(--premium-rotation-duration) linear infinite;
+  will-change: transform;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Optional subtle glow inside the container */
+.star-border-container.rotating-premium-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--premium-gradient);
+  filter: blur(12px);
+  opacity: 0.18;
+  animation: premium-rotate var(--premium-rotation-duration) linear infinite;
+  will-change: transform;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes premium-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
