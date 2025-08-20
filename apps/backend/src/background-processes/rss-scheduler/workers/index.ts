@@ -7,6 +7,7 @@ import { createRssFeedItemRepository } from '../../../repositories/RssFeedItemRe
 import axios from 'axios'
 import type { NewRssFeedItem } from '../../../db/schema'
 import { createGoogleGenaiModel } from '../../../llms/google-genai/model';
+import { createSocialMediaContentService } from '../../../services/SocialMediaContentService'
 import z from 'zod';
 
 
@@ -122,9 +123,65 @@ export function startRssSchedulerWorker(): Worker {
 
         console.log('New items===========>', newItems)
 
-        // Save new items to database
+        // Generate social media content for each new item
         if (result.length > 0) {
-          const savedItems = await rssFeedItemRepository.createMany(newItems)
+          // Register social media content service in the container
+          container.register({
+            socialMediaContentService: asFunction(createSocialMediaContentService).singleton()
+          })
+          
+          const socialMediaContentService = container.resolve('socialMediaContentService')
+          
+          // Process each item to generate social media content
+          for (const item of result) {
+            try {
+              // Only generate for items with sufficient content
+              if (item.content && item.title) {
+                console.log(`Generating social media content for: ${item.title}`)
+                
+                const socialMediaContent = await socialMediaContentService.generateContent({
+                  title: item.title,
+                  content: item.content,
+                  summary: item.summary || '',
+                  link: item.link
+                })
+                
+                // Add social media content to the item
+                item.imageUrl = socialMediaContent.imageUrl
+                // Using type assertion since we're augmenting the objects returned from the LLM
+                (item as any).socialMediaCaption = socialMediaContent.caption
+                (item as any).socialMediaHashtags = socialMediaContent.hashtags
+                
+                console.log(`Generated social media content for: ${item.title}`)
+                console.log(`Image URL: ${socialMediaContent.imageUrl}`)
+              }
+            } catch (error) {
+              // Log error but continue with other items
+              console.error(`Failed to generate social media content for item: ${item.title}`, error)
+            }
+          }
+          
+          // Map items to proper database format
+          const itemsToSave = result.map(item => {
+            // Type assertion for the augmented properties
+            const augmentedItem = item as any
+            return {
+              feedId: id,
+              guid: item.guid,
+              title: item.title,
+              link: item.link || '',
+              summary: item.summary || '',
+              content: item.content || '',
+              author: item.author || '',
+              categories: item.categories || [],
+              imageUrl: item.imageUrl,
+              socialMediaCaption: augmentedItem.socialMediaCaption,
+              socialMediaHashtags: augmentedItem.socialMediaHashtags ? JSON.stringify(augmentedItem.socialMediaHashtags) : null,
+              publishedAt: undefined // RSS items don't have publishedAt from the LLM response
+            }
+          })
+          
+          const savedItems = await rssFeedItemRepository.createMany(itemsToSave)
           console.log(`Added ${savedItems.length} new items to feed`, { id, feedName })
           return { added: savedItems.length }
         } else {
