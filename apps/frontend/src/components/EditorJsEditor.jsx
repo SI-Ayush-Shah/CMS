@@ -11,6 +11,7 @@ import Warning from "@editorjs/warning";
 import Embed from "@editorjs/embed";
 import ImageTool from "@editorjs/image";
 import { imageUploadApi } from "../services/imageUploadApi";
+import "./editorjs-theme.css";
 
 /**
  * EditorJsEditor
@@ -173,7 +174,7 @@ export default function EditorJsEditor({
 
   return (
     <div
-      className={`rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
+      className={`editorjs-theme rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
       style={style}
     >
       <div ref={holderRef} className="min-h-[560px]" />
