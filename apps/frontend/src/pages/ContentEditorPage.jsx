@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { contentApi } from "../services/contentApi";
-import EditorJsRenderer from "../components/EditorJsRenderer";
 import EditorJsEditor from "../components/EditorJsEditor";
 import RightPanel from "../components/RightPanel";
 import Loader from "../components/Loader";
@@ -26,15 +25,15 @@ export default function ContentEditorPage() {
   const { id } = useParams();
   const location = useLocation();
   const rssFeedItem = location.state?.rssFeedItem;
-  const isSummarizeMode = location.state?.mode === 'summarize';
-  
+  const isSummarizeMode = location.state?.mode === "summarize";
+
   // State for summarization loading
   const [isSummarizing, setIsSummarizing] = useState(false);
-  
+
   const { data: article } = useQuery({
     queryKey: ["article", id],
     queryFn: () => contentApi.getContent(id),
-    enabled: !!id && id !== 'new',
+    enabled: !!id && id !== "new",
   });
 
   const [isSavingDraft, setIsSavingDraft] = useState(false);
@@ -65,7 +64,11 @@ export default function ContentEditorPage() {
   }, []);
 
   const currentTitle = article?.title || dummyTitle;
-  const currentBanner = article?.bannerUrl || (location.state?.generatedContent?.bannerUrl) || rssFeedItem?.imageUrl || dummyImageUrl;
+  const currentBanner =
+    article?.bannerUrl ||
+    location.state?.generatedContent?.bannerUrl ||
+    rssFeedItem?.imageUrl ||
+    dummyImageUrl;
   const currentBody = article?.body;
   const [editorBody, setEditorBody] = useState(currentBody || null);
   const [editorMountKey, setEditorMountKey] = useState(0);
@@ -80,27 +83,34 @@ export default function ContentEditorPage() {
         try {
           setIsSummarizing(true);
           showMessage("Summarizing content...", "info");
-          
+
           // Set initial values from RSS item
           setTitle(rssFeedItem.title || "");
           setSummary(rssFeedItem.summary || "");
-          
+
           // Call the summarize API
-          const response = await contentApi.summarizeContent(rssFeedItem, rssFeedItem.imageUrl);
-          
+          const response = await contentApi.summarizeContent(
+            rssFeedItem,
+            rssFeedItem.imageUrl
+          );
+
           if (response && response.success && response.data) {
             showMessage("Content summarized successfully!", "success");
-            
+
             // Extract generatedContent from the response
             const { generatedContent } = response.data;
-            
+
             if (generatedContent) {
               // Update title, summary, category, tags
               setTitle(generatedContent.title || rssFeedItem.title || "");
               setSummary(generatedContent.summary || rssFeedItem.summary || "");
               setCategory(generatedContent.category || "");
-              setTags(Array.isArray(generatedContent.tags) ? generatedContent.tags : []);
-              
+              setTags(
+                Array.isArray(generatedContent.tags)
+                  ? generatedContent.tags
+                  : []
+              );
+
               // Update editor body
               if (generatedContent.body) {
                 setEditorBody(generatedContent.body);
@@ -108,7 +118,10 @@ export default function ContentEditorPage() {
               }
             }
           } else {
-            showMessage("Failed to summarize content. Using original content.", "error");
+            showMessage(
+              "Failed to summarize content. Using original content.",
+              "error"
+            );
           }
         } catch (error) {
           console.error("Error summarizing content:", error);
@@ -118,15 +131,15 @@ export default function ContentEditorPage() {
         }
       }
     };
-    
+
     processSummarization();
-  }, [rssFeedItem, isSummarizeMode]);
+  }, [rssFeedItem, isSummarizeMode, isSummarizing, showMessage]);
 
   // Effect to handle article data changes
   useEffect(() => {
     setEditorBody(currentBody || null);
-    setTitle(article?.title || (rssFeedItem?.title || ""));
-    setSummary(article?.summary || (rssFeedItem?.summary || ""));
+    setTitle(article?.title || rssFeedItem?.title || "");
+    setSummary(article?.summary || rssFeedItem?.summary || "");
     setCategory(article?.category || "");
     setTags(Array.isArray(article?.tags) ? article.tags : []);
     setEditorMountKey((k) => k + 1);
@@ -136,7 +149,7 @@ export default function ContentEditorPage() {
     article?.summary,
     article?.category,
     article?.tags,
-    rssFeedItem
+    rssFeedItem,
   ]);
 
   const initialEditorData = useMemo(() => {
@@ -296,7 +309,7 @@ export default function ContentEditorPage() {
       )}
 
       {/* Removed full-screen overlay */}
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Editor column */}
         <section className="lg:col-span-2 space-y-5">
@@ -418,31 +431,27 @@ export default function ContentEditorPage() {
                 </button>
               </div>
             </div>
-            
+
             {/* Show loader in LHS when summarizing */}
             {isSummarizing ? (
-              <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px] flex flex-col items-center justify-center" style={{ minHeight: "300px" }}>
+              <div
+                className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px] flex flex-col items-center justify-center"
+                style={{ minHeight: "300px" }}
+              >
                 <Loader text="Summarizing content..." size={120} />
-                <p className="text-invert-low text-sm mt-4">This may take a few moments</p>
+                <p className="text-invert-low text-sm mt-4">
+                  This may take a few moments
+                </p>
               </div>
             ) : (
               <div className="">
-                {/* Keep editor mounted for state retention; toggle visibility */}
-                <div className={viewMode === "edit" ? "block" : "hidden"}>
-                  <EditorJsEditor
-                    key={editorMountKey}
-                    initialData={initialEditorData}
-                    onChange={handleEditorChange}
-                    className="mx-auto max-w-[860px]"
-                  />
-                </div>
-                {viewMode === "preview" && (
-                  <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
-                    <EditorJsRenderer
-                      data={editorBody || currentBody || initialEditorData}
-                    />
-                  </div>
-                )}
+                <EditorJsEditor
+                  key={editorMountKey}
+                  initialData={initialEditorData}
+                  onChange={handleEditorChange}
+                  className="mx-auto max-w-[860px]"
+                  readOnly={viewMode === "preview"}
+                />
               </div>
             )}
           </div>

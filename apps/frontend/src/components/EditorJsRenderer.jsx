@@ -49,7 +49,8 @@ export default function EditorJsRenderer({ data, className = "" }) {
     if (Array.isArray(content[0])) {
       const first = content[0];
       // Handle odd shape: [["[\"h1\",\"h2\"]", "[\"r1c1\",\"r1c2\"]", ...]]
-      const looksLikeStringifiedRows = Array.isArray(first) && first.every((cell) => typeof cell === "string");
+      const looksLikeStringifiedRows =
+        Array.isArray(first) && first.every((cell) => typeof cell === "string");
       if (looksLikeStringifiedRows && content.length === 1) {
         const parsedRows = first
           .map((cell) => tryParseJsonArray(cell))
@@ -63,7 +64,11 @@ export default function EditorJsRenderer({ data, className = "" }) {
           const parsed = tryParseJsonArray(row);
           return parsed ?? [row];
         }
-        if (Array.isArray(row) && row.length === 1 && typeof row[0] === "string") {
+        if (
+          Array.isArray(row) &&
+          row.length === 1 &&
+          typeof row[0] === "string"
+        ) {
           const parsed = tryParseJsonArray(row[0]);
           return parsed ?? row;
         }
@@ -145,13 +150,19 @@ export default function EditorJsRenderer({ data, className = "" }) {
         const head = withHeadings && rows.length > 0 ? rows[0] : null;
         const bodyRows = withHeadings ? rows.slice(1) : rows;
         return (
-          <div key={id} className="overflow-x-auto my-4 rounded-xl border border-core-prim-300/20">
+          <div
+            key={id}
+            className="overflow-x-auto my-4 rounded-xl border border-core-prim-300/20"
+          >
             <table className="min-w-full text-left border-collapse text-[14px]">
               {head && (
                 <thead className="bg-core-prim-500/10 text-invert-high">
                   <tr>
                     {head.map((cell, cIdx) => (
-                      <th key={`${id}-head-${cIdx}`} className="px-4 py-2 font-semibold">
+                      <th
+                        key={`${id}-head-${cIdx}`}
+                        className="px-4 py-2 font-semibold"
+                      >
                         {String(cell)}
                       </th>
                     ))}
@@ -199,7 +210,9 @@ export default function EditorJsRenderer({ data, className = "" }) {
             key={id}
             className="border-l-4 border-core-prim-500/60 pl-4 italic text-invert-high/80 my-5 bg-core-prim-500/5 rounded-r-xl py-3"
           >
-            <blockquote className="text-[16px] leading-8">{data?.text}</blockquote>
+            <blockquote className="text-[16px] leading-8">
+              {data?.text}
+            </blockquote>
             {data?.caption && (
               <figcaption className="text-[12px] text-invert-low mt-1">
                 {data.caption}
@@ -267,7 +280,11 @@ export default function EditorJsRenderer({ data, className = "" }) {
                 withBorder ? "border border-core-prim-300/20" : ""
               } rounded-xl overflow-hidden`}
             >
-              <img src={url} alt={caption || "image"} className="w-full object-cover" />
+              <img
+                src={url}
+                alt={caption || "image"}
+                className="w-full object-cover"
+              />
             </div>
             {caption && (
               <figcaption className="text-[12px] text-invert-low mt-1">
