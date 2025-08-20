@@ -1,13 +1,11 @@
 import React from "react";
-import { Button } from "./Button";
 
-const BlogCard = ({
+const ContentCard = ({
   image = "",
   date = "",
   title = "",
   description = "",
-  ctaText = "Read more",
-  onCtaClick,
+  button,
   className = "",
 }) => {
   const formatDate = (value) => {
@@ -23,9 +21,10 @@ const BlogCard = ({
       return value;
     }
   };
+
   return (
     <div
-      className={`inline-grid leading-[0] place-items-start relative shrink-0 ${className}`}
+      className={`inline-grid leading-[0] place-items-start relative shrink-0 h-full ${className}`}
       style={{ gridColumns: "max-content", gridRows: "max-content" }}
     >
       {/* Image (16:9) */}
@@ -102,16 +101,16 @@ const BlogCard = ({
         </div>
 
         {/* CTA */}
-        <div className="flex gap-2 items-center justify-start w-full max-w-max">
-          <Button variant="solid" size="sm" onClick={onCtaClick} className="!rounded-lg">
-            {ctaText}
-          </Button>
-        </div>
+        {button && (
+          <div className="flex gap-2 items-center justify-start w-full max-w-max">
+            {button}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default BlogCard;
+export default ContentCard;
 
 
