@@ -153,6 +153,8 @@ Return JSON ONLY in Editor.js format, no extra explanation.`,
         category: result.category,
         tags: result.tags,
         body: normalizedBody,
+        images: imagesList,
+        bannerUrl,
       };
       const saved = await generatedContentRepository.create(toInsert);
 

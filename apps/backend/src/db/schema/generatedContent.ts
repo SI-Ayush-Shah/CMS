@@ -11,6 +11,8 @@ export const generatedContents = pgTable('generated_contents', {
   tags: jsonb('tags').$type<string[]>().notNull().default([]),
   // Editor.js body stored as JSON
   body: jsonb('body').$type<Record<string, unknown>>().notNull(),
+  images: jsonb('images').$type<string[]>().notNull().default([]),
+  bannerUrl: varchar('banner_url', { length: 1024 }),
   status: contentStatus('status').notNull().default('draft'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -23,6 +25,8 @@ export const insertGeneratedContentSchema = Type.Object({
   category: Type.String({ minLength: 1 }),
   tags: Type.Array(Type.String()),
   body: Type.Record(Type.String(), Type.Any()),
+  images: Type.Optional(Type.Array(Type.String())),
+  bannerUrl: Type.Optional(Type.String({ format: 'uri' })),
   status: Type.Optional(Type.Union([Type.Literal('draft'), Type.Literal('published')], { default: 'draft' }))
 })
 
@@ -33,6 +37,8 @@ export const selectGeneratedContentSchema = Type.Object({
   category: Type.String(),
   tags: Type.Array(Type.String()),
   body: Type.Record(Type.String(), Type.Any()),
+  images: Type.Array(Type.String()),
+  bannerUrl: Type.Optional(Type.String({ format: 'uri' })),
   status: Type.Union([Type.Literal('draft'), Type.Literal('published')]),
   createdAt: Type.String({ format: 'date-time' }),
   updatedAt: Type.String({ format: 'date-time' }),
