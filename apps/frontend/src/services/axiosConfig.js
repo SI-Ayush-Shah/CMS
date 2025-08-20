@@ -127,9 +127,6 @@ export const classifyNetworkError = (error) => {
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001",
   timeout: import.meta.env.VITE_API_TIMEOUT || 60000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // Request interceptor for adding auth tokens and retry metadata
@@ -149,6 +146,10 @@ apiClient.interceptors.request.use(
     // Add request timestamp for timeout tracking
     config.metadata.startTime = Date.now();
 
+    // Set Content-Type only when sending a body
+    if (config.data && !config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
+    }
     return config;
   },
   (error) => {
