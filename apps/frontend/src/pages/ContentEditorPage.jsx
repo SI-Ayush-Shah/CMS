@@ -129,7 +129,7 @@ export default function ContentEditorPage() {
   );
   // SEO meta description guidance
   const SEO_META_MIN = 50;
-  const SEO_META_MAX = 160;
+  const SEO_META_MAX = 760;
   const summaryLength = (summary || "").trim().length;
   const isSummaryTooShort = summaryLength > 0 && summaryLength < SEO_META_MIN;
   const isSummaryTooLong = summaryLength > SEO_META_MAX;
