@@ -223,12 +223,75 @@ importers:
 
   apps/showcase:
     dependencies:
+      '@editorjs/checklist':
+        specifier: ^1.5.0
+        version: 1.6.0
+      '@editorjs/code':
+        specifier: ^2.8.0
+        version: 2.9.3
+      '@editorjs/delimiter':
+        specifier: ^1.3.0
+        version: 1.4.2
+      '@editorjs/editorjs':
+        specifier: ^2.30.7
+        version: 2.30.8
+      '@editorjs/embed':
+        specifier: ^2.5.3
+        version: 2.7.6
+      '@editorjs/header':
+        specifier: ^2.8.1
+        version: 2.8.8
+      '@editorjs/image':
+        specifier: ^2.9.0
+        version: 2.10.3
+      '@editorjs/link':
+        specifier: ^2.6.2
+        version: 2.6.2
+      '@editorjs/list':
+        specifier: ^1.8.0
+        version: 1.10.0
+      '@editorjs/quote':
+        specifier: ^2.6.0
+        version: 2.7.6
+      '@editorjs/table':
+        specifier: ^2.0.4
+        version: 2.4.5
+      '@editorjs/warning':
+        specifier: ^1.4.0
+        version: 1.4.1
+      '@tailwindcss/vite':
+        specifier: ^4.1.12
+        version: 4.1.12(vite@7.1.3(@types/node@22.17.2)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.4)(yaml@2.8.1))
+      '@tanstack/react-query':
+        specifier: ^5.59.0
+        version: 5.85.5(react@19.1.1)
+      axios:
+        specifier: ^1.11.0
+        version: 1.11.0
+      gsap:
+        specifier: ^3.13.0
+        version: 3.13.0
+      ogl:
+        specifier: ^1.0.11
+        version: 1.0.11
       react:
         specifier: ^19.1.1
         version: 19.1.1
       react-dom:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
+      react-icons:
+        specifier: ^5.5.0
+        version: 5.5.0(react@19.1.1)
+      react-router-dom:
+        specifier: ^7.1.1
+        version: 7.8.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      tailwindcss:
+        specifier: ^4
+        version: 4.1.12
+      zustand:
+        specifier: ^4.5.7
+        version: 4.5.7(@types/react@19.1.10)(react@19.1.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.33.0
@@ -254,6 +317,9 @@ importers:
       globals:
         specifier: ^16.3.0
         version: 16.3.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
       vite:
         specifier: ^7.1.2
         version: 7.1.3(@types/node@22.17.2)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.4)(yaml@2.8.1)

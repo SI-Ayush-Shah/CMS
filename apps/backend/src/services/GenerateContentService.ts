@@ -107,7 +107,7 @@ CRITICAL: The article **must strictly relate to sports** (games, players, events
 - **Headers**: must clearly indicate sections (e.g., '"History"', '"Key Players"', '"Tactics"', '"Future Outlook"').  
 - **Images**:  
   - If user provides, use only those.  
-  - If not, generate appropriate sports-related placeholder images.  
+  - If not, then dont use any images.  
 - **Quotes**: should come from famous athletes, coaches, or sports analysts.  
 
 ---

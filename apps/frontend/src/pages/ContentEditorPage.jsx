@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/Button";
@@ -8,8 +14,10 @@ import EditorJsEditor from "../components/EditorJsEditor";
 import EditorJsRenderer from "../components/EditorJsRenderer";
 import RightPanel from "../components/RightPanel";
 import Loader from "../components/Loader";
+import ProcessingView from "../components/ProcessingView";
 import { normalizeEditorJsBody } from "../utils";
 import { useAutoResize } from "../hooks/useAutoResize";
+import { imageUploadApi } from "../services/imageUploadApi";
 
 /**
  * Content Editor Page
@@ -66,7 +74,9 @@ export default function ContentEditorPage() {
   }, []);
 
   const currentTitle = article?.title || dummyTitle;
+  const [bannerUrl, setBannerUrl] = useState("");
   const currentBanner =
+    bannerUrl ||
     article?.bannerUrl ||
     location.state?.generatedContent?.bannerUrl ||
     rssFeedItem?.imageUrl ||
@@ -83,6 +93,61 @@ export default function ContentEditorPage() {
     minHeight: 120,
     maxHeight: 400,
   });
+  // Banner upload state
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const bannerInputRef = useRef(null);
+  const [isBannerDragOver, setIsBannerDragOver] = useState(false);
+  const [bannerDragCounter, setBannerDragCounter] = useState(0);
+
+  const handleBannerFile = useCallback(
+    async (file) => {
+      if (!file) return;
+      if (!file.type?.startsWith("image/")) {
+        showMessage("Please drop a valid image file.", "error");
+        return;
+      }
+      try {
+        setIsUploadingBanner(true);
+        const uploaded = await imageUploadApi.uploadImage(file);
+        setBannerUrl(uploaded.url);
+        if (id) {
+          await contentApi.patchContent(id, { bannerUrl: uploaded.url });
+          showMessage("Banner updated.");
+        } else {
+          showMessage("Banner selected.", "info");
+        }
+      } catch (err) {
+        showMessage(err?.message || "Failed to upload banner.", "error");
+      } finally {
+        setIsUploadingBanner(false);
+      }
+    },
+    [id, showMessage]
+  );
+  // SEO meta description guidance
+  const SEO_META_MIN = 50;
+  const SEO_META_MAX = 160;
+  const summaryLength = (summary || "").trim().length;
+  const isSummaryTooShort = summaryLength > 0 && summaryLength < SEO_META_MIN;
+  const isSummaryTooLong = summaryLength > SEO_META_MAX;
+  const charCountClass =
+    isSummaryTooShort || isSummaryTooLong
+      ? "text-error-400"
+      : "text-invert-low";
+  const summaryStatusText =
+    summaryLength === 0
+      ? "Meta description missing — search engines may auto-generate less relevant text."
+      : isSummaryTooShort
+        ? `Too short — aim for ${SEO_META_MIN}\u2013${SEO_META_MAX} characters.`
+        : isSummaryTooLong
+          ? "Too long — may be truncated in search results."
+          : "Looks good — concise and descriptive.";
+  const summaryStatusClass =
+    summaryLength === 0
+      ? "text-warning-400"
+      : isSummaryTooShort || isSummaryTooLong
+        ? "text-error-400"
+        : "text-success-400";
   // Effect to handle RSS feed item summarization
   useEffect(() => {
     const processSummarization = async () => {
@@ -149,13 +214,21 @@ export default function ContentEditorPage() {
     setSummary(article?.summary || rssFeedItem?.summary || "");
     setCategory(article?.category || "");
     setTags(Array.isArray(article?.tags) ? article.tags : []);
+    setBannerUrl(
+      article?.bannerUrl ||
+        location.state?.generatedContent?.bannerUrl ||
+        rssFeedItem?.imageUrl ||
+        ""
+    );
     setEditorMountKey((k) => k + 1);
   }, [
     currentBody,
+    article?.bannerUrl,
     article?.title,
     article?.summary,
     article?.category,
     article?.tags,
+    location.state?.generatedContent?.bannerUrl,
     rssFeedItem,
   ]);
 
@@ -189,8 +262,22 @@ export default function ContentEditorPage() {
       showMessage("Please write the body content.", "error");
       return false;
     }
+    // Non-blocking SEO meta description guidance
+    if (!summary?.trim()) {
+      showMessage("Consider adding a meta description for better SEO.", "info");
+    } else if (summary.trim().length < SEO_META_MIN) {
+      showMessage(
+        `Meta description is short; aim for ${SEO_META_MIN}\u2013${SEO_META_MAX} characters.`,
+        "info"
+      );
+    } else if (summary.trim().length > SEO_META_MAX) {
+      showMessage(
+        "Meta description may be truncated in search results.",
+        "info"
+      );
+    }
     return true;
-  }, [title, currentTitle, editorBody, dummyBody, showMessage]);
+  }, [title, currentTitle, editorBody, dummyBody, summary, showMessage]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!validate()) return;
@@ -202,6 +289,7 @@ export default function ContentEditorPage() {
           summary: summary || undefined,
           category: category || undefined,
           tags: tags.length ? tags : undefined,
+          bannerUrl: bannerUrl || undefined,
           body: editorBody || currentBody,
         };
         const res = await contentApi.patchContent(id, payload);
@@ -234,6 +322,7 @@ export default function ContentEditorPage() {
     tags,
     currentTitle,
     currentBody,
+    bannerUrl,
   ]);
 
   const handlePublish = useCallback(async () => {
@@ -246,6 +335,7 @@ export default function ContentEditorPage() {
           summary: summary || undefined,
           category: category || undefined,
           tags: tags.length ? tags : undefined,
+          bannerUrl: bannerUrl || undefined,
           body: editorBody || currentBody,
         };
         const res = await contentApi.patchContent(id, payload);
@@ -278,6 +368,7 @@ export default function ContentEditorPage() {
     tags,
     currentTitle,
     currentBody,
+    bannerUrl,
   ]);
 
   const handleRefinementApplied = useCallback(
@@ -299,6 +390,11 @@ export default function ContentEditorPage() {
     },
     [article?.id, showMessage]
   );
+
+  // While summarizing, show the ProcessingView (full-screen) similar to wizard
+  if (isSummarizing) {
+    return <ProcessingView phase="summarizing" />;
+  }
 
   return (
     <div className="w-full h-full">
@@ -384,12 +480,73 @@ export default function ContentEditorPage() {
           <div className=" max-w-[860px] mx-auto">
             <p className="text-xs text-invert-low mb-2">Image</p>
             <div className="w-full">
-              <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
+              <div
+                className={`relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20 ${isBannerDragOver ? "ring-2 ring-core-prim-500" : ""}`}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBannerDragCounter((c) => c + 1);
+                  const hasFiles = Array.from(e.dataTransfer?.items || []).some(
+                    (i) => i.kind === "file"
+                  );
+                  if (hasFiles) setIsBannerDragOver(true);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = "copy";
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBannerDragCounter((c) => Math.max(0, c - 1));
+                  if (bannerDragCounter - 1 <= 0) setIsBannerDragOver(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsBannerDragOver(false);
+                  setBannerDragCounter(0);
+                  const file = e.dataTransfer?.files?.[0];
+                  if (file) handleBannerFile(file);
+                }}
+              >
                 <img
                   src={currentBanner}
                   alt="Cover preview"
                   className="w-full aspect-[16/10] object-cover"
                 />
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <input
+                    ref={bannerInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      await handleBannerFile(file);
+                      if (e.target) e.target.value = "";
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="text-[12px] px-2 py-1 min-w-0"
+                    isLoading={isUploadingBanner}
+                  >
+                    {article?.bannerUrl || bannerUrl
+                      ? "Replace banner"
+                      : "Upload banner"}
+                  </Button>
+                </div>
+                {isBannerDragOver && (
+                  <div className="absolute inset-0 bg-core-prim-500/10 flex items-center justify-center pointer-events-none">
+                    <div className="text-[12px] px-3 py-1.5 bg-core-neu-1000/80 rounded-full border border-core-prim-300/30">
+                      Drop image to set as banner
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -464,21 +621,36 @@ export default function ContentEditorPage() {
           <div className=" max-w-[860px] mx-auto rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col">
-                <label
-                  htmlFor="summary"
-                  className="text-[11px] text-invert-low mb-1"
-                >
-                  Summary
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="summary"
+                    className="text-[11px] text-invert-low"
+                  >
+                    Meta description (SEO)
+                  </label>
+                  <span className={`text-[11px] ${charCountClass}`}>
+                    {summaryLength}/{SEO_META_MAX}
+                  </span>
+                </div>
                 <textarea
                   id="summary"
                   ref={summaryRef}
-                  placeholder="Summary"
+                  placeholder="Write a concise summary for search engines (50–160 characters)"
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                   rows={5}
+                  aria-describedby="summary-help"
+                  aria-invalid={isSummaryTooShort || isSummaryTooLong}
                   className="w-full resize-none rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
                 />
+                <p
+                  id="summary-help"
+                  className={`text-[11px] mt-1 ${summaryStatusClass}`}
+                >
+                  Appears as the SEO meta description in search results. Aim for{" "}
+                  {SEO_META_MIN}–{SEO_META_MAX} characters and include your
+                  primary keyword. {summaryStatusText}
+                </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col">

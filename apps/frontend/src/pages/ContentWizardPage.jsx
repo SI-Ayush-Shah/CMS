@@ -21,6 +21,13 @@ export default function ContentWizardPage() {
   // Platform selection state – Blog is always selected
   const [instagramSelected, setInstagramSelected] = useState(false);
   const [twitterSelected, setTwitterSelected] = useState(false);
+  // Banner selection state
+  const [wizardImages, setWizardImages] = useState([]);
+  const [bannerIndex, setBannerIndex] = useState(null);
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
+  const [isBannerDragOver, setIsBannerDragOver] = useState(false);
+  const [bannerDragCounter, setBannerDragCounter] = useState(0);
 
   const { submit, isLoading, loadingState } = useContentSubmission({
     onSuccess: (result) => {
@@ -31,15 +38,18 @@ export default function ContentWizardPage() {
         result?.data?.blogId;
 
       if (blogId) {
-        setFeedbackMessage(
-          "Content generated successfully! Redirecting to editor..."
-        );
-        setFeedbackType("success");
-
-        // Navigate to editor page after short delay for user feedback
-        setTimeout(() => {
-          navigate(`/editor/${blogId}`);
-        }, 1500);
+        // Keep processing UI visible and redirect immediately without flicker
+        try {
+          // Ensure processing overlay persists during route change
+          const store = useProcessingStore.getState?.();
+          if (store?.start) {
+            store.start("redirecting", "Redirecting to editor...");
+          }
+        } catch {
+          // intentionally ignored – overlay is non-critical
+        }
+        navigate(`/editor/${blogId}`, { replace: true });
+        return;
       } else {
         // Fallback to current behavior if no blog ID
         const payload = result?.generatedContent;
@@ -94,12 +104,18 @@ export default function ContentWizardPage() {
           // Platform flags for backend query params
           instagram: instagramSelected,
           twitter: twitterSelected,
+          // Prefer explicit banner file; else pass selected index
+          bannerFile: bannerFile || undefined,
+          bannerIndex:
+            bannerFile || bannerIndex === null
+              ? undefined
+              : Math.max(0, Math.min(bannerIndex, (images || []).length - 1)),
         });
       } catch (error) {
         console.error("Content submission failed:", error);
       }
     },
-    [submit, instagramSelected, twitterSelected]
+    [submit, instagramSelected, twitterSelected, bannerFile, bannerIndex]
   );
 
   /**
@@ -134,7 +150,7 @@ export default function ContentWizardPage() {
           {/* Feedback message */}
           {feedbackMessage && (
             <div
-              className={`max-w-[600px] mx-auto p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-300 mx-4 sm:mx-auto ${
+              className={`max-w-[600px] p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-300 mx-4 sm:mx-auto ${
                 feedbackType === "success"
                   ? "bg-green-500/10 border border-green-500/20 text-green-400"
                   : "bg-error-500/10 border border-error-500/20 text-error-400"
@@ -584,6 +600,16 @@ export default function ContentWizardPage() {
                     maxLength={5000}
                     maxImages={10}
                     disabled={isLoading}
+                    onImagesChange={(imgs) => {
+                      setWizardImages(imgs || []);
+                      // If selected index is out of range after change, reset
+                      if (
+                        bannerIndex !== null &&
+                        (!imgs || bannerIndex >= imgs.length)
+                      ) {
+                        setBannerIndex(null);
+                      }
+                    }}
                     validationOptions={{
                       text: {
                         required: true,
@@ -595,6 +621,165 @@ export default function ContentWizardPage() {
                       },
                     }}
                   />
+                  {/* Banner selection controls */}
+                  <div className="w-full mt-3 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-invert-low">
+                        Banner image
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-col gap-2">
+                      {wizardImages.length > 0 && (
+                        <>
+                          <div className="text-[11px] text-invert-low">
+                            Select one of your uploaded images as banner:
+                          </div>
+                          <div
+                            className="flex gap-2 overflow-x-auto"
+                            role="list"
+                          >
+                            {wizardImages.map((img, idx) => (
+                              <button
+                                key={img.id}
+                                type="button"
+                                role="listitem"
+                                onClick={() => {
+                                  setBannerIndex(idx);
+                                  setBannerFile(null);
+                                  if (bannerPreviewUrl) setBannerPreviewUrl("");
+                                }}
+                                aria-pressed={bannerIndex === idx}
+                                className={`relative w-16 h-16 rounded-md overflow-hidden border transition-colors ${
+                                  bannerIndex === idx
+                                    ? "border-core-prim-400"
+                                    : "border-core-prim-300/20"
+                                }`}
+                              >
+                                <img
+                                  src={img.preview}
+                                  alt={`Banner option ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                {bannerIndex === idx && (
+                                  <div className="absolute inset-0 ring-2 ring-core-prim-400" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      <div
+                        className={`relative flex items-center gap-2 mt-1 rounded-xl border border-core-prim-300/20 p-2 ${
+                          isBannerDragOver ? "ring-2 ring-core-prim-500" : ""
+                        }`}
+                        onDragEnter={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setBannerDragCounter((c) => c + 1);
+                          const hasFiles = Array.from(
+                            e.dataTransfer?.items || []
+                          ).some((i) => i.kind === "file");
+                          if (hasFiles) setIsBannerDragOver(true);
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.dataTransfer.dropEffect = "copy";
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setBannerDragCounter((c) => Math.max(0, c - 1));
+                          if (bannerDragCounter - 1 <= 0)
+                            setIsBannerDragOver(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsBannerDragOver(false);
+                          setBannerDragCounter(0);
+                          const file = e.dataTransfer?.files?.[0];
+                          if (file) {
+                            setBannerFile(file);
+                            setBannerIndex(null);
+                            try {
+                              const url = URL.createObjectURL(file);
+                              setBannerPreviewUrl(url);
+                            } catch (err) {
+                              console.warn(
+                                "Failed to preview banner file",
+                                err
+                              );
+                            }
+                          }
+                        }}
+                      >
+                        <input
+                          id="wizard-banner-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setBannerFile(file);
+                              setBannerIndex(null);
+                              try {
+                                const url = URL.createObjectURL(file);
+                                setBannerPreviewUrl(url);
+                              } catch (err) {
+                                console.warn(
+                                  "Failed to preview banner file",
+                                  err
+                                );
+                              }
+                            }
+                            if (e.target) e.target.value = "";
+                          }}
+                        />
+                        <label
+                          htmlFor="wizard-banner-upload"
+                          className="cursor-pointer rounded-2xl px-3 py-1.5 border border-core-prim-300/30 text-[12px] hover:bg-core-prim-500/10"
+                        >
+                          Upload separate banner
+                        </label>
+                        {bannerFile ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBannerFile(null);
+                              if (bannerPreviewUrl) setBannerPreviewUrl("");
+                            }}
+                            className="text-[12px] text-error-400 hover:text-error-300"
+                          >
+                            Clear
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-invert-low">
+                            Optional
+                          </span>
+                        )}
+                        {isBannerDragOver && (
+                          <div className="absolute inset-0 bg-core-prim-500/5 flex items-center justify-center pointer-events-none rounded-xl">
+                            <div className="text-[11px] px-2 py-1 bg-core-neu-1000/80 rounded-full border border-core-prim-300/30">
+                              Drop image to set as banner
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {bannerFile && bannerPreviewUrl && (
+                        <div className="mt-2 rounded-lg overflow-hidden border border-core-prim-300/20">
+                          <img
+                            src={bannerPreviewUrl}
+                            alt="Selected banner preview"
+                            className="w-full max-h-40 object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="w-full h-full flex gap-3  items-center mt-3">
                   {/* Blog is always selected and cannot be unchecked */}

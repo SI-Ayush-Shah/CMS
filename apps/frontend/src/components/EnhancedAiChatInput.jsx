@@ -37,6 +37,7 @@ export const EnhancedAiChatInput = ({
   maxImages = 10,
   disabled = false,
   validationOptions = {},
+  onImagesChange,
 }) => {
   // Refs
   const textareaRef = useRef(null);
@@ -104,6 +105,13 @@ export const EnhancedAiChatInput = ({
         handleValidationError("image", error);
       },
     });
+
+  // Notify parent when images change (for banner selection in wizard)
+  useEffect(() => {
+    if (typeof onImagesChange === "function") {
+      onImagesChange(images);
+    }
+  }, [images, onImagesChange]);
 
   const {
     errors,
