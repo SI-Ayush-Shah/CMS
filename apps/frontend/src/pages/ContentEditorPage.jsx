@@ -39,6 +39,7 @@ export default function ContentEditorPage() {
 
   // State for summarization loading
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const summarizationTriggeredRef = useRef(false);
 
   const { data: article } = useQuery({
     queryKey: ["article", id],
@@ -148,10 +149,12 @@ export default function ContentEditorPage() {
       : isSummaryTooShort || isSummaryTooLong
         ? "text-error-400"
         : "text-success-400";
-  // Effect to handle RSS feed item summarization
+  // Effect to handle RSS feed item summarization (guarded to run once)
   useEffect(() => {
     const processSummarization = async () => {
-      if (rssFeedItem && isSummarizeMode && !isSummarizing) {
+      if (summarizationTriggeredRef.current) return;
+      if (rssFeedItem && isSummarizeMode) {
+        summarizationTriggeredRef.current = true;
         try {
           setIsSummarizing(true);
           showMessage("Summarizing content...", "info");
@@ -205,7 +208,7 @@ export default function ContentEditorPage() {
     };
 
     processSummarization();
-  }, [rssFeedItem, isSummarizeMode, isSummarizing, showMessage]);
+  }, [rssFeedItem, isSummarizeMode, showMessage]);
 
   // Effect to handle article data changes
   useEffect(() => {
