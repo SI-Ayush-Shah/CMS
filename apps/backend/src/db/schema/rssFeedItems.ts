@@ -10,6 +10,7 @@ export const rssFeedItems = pgTable('rss_feed_items', {
   link: varchar('link', { length: 1024 }).notNull(),
   summary: text('summary'),
   content: text('content'),
+  imageUrl: varchar('image_url', { length: 1024 }),
   author: varchar('author', { length: 255 }),
   categories: jsonb('categories').$type<string[]>().notNull().default([]),
   publishedAt: timestamp('published_at', { withTimezone: true }),
