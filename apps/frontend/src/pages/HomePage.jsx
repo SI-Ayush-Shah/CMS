@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ProgressToastDemo from '../components/ProgressToastDemo';
 
 const HomePage = () => {
   return (
@@ -78,6 +79,18 @@ const HomePage = () => {
                 Following React best practices with proper accessibility and responsive design.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Progress Toast Demo Section */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-h2 leading-h2 font-bold text-main-high mb-8 text-center">
+            Progress Toast Demo
+          </h2>
+          <div className="bg-surface-low p-6 rounded-lg border border-default mb-12">
+            <ProgressToastDemo />
           </div>
         </div>
       </section>
