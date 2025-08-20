@@ -38,15 +38,18 @@ export default function ContentWizardPage() {
         result?.data?.blogId;
 
       if (blogId) {
-        setFeedbackMessage(
-          "Content generated successfully! Redirecting to editor..."
-        );
-        setFeedbackType("success");
-
-        // Navigate to editor page after short delay for user feedback
-        setTimeout(() => {
-          navigate(`/editor/${blogId}`);
-        }, 1500);
+        // Keep processing UI visible and redirect immediately without flicker
+        try {
+          // Ensure processing overlay persists during route change
+          const store = useProcessingStore.getState?.();
+          if (store?.start) {
+            store.start("redirecting", "Redirecting to editor...");
+          }
+        } catch {
+          // intentionally ignored – overlay is non-critical
+        }
+        navigate(`/editor/${blogId}`, { replace: true });
+        return;
       } else {
         // Fallback to current behavior if no blog ID
         const payload = result?.generatedContent;

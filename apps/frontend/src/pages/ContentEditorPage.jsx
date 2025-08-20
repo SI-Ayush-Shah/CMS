@@ -14,6 +14,7 @@ import EditorJsEditor from "../components/EditorJsEditor";
 import EditorJsRenderer from "../components/EditorJsRenderer";
 import RightPanel from "../components/RightPanel";
 import Loader from "../components/Loader";
+import ProcessingView from "../components/ProcessingView";
 import { normalizeEditorJsBody } from "../utils";
 import { useAutoResize } from "../hooks/useAutoResize";
 import { imageUploadApi } from "../services/imageUploadApi";
@@ -389,6 +390,11 @@ export default function ContentEditorPage() {
     },
     [article?.id, showMessage]
   );
+
+  // While summarizing, show the ProcessingView (full-screen) similar to wizard
+  if (isSummarizing) {
+    return <ProcessingView phase="summarizing" />;
+  }
 
   return (
     <div className="w-full h-full">
