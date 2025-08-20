@@ -38,7 +38,7 @@ export const selectGeneratedContentSchema = Type.Object({
   tags: Type.Array(Type.String()),
   body: Type.Record(Type.String(), Type.Any()),
   images: Type.Array(Type.String()),
-  bannerUrl: Type.Optional(Type.String({ format: 'uri' })),
+  bannerUrl: Type.Union([Type.String({ format: 'uri' }), Type.Null()]),
   status: Type.Union([Type.Literal('draft'), Type.Literal('published')]),
   createdAt: Type.String({ format: 'date-time' }),
   updatedAt: Type.String({ format: 'date-time' }),
