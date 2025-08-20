@@ -1,5 +1,5 @@
 import { Button } from './Button';
-import { HiOutlineSparkles } from "react-icons/hi";
+import { HiOutlineSparkles } from "react-icons/hi2";
 import ContentCard from './ContentCard';
 
 const RssFeedCard = ({ 

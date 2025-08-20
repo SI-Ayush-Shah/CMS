@@ -9,6 +9,9 @@ import { IoBriefcaseOutline } from "react-icons/io5";
 import { MdRssFeed } from "react-icons/md";
 import { FaHashtag } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
+import { GoStack } from "react-icons/go";
+import { IoShareSocialOutline } from "react-icons/io5";
+import { ImFeed } from "react-icons/im";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
@@ -28,26 +31,20 @@ export function Leftpanel() {
       {
         id: "content-hub",
         label: "Content Hub",
-        icon: <PiNotePencilThin />,
+        icon: <GoStack />,
         path: "/content-hub",
         matchPaths: ["/content-hub", "/blog"],
       },
       {
-        id: "ai-jobs",
-        label: "AI Jobs",
-        icon: <IoBriefcaseOutline />,
-        path: "/jobs",
-      },
-      {
         id: "feed-manager",
         label: "Feed Manager",
-        icon: <MdRssFeed />,
+        icon: <ImFeed />,
         path: "/feed-manager",
       },
       {
         id: "social-media",
         label: "Social Media",
-        icon: <FaHashtag />,
+        icon: <IoShareSocialOutline />,
         path: "/social-media",
       },
       {
