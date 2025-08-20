@@ -1,411 +1,182 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
-import { contentApi } from "../services/contentApi";
-import EditorJsRenderer from "../components/EditorJsRenderer";
-import EditorJsEditor from "../components/EditorJsEditor";
-import RightPanel from "../components/RightPanel";
-import { normalizeEditorJsBody } from "../utils";
+import React, { useEffect, useRef } from "react";
+import EditorJS from "@editorjs/editorjs";
+import Header from "@editorjs/header";
+import List from "@editorjs/list";
+import Table from "@editorjs/table";
+import Code from "@editorjs/code";
+import Quote from "@editorjs/quote";
+import Delimiter from "@editorjs/delimiter";
+import Checklist from "@editorjs/checklist";
+import Warning from "@editorjs/warning";
+import Embed from "@editorjs/embed";
+import ImageTool from "@editorjs/image";
+import { imageUploadApi } from "../services/imageUploadApi";
 
 /**
- * Content Editor Page
+ * EditorJsEditor
  *
- * UI inspired by the provided Figma. Left column contains the editor:
- * - Cover Image (single image)
- * - Title
- * - Body
- * - Actions (Save to drafts / Publish)
- *
- * Right column contains an assistant panel using the existing
- * EnhancedAiChatInput for ideation/help while writing.
+ * A thin React wrapper around Editor.js with a broad set of tools enabled
+ * and a file uploader that leverages our imageUploadApi mock.
  */
-export default function ContentEditorPage() {
-  const { id } = useParams();
-  const { data: article } = useQuery({
-    queryKey: ["article", id],
-    queryFn: () => contentApi.getContent(id),
-    enabled: !!id,
-  });
+export default function EditorJsEditor({
+  initialData,
+  onChange,
+  className = "",
+  style,
+}) {
+  const holderRef = useRef(null);
+  const editorRef = useRef(null);
+  const initializedRef = useRef(false);
 
-  const [isSavingDraft, setIsSavingDraft] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' | 'error'
-  const [viewMode, setViewMode] = useState("edit"); // 'edit' | 'preview'
-
-  // Read-only dummy content for the editor preview (LHS)
-  const dummyTitle = "Virat Kohli: A Career Unforgettable—and Unfulfilled";
-  const dummyBody = `Virat Kohli's retirement from Tests has left Indian cricket beleaguered and the sporting world gasping in surprise.\n\nComing on the heels of captain Rohit Sharma quitting a few days earlier, it adds up to a double whammy for India who embark on a tough tour of England for a five-Test series come June without their two most experienced batters.\n\nLike Sharma, Kohli took to Instagram, where he commands more than 270 million followers, to make his retirement public. "As I step away from this format, it's not easy – but it feels right..." he explained to his disconsolate fans.\n\nTributes for Kohli have come in a deluge since: from fellow cricketers, past and present, old and young, and also legends from other disciplines like tennis ace Novak Djokovic and football star Harry Kane, which highlights the sweep and heft of Kohli's global appeal.\n\nLeading India to victory in the Under-19 World Cup in 2008, Kohli was fast tracked into international cricket by the then-chairman of selectors, former India captain Dilip Vengsarkar, against the judgement of others in the cricket establishment.`;
-  const dummyImageUrl = useMemo(
-    () =>
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1600&auto=format&fit=crop",
-    []
-  );
-
-  const showMessage = useCallback((text, type = "success") => {
-    setMessage(text);
-    setMessageType(type);
-    window.setTimeout(
-      () => {
-        setMessage("");
-        setMessageType("");
-      },
-      type === "success" ? 4000 : 6000
-    );
-  }, []);
-
-  const currentTitle = article?.title || dummyTitle;
-  const currentBanner = article?.bannerUrl || dummyImageUrl;
-  const currentBody = article?.body;
-  const [editorBody, setEditorBody] = useState(currentBody || null);
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [category, setCategory] = useState("");
-  const [tags, setTags] = useState([]);
   useEffect(() => {
-    setEditorBody(currentBody || null);
-    setTitle(article?.title || "");
-    setSummary(article?.summary || "");
-    setCategory(article?.category || "");
-    setTags(Array.isArray(article?.tags) ? article.tags : []);
-  }, [
-    currentBody,
-    article?.title,
-    article?.summary,
-    article?.category,
-    article?.tags,
-  ]);
+    const holderEl = holderRef.current;
+    if (!holderEl) return;
+    if (initializedRef.current || editorRef.current) return;
 
-  const initialEditorData = useMemo(() => {
-    if (editorBody) return editorBody;
-    if (currentBody) return currentBody;
-    const blocks = dummyBody
-      .split("\n")
-      .filter(Boolean)
-      .map((p) => ({
-        id: Math.random().toString(36).slice(2),
-        type: "paragraph",
-        data: { text: p },
-      }));
-    return { time: Date.now(), blocks, version: "2.30.7" };
-  }, [editorBody, currentBody, dummyBody]);
-
-  const handleEditorChange = useCallback((data) => {
-    const normalized = normalizeEditorJsBody(data);
-    setEditorBody(normalized);
-  }, []);
-
-  const validate = useCallback(() => {
-    if (!(title || currentTitle).trim()) {
-      showMessage("Please add a title.", "error");
-      return false;
-    }
-    const hasEditorBlocks =
-      Array.isArray(editorBody?.blocks) && editorBody.blocks.length > 0;
-    if (!hasEditorBlocks && !dummyBody.trim()) {
-      showMessage("Please write the body content.", "error");
-      return false;
-    }
-    return true;
-  }, [title, currentTitle, editorBody, dummyBody, showMessage]);
-
-  const handleSaveDraft = useCallback(async () => {
-    if (!validate()) return;
-    try {
-      setIsSavingDraft(true);
-      if (id) {
-        const payload = {
-          title: title || currentTitle,
-          summary: summary || undefined,
-          category: category || undefined,
-          tags: tags.length ? tags : undefined,
-          body: editorBody || currentBody,
-        };
-        const res = await contentApi.patchContent(id, payload);
-        showMessage("Draft updated successfully.");
-        return res;
-      } else {
-        const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
-          imageIds: [],
-          metadata: { status: "draft" },
-        });
-        showMessage("Saved to drafts successfully.");
-        return res;
-      }
-    } catch (err) {
-      showMessage(err?.message || "Failed to save draft.", "error");
-    } finally {
-      setIsSavingDraft(false);
-    }
-  }, [
-    validate,
-    dummyTitle,
-    dummyBody,
-    showMessage,
-    id,
-    editorBody,
-    title,
-    summary,
-    category,
-    tags,
-    currentTitle,
-    currentBody,
-  ]);
-
-  const handlePublish = useCallback(async () => {
-    if (!validate()) return;
-    try {
-      setIsPublishing(true);
-      if (id) {
-        const payload = {
-          title: title || currentTitle,
-          summary: summary || undefined,
-          category: category || undefined,
-          tags: tags.length ? tags : undefined,
-          body: editorBody || currentBody,
-        };
-        const res = await contentApi.patchContent(id, payload);
-        showMessage("Content updated.");
-        return res;
-      } else {
-        const res = await contentApi.saveContent({
-          text: `${dummyTitle}\n\n${dummyBody}`,
-          imageIds: [],
-          metadata: { status: "published" },
-        });
-        showMessage("Published successfully.");
-        return res;
-      }
-    } catch (err) {
-      showMessage(err?.message || "Failed to publish.", "error");
-    } finally {
-      setIsPublishing(false);
-    }
-  }, [
-    validate,
-    dummyTitle,
-    dummyBody,
-    showMessage,
-    id,
-    editorBody,
-    title,
-    summary,
-    category,
-    tags,
-    currentTitle,
-    currentBody,
-  ]);
-
-  const handleRefinementApplied = useCallback(
-    async (updatedBody) => {
+    // Global singleton guard (dev StrictMode resilience)
+    if (typeof window !== "undefined" && window.__cmsEditorInstance) {
       try {
-        const blogId = article?.id;
-        const normalized = normalizeEditorJsBody(updatedBody);
-        setEditorBody(normalized);
-        if (blogId) {
-          await contentApi.updateBlogContent(blogId, normalized);
-          showMessage("Refinement saved.");
-        } else {
-          showMessage("Refinement applied to preview.");
-        }
+        window.__cmsEditorInstance.destroy();
       } catch (err) {
-        showMessage(err?.message || "Failed to save refinement.", "error");
+        console.warn("Previous global EditorJS instance destroy failed", err);
       }
-    },
-    [article?.id, showMessage]
-  );
+      window.__cmsEditorInstance = null;
+    }
+
+    const normalizeInitialData = (data) => {
+      if (!data || !Array.isArray(data.blocks)) return { blocks: [] };
+      const blocks = data.blocks.map((block) => {
+        if (block?.type === "image") {
+          const d = block.data || {};
+          const url =
+            typeof d.file === "string" ? d.file : d?.file?.url || d?.url;
+          return {
+            ...block,
+            data: { ...d, file: url ? { url } : d.file },
+          };
+        }
+        return block;
+      });
+      return { ...data, blocks };
+    };
+
+    // Ensure clean mount surface
+    holderEl.innerHTML = "";
+
+    const editor = new EditorJS({
+      holder: holderEl,
+      autofocus: true,
+      placeholder: "Start writing your article...",
+      data: normalizeInitialData(initialData) || { blocks: [] },
+      tools: {
+        header: {
+          class: Header,
+          inlineToolbar: ["link", "bold", "italic"],
+          config: { levels: [2, 3, 4], defaultLevel: 2 },
+        },
+        list: {
+          class: List,
+          inlineToolbar: true,
+        },
+        table: {
+          class: Table,
+          inlineToolbar: true,
+        },
+        code: Code,
+        quote: {
+          class: Quote,
+          inlineToolbar: true,
+          config: {
+            quotePlaceholder: "Enter a quote",
+            captionPlaceholder: "Quote author",
+          },
+        },
+        delimiter: Delimiter,
+        checklist: {
+          class: Checklist,
+          inlineToolbar: true,
+        },
+        warning: Warning,
+        embed: {
+          class: Embed,
+          inlineToolbar: false,
+          config: {
+            services: {
+              youtube: true,
+              vimeo: true,
+              twitter: true,
+              instagram: true,
+              codepen: true,
+            },
+          },
+        },
+        image: {
+          class: ImageTool,
+          config: {
+            captionPlaceholder: "Add a caption",
+            uploader: {
+              async uploadByFile(file) {
+                const uploaded = await imageUploadApi.uploadImage(
+                  file,
+                  () => {}
+                );
+                return { success: 1, file: { url: uploaded.url } };
+              },
+              async uploadByUrl(url) {
+                return { success: 1, file: { url } };
+              },
+            },
+          },
+        },
+      },
+      onChange: async () => {
+        try {
+          const data = await editor.save();
+          if (onChange) onChange(data);
+        } catch (err) {
+          console.error("EditorJS save failed", err);
+        }
+      },
+    });
+
+    editorRef.current = editor;
+    initializedRef.current = true;
+    if (typeof window !== "undefined") {
+      window.__cmsEditorInstance = editor;
+    }
+
+    return () => {
+      const instance = editorRef.current;
+      editorRef.current = null;
+      initializedRef.current = false;
+      try {
+        instance && instance.destroy();
+      } catch (err) {
+        console.warn("EditorJS destroy failed", err);
+      }
+      if (
+        typeof window !== "undefined" &&
+        window.__cmsEditorInstance === instance
+      ) {
+        window.__cmsEditorInstance = null;
+      }
+      // Ensure holder is cleared to avoid ghost toolbars
+      try {
+        holderEl.innerHTML = "";
+      } catch (err) {
+        console.warn("Failed to clear editor holder", err);
+      }
+    };
+    // We intentionally want to init once per mount; do not depend on initialData
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="w-full h-full">
-      {/* Message */}
-      {message && (
-        <div
-          className={`mb-4 p-3 rounded-lg text-sm ${
-            messageType === "success"
-              ? "bg-success-500/10 border border-success-500/20 text-success-500"
-              : "bg-error-500/10 border border-error-500/20 text-error-400"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Editor column */}
-        <section className="lg:col-span-2 space-y-5">
-          {/* Header with title, status, updated at, and actions only */}
-          <div className="mb-5 rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3 sticky top-0 z-10 backdrop-blur-lg">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div className="flex-1 min-w-0">
-                <Input
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="text-[18px] font-semibold"
-                />
-                {article?.updatedAt && (
-                  <div className="text-[11px] text-invert-low mt-1">
-                    Updated {new Date(article.updatedAt).toLocaleString()}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-3 mt-2 md:mt-0">
-                {article?.status && (
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full border ${
-                      article.status === "published"
-                        ? "bg-success-500/10 border-success-500/20 text-success-400"
-                        : "bg-warning-500/10 border-warning-500/20 text-warning-400"
-                    }`}
-                  >
-                    {article.status}
-                  </span>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  isLoading={isSavingDraft}
-                  className="min-w-28"
-                >
-                  Save draft
-                </Button>
-                <Button
-                  variant="solid"
-                  onClick={handlePublish}
-                  isLoading={isPublishing}
-                  className="min-w-24"
-                >
-                  Publish
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Metadata fields below header */}
-          <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-3">
-            <div className="flex flex-col gap-3">
-              <textarea
-                placeholder="Summary"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                rows={3}
-                className="w-full rounded-lg px-3 py-2 text-[13px] bg-button-filled-main-default focus:ring-2 focus:ring-core-prim-500"
-              />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  placeholder="Category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
-                <Input
-                  placeholder="Tags (comma-separated)"
-                  value={tags.join(", ")}
-                  onChange={(e) =>
-                    setTags(
-                      e.target.value
-                        .split(",")
-                        .map((t) => t.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
-              </div>
-          {/* Header with actions */}
-          <div className="flex items-center justify-between mb-5 rounded-md border border-core-prim-300/20 bg-core-neu-1000/40 px-4 py-2 sticky top-2 z-10 backdrop-blur-lg">
-            <div className="text-[20px] flex flex-col font-semibold text-invert-high">
-              Creative Wizard{" "}
-              {id && (
-                <span className="text-[12px] text-invert-low">#{id}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={handleSaveDraft}
-                isLoading={isSavingDraft}
-                className="min-w-40"
-              >
-                Save to drafts
-              </Button>
-              <Button
-                variant="solid"
-                onClick={handlePublish}
-                isLoading={isPublishing}
-                className="min-w-36"
-              >
-                Publish
-              </Button>
-            </div>
-          </div>
-          <div className="px-3">
-            <p className="text-xs text-invert-low mb-2">Image</p>
-            <div className="w-full">
-              <div className="relative w-full overflow-hidden rounded-2xl border border-core-prim-300/20">
-                <img
-                  src={currentBanner}
-                  alt="Cover preview"
-                  className="w-full aspect-[16/10] object-cover"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-invert-low">Body</p>
-              <div className="flex items-center rounded-md overflow-hidden border border-core-prim-300/20">
-                <button
-                  className={`px-3 py-1.5 text-[12px] ${
-                    viewMode === "edit"
-                      ? "bg-core-prim-500/20 text-invert-high"
-                      : "bg-transparent text-invert-low"
-                  }`}
-                  onClick={() => setViewMode("edit")}
-                >
-                  Edit
-                </button>
-                <button
-                  className={`px-3 py-1.5 text-[12px] ${
-                    viewMode === "preview"
-                      ? "bg-core-prim-500/20 text-invert-high"
-                      : "bg-transparent text-invert-low"
-                  }`}
-                  onClick={() => setViewMode("preview")}
-                >
-                  Preview
-                </button>
-              </div>
-            </div>
-          <div className="px-3">
-            <p className="text-xs text-invert-low mb-2">Body</p>
-            <div className="">
-              {/* Keep editor mounted for state retention; toggle visibility */}
-              <div className={viewMode === "edit" ? "block" : "hidden"}>
-                <EditorJsEditor
-                  initialData={initialEditorData}
-                  onChange={handleEditorChange}
-                  className="mx-auto max-w-[860px]"
-                />
-              </div>
-              {viewMode === "preview" && (
-                <div className="rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-6 mx-auto max-w-[860px]">
-                  <EditorJsRenderer data={editorBody || currentBody} />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Right Panel */}
-        <RightPanel
-          blogId={article?.id}
-          body={editorBody || currentBody}
-          onRefinement={handleRefinementApplied}
-        />
-      </div>
+    <div
+      className={`rounded-xl border border-core-prim-300/20 bg-core-neu-1000/40 p-3 ${className}`}
+      style={style}
+    >
+      <div ref={holderRef} className="min-h-[560px]" />
     </div>
   );
 }
