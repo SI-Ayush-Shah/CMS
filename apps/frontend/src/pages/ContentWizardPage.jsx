@@ -22,12 +22,15 @@ export default function ContentWizardPage() {
   const { submit, isLoading, loadingState } = useContentSubmission({
     onSuccess: (result) => {
       // Extract blog ID from response for navigation
-      const blogId = result?.generatedContent?.data?.blogId ||
+      const blogId =
+        result?.generatedContent?.data?.blogId ||
         result?.generatedContent?.blogId ||
         result?.data?.blogId;
 
       if (blogId) {
-        setFeedbackMessage("Content generated successfully! Redirecting to editor...");
+        setFeedbackMessage(
+          "Content generated successfully! Redirecting to editor..."
+        );
         setFeedbackType("success");
 
         // Navigate to editor page after short delay for user feedback
@@ -38,7 +41,9 @@ export default function ContentWizardPage() {
         // Fallback to current behavior if no blog ID
         const payload = result?.generatedContent;
         const gc =
-          payload?.data?.generatedContent || payload?.generatedContent || payload;
+          payload?.data?.generatedContent ||
+          payload?.generatedContent ||
+          payload;
         const normalized = {
           title: gc?.title,
           summary: gc?.summary,
@@ -104,28 +109,30 @@ export default function ContentWizardPage() {
   return (
     <ContentWizardErrorBoundary>
       <div className="relative w-full flex h-full items-center justify-center">
-        {/* Top progress bar while processing */}
-        <LoadingProgress
-          isLoading={loadingState?.phase && loadingState.phase !== "idle"}
-        />
         <div className="flex flex-col w-full gap-4 h-full justify-center ">
-          {/* Title - responsive design with improved mobile spacing */}
-          <div className="font-semibold text-invert-high text-xl sm:text-2xl md:text-3xl lg:text-[36px] text-center px-4 sm:px-6">
-            What's on your mind today?
-          </div>
+          {/* Title and Subtitle - hidden during processing */}
+          {!isLoading && !isProcessing && loadingState?.phase === "idle" && (
+            <>
+              {/* Title - responsive design with improved mobile spacing */}
+              <div className="font-semibold text-invert-high text-xl sm:text-2xl md:text-3xl lg:text-[36px] text-center px-4 sm:px-6">
+                What's on your mind today?
+              </div>
 
-          {/* Subtitle - responsive design with better mobile readability */}
-          <div className="font-normal text-invert-low text-sm sm:text-base text-center px-4 sm:px-6">
-            Type it. Dream it. Watch it appear!
-          </div>
+              {/* Subtitle - responsive design with better mobile readability */}
+              <div className="font-normal text-invert-low text-sm sm:text-base text-center px-4 sm:px-6">
+                Type it. Dream it. Watch it appear!
+              </div>
+            </>
+          )}
 
           {/* Feedback message */}
           {feedbackMessage && (
             <div
-              className={`max-w-[600px] mx-auto p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-300 mx-4 sm:mx-auto ${feedbackType === "success"
-                ? "bg-green-500/10 border border-green-500/20 text-green-400"
-                : "bg-error-500/10 border border-error-500/20 text-error-400"
-                }`}
+              className={`max-w-[600px] mx-auto p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-300 mx-4 sm:mx-auto ${
+                feedbackType === "success"
+                  ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                  : "bg-error-500/10 border border-error-500/20 text-error-400"
+              }`}
             >
               <div className="flex items-center justify-center gap-2">
                 {feedbackType === "success" ? (
@@ -179,9 +186,9 @@ export default function ContentWizardPage() {
 
           {/* Switch between: input → processing → editor */}
           {isProcessing ? (
-            <>
+            <div className="flex-1 flex items-center justify-center my-auto">
               <ProcessingView phase={phase} />
-            </>
+            </div>
           ) : article ? (
             <ContentEditorView
               article={
@@ -562,24 +569,39 @@ export default function ContentWizardPage() {
               }
             />
           ) : (
-            <div className="w-full max-w-[600px] mx-auto min-h-[175px] sm:min-h-[200px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-2 sm:px-4 md:px-0">
-              <EnhancedAiChatInput
-                onSubmit={handleContentSubmit}
-                placeholder="Your blog crafting experience starts here..."
-                maxLength={5000}
-                maxImages={10}
-                disabled={isLoading}
-                validationOptions={{
-                  text: {
-                    required: true,
-                    maxLength: 2000,
-                  },
-                  images: {
-                    maxImages: 10,
-                    required: false,
-                  },
-                }}
-              />
+            <div className="">
+              <div className="w-full max-w-[600px] mx-auto min-h-[175px] sm:min-h-[200px] backdrop-blur-[20px] backdrop-filter bg-core-neu-1000 rounded-[15px] px-2 sm:px-4 md:px-0">
+                <div className="w-full h-full flex flex-col justify-center items-center">
+                  <EnhancedAiChatInput
+                    onSubmit={handleContentSubmit}
+                    placeholder="Your blog crafting experience starts here..."
+                    maxLength={5000}
+                    maxImages={10}
+                    disabled={isLoading}
+                    validationOptions={{
+                      text: {
+                        required: true,
+                        maxLength: 2000,
+                      },
+                      images: {
+                        maxImages: 10,
+                        required: false,
+                      },
+                    }}
+                  />
+                </div>
+                <div className="w-full h-full flex gap-3  items-center mt-3">
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                    Blog
+                  </button>
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                    Instagram
+                  </button>
+                  <button className="border-2 border-core-prim-100 rounded-xl px-4 py-1 hover:bg-core-prim-500/30 hover:text-invert-high">
+                    Twitter
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
