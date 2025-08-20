@@ -126,7 +126,7 @@ export const classifyNetworkError = (error) => {
 // TODO: Update baseURL when backend API is available
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001",
-  timeout: 60000, // 15 seconds timeout
+  timeout: import.meta.env.VITE_API_TIMEOUT || 60000,
   headers: {
     "Content-Type": "application/json",
   },
