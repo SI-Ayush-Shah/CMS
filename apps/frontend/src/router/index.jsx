@@ -7,18 +7,16 @@ import ContentWizardPage from "../pages/ContentWizardPage";
 import ComponentsPage from "../pages/ComponentsPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import LoginWrapper from "../components/LoginWrapper";
-
-// Lazy load page components for code splitting
-const HomePage = lazy(() => import("../pages/HomePage"));
-const AboutPage = lazy(() => import("../pages/AboutPage"));
-const BlogPage = lazy(() => import("../pages/BlogPage"));
-const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
-const LoginPage = lazy(() => import("../pages/LoginPage"));
-const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
-const EditorPage = lazy(() => import("../pages/EditorPage"));
-const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
-const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
-const SocialMediaPage = lazy(() => import("../pages/SocialMediaPage"));
+import HomePage from "../pages/HomePage";
+import AboutPage from "../pages/AboutPage";
+import BlogPage from "../pages/BlogPage";
+import ContentEditorPage from "../pages/ContentEditorPage";
+import EditorPage from "../pages/EditorPage";
+import AnalyticsPage from "../pages/AnalyticsPage";
+import FeedManagerPage from "../pages/FeedManagerPage";
+import SocialMediaPage from "../pages/SocialMediaPage";
+import LoginPage from "../pages/LoginPage";
+import NotFoundPage from "../pages/NotFoundPage";
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([

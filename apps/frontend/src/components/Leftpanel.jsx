@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
@@ -16,44 +16,50 @@ export function Leftpanel() {
   const location = useLocation();
   const { user, logout } = useAuthStore();
 
-  const navigationItems = [
-    {
-      id: "creative-wizard",
-      label: "Creative Wizard",
-      icon: <PiMagicWand />,
-      path: "/wizard",
-    },
-    {
-      id: "content-hub",
-      label: "Content Hub",
-      icon: <PiNotePencilThin />,
-      path: "/blog",
-    },
-    {
-      id: "ai-jobs",
-      label: "AI Jobs",
-      icon: <IoBriefcaseOutline />,
-      path: "/jobs",
-    },
-    {
-      id: "feed-manager",
-      label: "Feed Manager",
-      icon: <MdRssFeed />,
-      path: "/feed-manager",
-    },
-    {
-      id: "social-media",
-      label: "Social Media",
-      icon: <FaHashtag />,
-      path: "/social-media",
-    },
-    {
-      id: "analytics",
-      label: "Analytics",
-      icon: <PiChartLineUp />,
-      path: "/components",
-    },
-  ];
+  const navigationItems = useMemo(
+    () => [
+      {
+        id: "creative-wizard",
+        label: "Creative Wizard",
+        icon: <PiMagicWand />,
+        path: "/wizard",
+        matchPaths: ["/wizard", "/creative-wizard"],
+      },
+      {
+        id: "content-hub",
+        label: "Content Hub",
+        icon: <PiNotePencilThin />,
+        path: "/content-hub",
+        matchPaths: ["/content-hub", "/blog"],
+      },
+      {
+        id: "ai-jobs",
+        label: "AI Jobs",
+        icon: <IoBriefcaseOutline />,
+        path: "/jobs",
+      },
+      {
+        id: "feed-manager",
+        label: "Feed Manager",
+        icon: <MdRssFeed />,
+        path: "/feed-manager",
+      },
+      {
+        id: "social-media",
+        label: "Social Media",
+        icon: <FaHashtag />,
+        path: "/social-media",
+      },
+      {
+        id: "analytics",
+        label: "Analytics",
+        icon: <PiChartLineUp />,
+        path: "/analytics",
+        matchPaths: ["/analytics", "/components"],
+      },
+    ],
+    []
+  );
 
   const togglePanel = () => {
     setIsExpanded(!isExpanded);
@@ -66,16 +72,19 @@ export function Leftpanel() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
-  // Highlight active item based on current route
+  // Highlight active item based on current route (supports aliases)
   useEffect(() => {
-    const matched = navigationItems.find(
-      (item) => item.path && location.pathname.startsWith(item.path)
-    );
+    const matched = navigationItems.find((item) => {
+      const paths = item.matchPaths || (item.path ? [item.path] : []);
+      return paths.some(
+        (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
+      );
+    });
     if (matched) setActiveItemId(matched.id);
-  }, [location.pathname]);
+  }, [location.pathname, navigationItems]);
 
   return (
     <div
@@ -144,24 +153,22 @@ export function Leftpanel() {
           {isExpanded && (
             <div className="flex-1 min-w-0">
               <p className="text-invert-high text-[14px] font-normal truncate">
-                {user?.name || 'Admin User'}
+                {user?.name || "Admin User"}
               </p>
-              
             </div>
           )}
         </div>
-        
+
         <div>
-        {/* Logout Button */}
-        {isExpanded && (
-          <button
-            onClick={handleLogout}
-            className="w-full  text-[14px] font-normal text-text-invert-low hover:text-invert-high cursor-pointer"
-          >
-    <PiSignOutLight className="text-[20px]" />
-           
-          </button>
-        )}
+          {/* Logout Button */}
+          {isExpanded && (
+            <button
+              onClick={handleLogout}
+              className="w-full  text-[14px] font-normal text-text-invert-low hover:text-invert-high cursor-pointer"
+            >
+              <PiSignOutLight className="text-[20px]" />
+            </button>
+          )}
         </div>
       </div>
     </div>
