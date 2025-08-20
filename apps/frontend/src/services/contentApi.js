@@ -247,6 +247,19 @@ export const updateBlogContent = async (blogId, updatedBody) => {
 };
 
 /**
+ * Patch content with arbitrary fields supported by backend PATCH schema
+ * @param {string} blogId
+ * @param {Object} payload - any of {title, summary, category, tags, bannerUrl, images, body, status}
+ */
+export const patchContent = async (blogId, payload) => {
+  const response = await apiClient.patch(
+    `/content-studio/api/content/${blogId}`,
+    payload
+  );
+  return response.data;
+};
+
+/**
  * Rollback blog content to previous version
  * @param {string} blogId - The blog ID to rollback
  * @param {Object} previousBody - The previous version content
@@ -312,6 +325,7 @@ export const contentApi = {
   getBlogContent,
   refineContent,
   updateBlogContent,
+  patchContent,
   rollbackBlogContent,
   fetchRssItems,
 };

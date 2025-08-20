@@ -34,7 +34,10 @@ export default function EditorJsRenderer({ data }) {
           return (
             <ol key={id} className="list-decimal pl-5 space-y-1 mb-3">
               {items.map((item, idx) => (
-                <li key={`${id}-${idx}`} dangerouslySetInnerHTML={{ __html: item }} />
+                <li
+                  key={`${id}-${idx}`}
+                  dangerouslySetInnerHTML={{ __html: item }}
+                />
               ))}
             </ol>
           );
@@ -42,7 +45,10 @@ export default function EditorJsRenderer({ data }) {
         return (
           <ul key={id} className="list-disc pl-5 space-y-1 mb-3">
             {items.map((item, idx) => (
-              <li key={`${id}-${idx}`} dangerouslySetInnerHTML={{ __html: item }} />
+              <li
+                key={`${id}-${idx}`}
+                dangerouslySetInnerHTML={{ __html: item }}
+              />
             ))}
           </ul>
         );
@@ -59,9 +65,15 @@ export default function EditorJsRenderer({ data }) {
                   rows.filter(Boolean).map((row, rIdx) => {
                     const cells = Array.isArray(row) ? row : [row];
                     return (
-                      <tr key={`${id}-row-${rIdx}`} className="border-b border-core-prim-300/10">
+                      <tr
+                        key={`${id}-row-${rIdx}`}
+                        className="border-b border-core-prim-300/10"
+                      >
                         {cells.map((cell, cIdx) => (
-                          <td key={`${id}-cell-${rIdx}-${cIdx}`} className="px-3 py-2 align-top text-[14px]">
+                          <td
+                            key={`${id}-cell-${rIdx}-${cIdx}`}
+                            className="px-3 py-2 align-top text-[14px]"
+                          >
                             {cell}
                           </td>
                         ))}
@@ -75,17 +87,25 @@ export default function EditorJsRenderer({ data }) {
       }
       case "code": {
         return (
-          <pre key={id} className="bg-black/40 border border-core-prim-300/20 rounded-lg p-3 text-[12px] overflow-auto mb-3">
+          <pre
+            key={id}
+            className="bg-black/40 border border-core-prim-300/20 rounded-lg p-3 text-[12px] overflow-auto mb-3"
+          >
             <code>{data?.code || ""}</code>
           </pre>
         );
       }
       case "quote": {
         return (
-          <figure key={id} className="border-l-4 border-core-prim-400 pl-3 italic text-invert-high/80 my-4">
+          <figure
+            key={id}
+            className="border-l-4 border-core-prim-400 pl-3 italic text-invert-high/80 my-4"
+          >
             <blockquote>{data?.text}</blockquote>
             {data?.caption && (
-              <figcaption className="text-[12px] text-invert-low mt-1">{data.caption}</figcaption>
+              <figcaption className="text-[12px] text-invert-low mt-1">
+                {data.caption}
+              </figcaption>
             )}
           </figure>
         );
@@ -94,34 +114,66 @@ export default function EditorJsRenderer({ data }) {
         return <hr key={id} className="my-5 border-core-prim-300/20" />;
       }
       case "checklist": {
-        const items = Array.isArray(data?.items) ? data.items : [];
+        const rawItems = Array.isArray(data?.items) ? data.items : [];
         return (
-          <ul key={id} className="space-y-1 mb-3">
-            {items.map((text, idx) => (
-              <li key={`${id}-${idx}`} className="flex items-start gap-2">
-                <span className="mt-1 inline-block size-3 rounded border border-core-prim-300/40" />
-                <span>{text}</span>
-              </li>
-            ))}
+          <ul key={id} className="space-y-2 mb-3">
+            {rawItems.map((item, idx) => {
+              const text = typeof item === "string" ? item : item?.text;
+              const checked =
+                typeof item === "object" ? !!item?.checked : false;
+              return (
+                <li key={`${id}-${idx}`} className="flex items-start gap-3">
+                  <span
+                    className={`mt-1 inline-flex items-center justify-center w-4 h-4 rounded-full border ${
+                      checked
+                        ? "bg-core-prim-500/80 border-core-prim-500 text-white"
+                        : "border-core-prim-300/40 text-invert-low"
+                    }`}
+                  >
+                    {checked ? "✓" : ""}
+                  </span>
+                  <span
+                    className="text-[14px] leading-7"
+                    dangerouslySetInnerHTML={{ __html: text || "" }}
+                  />
+                </li>
+              );
+            })}
           </ul>
         );
       }
       case "warning": {
         return (
-          <div key={id} className="rounded-lg bg-warning-500/10 border border-warning-500/20 p-3 my-3">
-            {data?.title && <div className="font-medium mb-1">{data.title}</div>}
+          <div
+            key={id}
+            className="rounded-lg bg-warning-500/10 border border-warning-500/20 p-3 my-3"
+          >
+            {data?.title && (
+              <div className="font-medium mb-1">{data.title}</div>
+            )}
             <div className="text-[14px]">{data?.message}</div>
           </div>
         );
       }
       case "image": {
-        const url = data?.file?.url || data?.url;
+        const url =
+          typeof data?.file === "string"
+            ? data.file
+            : data?.file?.url || data?.url;
         const caption = data?.caption;
         if (!url) return null;
         return (
           <figure key={id} className="my-4">
-            <img src={url} alt={caption || "image"} className="w-full rounded-xl border border-core-prim-300/20" />
-            {caption && <figcaption className="text-[12px] text-invert-low mt-1">{caption}</figcaption>}
+            <img
+              src={url}
+              alt={caption || "image"}
+              className="w-full rounded-xl border border-core-prim-300/20"
+            />
+            {caption && (
+              <figcaption className="text-[12px] text-invert-low mt-1">
+                {caption}
+              </figcaption>
+            )}
           </figure>
         );
       }
@@ -144,7 +196,13 @@ export default function EditorJsRenderer({ data }) {
         const link = data?.link || data?.url;
         if (!link) return null;
         return (
-          <a key={id} href={link} target="_blank" rel="noreferrer" className="text-core-prim-400 underline">
+          <a
+            key={id}
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="text-core-prim-400 underline"
+          >
             {data?.meta?.title || link}
           </a>
         );
@@ -156,5 +214,3 @@ export default function EditorJsRenderer({ data }) {
 
   return <div>{data.blocks.map(renderBlock)}</div>;
 }
-
-
