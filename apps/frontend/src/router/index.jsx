@@ -14,6 +14,7 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const ContentEditorPage = lazy(() => import("../pages/ContentEditorPage"));
 const AnalyticsPage = lazy(() => import("../pages/AnalyticsPage"));
+const FeedManagerPage = lazy(() => import("../pages/FeedManagerPage"));
 
 // Router configuration with route definitions
 export const router = createBrowserRouter([
@@ -94,6 +95,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyPageWrapper>
             <AnalyticsPage />
+          </LazyPageWrapper>
+        ),
+      },
+      {
+        path: "feed-manager",
+        element: (
+          <LazyPageWrapper>
+            <FeedManagerPage />
           </LazyPageWrapper>
         ),
       },

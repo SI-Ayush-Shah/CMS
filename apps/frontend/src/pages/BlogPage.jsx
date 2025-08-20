@@ -20,11 +20,15 @@ const BlogPage = () => {
 
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState("custom"); // custom | ai | published
-  const status = useMemo(() => (activeTab === "published" ? "published" : "draft"), [activeTab]);
+  const status = useMemo(
+    () => (activeTab === "published" ? "published" : "draft"),
+    [activeTab]
+  );
   const pageSize = 8;
   const { data, isLoading, isFetching, isError } = useQuery({
     queryKey: ["blogPosts", { page, pageSize, status }],
-    queryFn: () => contentApi.fetchBlogPosts({ page, pageSize, status, sort: "desc" }),
+    queryFn: () =>
+      contentApi.fetchBlogPosts({ page, pageSize, status, sort: "desc" }),
     keepPreviousData: true,
   });
   const blogPosts = data?.items || [];
@@ -35,26 +39,35 @@ const BlogPage = () => {
     <>
       {/* Google Fonts */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link 
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" 
-        rel="stylesheet" 
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
       />
-      
-      <div 
-        className="min-h-screen"
-      >
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+
+      <div className="min-h-screen">
         {/* Page Title + Tabs */}
         <section className="px-6 pt-10 pb-6">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-white text-[28px] font-semibold mb-4">Content Hub</h1>
+            <h1 className="text-white text-[28px] font-semibold mb-4">
+              Content Hub
+            </h1>
             <Tabs active={activeTab} onChange={setActiveTab} />
           </div>
         </section>
 
         {/* Blog Posts Grid via MagicBento + BentoCard (Figma DOM inside) */}
         <section className="pb-16 px-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto min-h-full">
+            {(isLoading || isFetching) && blogPosts.length === 0 && (
+              <div className="w-full h-full flex items-center justify-center">
+                <Loader text="Loading posts..." />
+              </div>
+            )}
             <MagicBento
               textAutoHide
               enableStars={false}
@@ -67,13 +80,10 @@ const BlogPage = () => {
               glowColor="132, 0, 255"
             >
               <div className="card-responsive grid gap-6">
-                {(isLoading || isFetching) && blogPosts.length === 0 && (
-                  <div className="w-full h-[40vh]">
-                    <Loader text="Loading posts..." />
-                  </div>
-                )}
                 {isError && (
-                  <div className="text-error-400">Failed to load posts. Please try again.</div>
+                  <div className="text-error-400">
+                    Failed to load posts. Please try again.
+                  </div>
                 )}
                 {blogPosts.map((p) => (
                   <BentoCard
@@ -108,7 +118,8 @@ export default BlogPage;
 
 // Simple tabs UI to match provided design (left-aligned pills)
 const Tabs = ({ active = "custom", onChange }) => {
-  const base = "px-4 h-9 inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors";
+  const base =
+    "px-4 h-9 inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors";
   return (
     <div className="flex gap-3">
       <button
