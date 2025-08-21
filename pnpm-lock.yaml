@@ -47,6 +47,9 @@ importers:
       '@langchain/google-genai':
         specifier: ^0.2.16
         version: 0.2.16(@langchain/core@0.3.72(openai@5.13.1(ws@8.18.3)(zod@4.0.17)))
+      '@langchain/openai':
+        specifier: ^0.6.9
+        version: 0.6.9(@langchain/core@0.3.72(openai@5.13.1(ws@8.18.3)(zod@4.0.17)))(ws@8.18.3)
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.0.1
