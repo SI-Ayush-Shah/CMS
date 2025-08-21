@@ -27,12 +27,12 @@ export function createSocialMediaPostService(): SocialMediaPostService {
 
       const where = params.platform ? eq(socialMediaPosts.platform, params.platform) : undefined
 
-      const [{ total }] = await db
+      const [{ total }] = await db!
         .select({ total: count() })
         .from(socialMediaPosts)
         .where(where as any)
 
-      const items = await db
+      const items = await db!
         .select()
         .from(socialMediaPosts)
         .where(where as any)
