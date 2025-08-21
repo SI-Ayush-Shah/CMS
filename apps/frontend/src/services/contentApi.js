@@ -1,4 +1,5 @@
 import { apiClient } from "./axiosConfig";
+import { buildUrlWithParams, postMultipart, getWithParams } from "./httpUtils";
 
 /**
  * Blog listing (server-backed)
@@ -88,32 +89,43 @@ export const generateContent = async (text, imageIds = []) => {
  * @param {Array<{file: File}>} images - Images selected in the UI (each item must include a `file`)
  * @returns {Promise<Object>} Backend response with blog ID
  */
-export const generateContentViaForm = async (text, images = []) => {
+export const generateContentViaForm = async (
+  text,
+  images = [],
+  options = {}
+) => {
   const formData = new FormData();
   formData.append("content", text ?? "");
 
-  // Banner is single – use the first image if available
-  if (images && images.length > 0 && images[0]?.file) {
+  // Banner handling: prefer explicit bannerFile, then bannerIndex, else fallback to first image
+  let usedBannerIndex = null;
+  if (options?.bannerFile instanceof File) {
+    formData.append("banner", options.bannerFile);
+  } else if (
+    Number.isInteger(options?.bannerIndex) &&
+    options.bannerIndex >= 0 &&
+    images?.[options.bannerIndex]?.file
+  ) {
+    formData.append("banner", images[options.bannerIndex].file);
+    usedBannerIndex = options.bannerIndex;
+  } else if (images && images.length > 0 && images[0]?.file) {
     formData.append("banner", images[0].file);
+    usedBannerIndex = 0;
   }
 
   // Append remaining images (excluding banner) as multiple `image` fields
-  images.slice(1).forEach((img) => {
-    if (img?.file) {
-      formData.append("image", img.file);
-    }
+  images.forEach((img, index) => {
+    if (index === usedBannerIndex) return;
+    if (img?.file) formData.append("image", img.file);
   });
 
-  const response = await apiClient.post(
-    "/content-studio/api/generate-content",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      skipRetry: true,
-    }
-  );
+  // Build URL with optional platform query params
+  const url = buildUrlWithParams("/content-studio/api/generate-content", {
+    instagram: options?.instagram,
+    twitter: options?.twitter,
+  });
+
+  const response = await postMultipart(url, formData, { skipRetry: true });
 
   return response.data;
 };
@@ -247,6 +259,19 @@ export const updateBlogContent = async (blogId, updatedBody) => {
 };
 
 /**
+ * Patch content with arbitrary fields supported by backend PATCH schema
+ * @param {string} blogId
+ * @param {Object} payload - any of {title, summary, category, tags, bannerUrl, images, body, status}
+ */
+export const patchContent = async (blogId, payload) => {
+  const response = await apiClient.patch(
+    `/content-studio/api/content/${blogId}`,
+    payload
+  );
+  return response.data;
+};
+
+/**
  * Rollback blog content to previous version
  * @param {string} blogId - The blog ID to rollback
  * @param {Object} previousBody - The previous version content
@@ -280,6 +305,44 @@ export const rollbackBlogContent = async (blogId, previousBody) => {
   };
 };
 
+/**
+ * Fetch RSS feed items
+ * @param {Object} options - Options for fetching RSS feed items
+ * @param {number} options.page - Page number
+ * @param {number} options.pageSize - Number of items per page
+ * @returns {Promise<Object>} RSS feed items response
+ */
+export const fetchRssItems = async ({ page = 1, pageSize = 10 } = {}) => {
+  const { data } = await getWithParams(
+    "/content-studio/api/rss-items",
+    { page: String(page), pageSize: String(pageSize) },
+    { skipRetry: false }
+  );
+  // API returns { success: boolean, data: { items, total, page, pageSize } }
+  return data?.data || { items: [], total: 0, page, pageSize };
+};
+
+/**
+ * Summarize RSS feed item content
+ * @param {Object} content - The RSS feed item to summarize
+ * @param {string} bannerUrl - Optional banner URL for the content
+ * @returns {Promise<Object>} Summarized content response
+ */
+export const summarizeContent = async (content, bannerUrl) => {
+  const payload = {
+    content,
+    bannerUrl,
+  };
+
+  const { data } = await apiClient.post(
+    "/content-studio/api/summarize",
+    payload,
+    { skipRetry: false }
+  );
+
+  return data;
+};
+
 // Export all functions as a service object
 export const contentApi = {
   generateContent,
@@ -291,5 +354,8 @@ export const contentApi = {
   getBlogContent,
   refineContent,
   updateBlogContent,
+  patchContent,
   rollbackBlogContent,
+  fetchRssItems,
+  summarizeContent,
 };

@@ -3,6 +3,7 @@
 
 // Axios configuration
 export { apiClient } from "./axiosConfig";
+export { buildUrlWithParams, postMultipart, getWithParams } from "./httpUtils";
 
 // Content API services
 export {
@@ -23,3 +24,11 @@ export {
   getImage,
   getUploadProgress,
 } from "./imageUploadApi";
+
+// Social API services
+export {
+  socialApi,
+  listSocialPosts,
+  getSocialJobStatus,
+  publishSocialPost,
+} from "./socialApi";

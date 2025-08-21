@@ -985,7 +985,7 @@ export const BentoCard = ({
   return (
     <div
       ref={ref}
-      className={`card rounded-[15px] border border-solid p-2 ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
+      className={`card rounded-[15px] border border-solid px-3 pb-5 pt-3 ${enableBorderGlow ? "card--border-glow" : ""} ${className}`}
       style={{
         ...style,
         position: "relative",

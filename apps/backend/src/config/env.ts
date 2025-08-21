@@ -14,7 +14,7 @@ const schema = Type.Object({
   // Optional database URL - can be undefined if not using database features
   DATABASE_URL: Type.Optional(Type.String()),
   // Redis configuration (either REDIS_URL or discrete host/port/credentials)
-  REDIS_URL: Type.Optional(Type.String({ default: 'redis://localhost:6379' })),
+  REDIS_URL: Type.Optional(Type.String({ default: "redis://localhost:6379" })),
   REDIS_HOST: Type.Optional(Type.String()),
   REDIS_PORT: Type.Optional(Type.Number()),
   REDIS_USERNAME: Type.Optional(Type.String()),
@@ -22,6 +22,15 @@ const schema = Type.Object({
   CLOUDINARY_CLOUD_NAME: Type.Optional(Type.String()),
   CLOUDINARY_API_KEY: Type.Optional(Type.String()),
   CLOUDINARY_API_SECRET: Type.Optional(Type.String()),
+  // Twitter credentials for publishing
+  TWITTER_API_KEY: Type.Optional(Type.String()),
+  TWITTER_API_SECRET: Type.Optional(Type.String()),
+  TWITTER_ACCESS_TOKEN: Type.Optional(Type.String()),
+  TWITTER_ACCESS_TOKEN_SECRET: Type.Optional(Type.String()),
+  TWITTER_BEARER_TOKEN: Type.Optional(Type.String()),
+  // Instagram Graph API credentials for publishing
+  IG_BUSINESS_ACCOUNT_ID: Type.Optional(Type.String()),
+  IG_ACCESS_TOKEN: Type.Optional(Type.String()),
 });
 
 export const env = envSchema<Static<typeof schema>>({
