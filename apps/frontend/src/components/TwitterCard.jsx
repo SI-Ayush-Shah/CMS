@@ -10,6 +10,7 @@ const TwitterCard = ({
   date,
   content,
   image,
+  status,
   onPublished,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -85,9 +86,10 @@ const TwitterCard = ({
               size="sm"
               onClick={() => onPublished && onPublished(id)}
               className="!rounded-lg py-1"
+              disabled={status === "published"}
             >
               <HiOutlineSparkles className="text-lg" />
-              Publish
+              {status === "published" ? "Published" : "Publish"}
             </Button>
           </div>
         </div>

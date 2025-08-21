@@ -12,6 +12,7 @@ const InstagramCard = ({
   hashtags,
   likes,
   comments,
+  status,
   onPublished,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -96,9 +97,10 @@ const InstagramCard = ({
           size="sm"
           onClick={() => onPublished && onPublished(id)}
           className="!rounded-lg py-1"
+          disabled={status === "published"}
         >
           <HiOutlineSparkles className="text-lg" />
-          Publish
+          {status === "published" ? "Published" : "Publish"}
         </Button>
       </div>
     </div>

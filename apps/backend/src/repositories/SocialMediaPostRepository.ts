@@ -10,6 +10,7 @@ export interface SocialMediaPostRepository {
   create(data: NewSocialMediaPost): Promise<SocialMediaPost>;
   listByFeedItem(feedItemId: string): Promise<SocialMediaPost[]>;
   findById(id: string): Promise<SocialMediaPost | null>;
+  markPublished(id: string): Promise<void>;
 }
 
 interface Dependencies {
@@ -42,6 +43,13 @@ export function createSocialMediaPostRepository({
         .from(socialMediaPosts)
         .where(eq(socialMediaPosts.id, id));
       return row || null;
+    },
+    async markPublished(id: string): Promise<void> {
+      if (!id) return;
+      await db
+        .update(socialMediaPosts)
+        .set({ status: "published", updatedAt: new Date() as any })
+        .where(eq(socialMediaPosts.id, id));
     },
   };
 }

@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { Type } from "@sinclair/typebox";
 import "../../types/container";
+import { selectGeneratedContentSchema } from "../../db/schema/generatedContent";
 
 const contentRoutes: FastifyPluginAsync = async (fastify) => {
   const server = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -30,7 +31,7 @@ const contentRoutes: FastifyPluginAsync = async (fastify) => {
         200: Type.Object({
           success: Type.Boolean(),
           data: Type.Object({
-            items: Type.Array(Type.Any()),
+            items: Type.Array(selectGeneratedContentSchema),
             total: Type.Number(),
             page: Type.Number(),
             pageSize: Type.Number(),
@@ -58,7 +59,25 @@ const contentRoutes: FastifyPluginAsync = async (fastify) => {
         tags,
         sort,
       });
-      return reply.code(200).send({ success: true, data: result });
+      const mapped = {
+        page: result.page,
+        pageSize: result.pageSize,
+        total: result.total,
+        items: result.items.map((row: any) => ({
+          id: row.id,
+          title: row.title,
+          summary: row.summary,
+          category: row.category,
+          tags: row.tags || [],
+          body: row.body || {},
+          images: Array.isArray(row.images) ? row.images : [],
+          bannerUrl: row.bannerUrl ?? null,
+          status: row.status,
+          createdAt: new Date(row.createdAt).toISOString(),
+          updatedAt: new Date(row.updatedAt).toISOString(),
+        })),
+      };
+      return reply.code(200).send({ success: true, data: mapped });
     },
   });
 
@@ -69,7 +88,7 @@ const contentRoutes: FastifyPluginAsync = async (fastify) => {
     schema: {
       params: Type.Object({ id: Type.String({ format: "uuid" }) }),
       response: {
-        200: Type.Object({ success: Type.Boolean(), data: Type.Any() }),
+        200: Type.Object({ success: Type.Boolean(), data: selectGeneratedContentSchema }),
         404: Type.Object({ success: Type.Boolean(), error: Type.String() }),
       },
     },
@@ -79,7 +98,20 @@ const contentRoutes: FastifyPluginAsync = async (fastify) => {
       const row = await generatedContentRepository.findById(id);
       if (!row)
         return reply.code(404).send({ success: false, error: "Not found" });
-      return reply.code(200).send({ success: true, data: row });
+      const mapped = {
+        id: row.id,
+        title: row.title,
+        summary: row.summary,
+        category: row.category,
+        tags: (row as any).tags || [],
+        body: (row as any).body || {},
+        images: Array.isArray((row as any).images) ? (row as any).images : [],
+        bannerUrl: (row as any).bannerUrl ?? null,
+        status: row.status as any,
+        createdAt: new Date((row as any).createdAt).toISOString(),
+        updatedAt: new Date((row as any).updatedAt).toISOString(),
+      };
+      return reply.code(200).send({ success: true, data: mapped });
     },
   });
 

@@ -17,9 +17,7 @@ export interface ListResult {
 
 export interface SocialMediaPostService {
   list(params: ListParams): Promise<ListResult>;
-  publish(
-    id: string
-  ): Promise<{
+  publish(id: string): Promise<{
     success: true;
     platform: "twitter" | "instagram";
     platformPostId?: string;
@@ -64,6 +62,8 @@ export function createSocialMediaPostService(): SocialMediaPostService {
       const post = await repo.findById(id);
       if (!post) throw new Error("Social media post not found");
       const result = await publisher.publish(post);
+      // Mark as published on successful platform publish
+      await repo.markPublished(id);
       return {
         success: true,
         platform: result.platform,

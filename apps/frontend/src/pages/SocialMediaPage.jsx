@@ -224,6 +224,7 @@ const SocialMediaPage = () => {
                           }
                           likes={0}
                           comments={0}
+                          status={post.status}
                           onPublished={handlePublish}
                         />
                       </BentoCard>
@@ -261,9 +262,7 @@ const SocialMediaPage = () => {
                               ).toLocaleDateString()}
                               content={post.text}
                               image={post.imageUrl}
-                              likes={0}
-                              retweets={0}
-                              comments={0}
+                              status={post.status}
                               onPublished={handlePublish}
                             />
                           </BentoCard>
