@@ -258,8 +258,8 @@ const SocialMediaPage = () => {
                           >
                             <TwitterCard
                               id={post.id}
-                              username={"CMS Bot"}
-                              handle={"cmsbot"}
+                              username={"Rajasthan Royals"}
+                              handle={"rajasthanroyals"}
                               date={new Date(
                                 post.createdAt
                               ).toLocaleDateString()}
