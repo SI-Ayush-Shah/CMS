@@ -15,6 +15,13 @@
       "when": 1755702548256,
       "tag": "0001_stale_silver_surfer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755712922265,
+      "tag": "0002_melted_nehzno",
+      "breakpoints": true
     }
   ]
 }

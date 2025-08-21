@@ -1,0 +1,30 @@
+
+> backend@1.0.0 start /Users/sagarchavan/CMS/apps/backend
+> node --enable-source-maps --experimental-specifier-resolution=node dist/index.js
+
+⚠️ DATABASE_URL not provided - database features will be disabled
+✅ Redis connected
+Started worker from /Users/sagarchavan/CMS/apps/backend/dist/background-processes/social-media-generation/workers/index.js
+Started worker from /Users/sagarchavan/CMS/apps/backend/dist/background-processes/rss-scheduler/workers/index.js
+🚀 Server listening on http://0.0.0.0:3000
+Social media generation worker is ready
+RSS scheduler worker is ready
+[03:13:56 UTC] [34mDEBUG[39m: [36mStart async awilix init[39m
+[03:13:56 UTC] [34mDEBUG[39m: [36mFinished async awilix init in 0 msecs[39m
+[03:13:56 UTC] [32mINFO[39m: [36mServer listening at http://127.0.0.1:3000[39m
+[03:13:56 UTC] [32mINFO[39m: [36mServer listening at http://192.168.109.172:3000[39m
+[03:14:01 UTC] [32mINFO[39m: [36mincoming request[39m
+    [35mreqId[39m: "req-1"
+    [35mreq[39m: {
+      "method": "GET",
+      "url": "/content-studio/api/health",
+      "host": "localhost:3000",
+      "remoteAddress": "127.0.0.1",
+      "remotePort": 50525
+    }
+[03:14:01 UTC] [32mINFO[39m: [36mrequest completed[39m
+    [35mreqId[39m: "req-1"
+    [35mres[39m: {
+      "statusCode": 200
+    }
+    [35mresponseTime[39m: 1.6800830364227295

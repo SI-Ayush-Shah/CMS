@@ -26,4 +26,9 @@ export {
 } from "./imageUploadApi";
 
 // Social API services
-export { socialApi, listSocialPosts, getSocialJobStatus } from "./socialApi";
+export {
+  socialApi,
+  listSocialPosts,
+  getSocialJobStatus,
+  publishSocialPost,
+} from "./socialApi";

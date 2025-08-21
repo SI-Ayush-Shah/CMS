@@ -8,6 +8,7 @@ import "./types/container"; // Import type declarations
 import multipart from "@fastify/multipart";
 import cors from "@fastify/cors";
 import rssSchedulerWorkerPlugin from "./infra/bullmq/rssSchedulerWorkerPlugin";
+import selfPingPlugin from "./infra/selfPingPlugin";
 
 // Create Fastify instance with Pino logger
 const fastify: FastifyInstance = Fastify({
@@ -56,8 +57,9 @@ const start = async (): Promise<void> => {
     });
     // Start server
     const { env } = require("./config/env");
-    // Register BullMQ worker plugin before listening so lifecycle hooks are bound
+    // Register plugins before listening so lifecycle hooks are bound
     await fastify.register(rssSchedulerWorkerPlugin);
+    await fastify.register(selfPingPlugin);
     await fastify.listen({ port: env.PORT, host: "0.0.0.0" });
     console.log(`🚀 Server listening on http://0.0.0.0:${env.PORT}`);
   } catch (err) {

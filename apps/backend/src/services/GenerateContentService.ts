@@ -146,6 +146,8 @@ CRITICAL: The article **must strictly relate to sports** (games, players, events
         category: result.category,
         tags: result.tags,
         body: normalizedBody,
+        images: imagesList,
+        bannerUrl,
       };
       const saved = await generatedContentRepository.create(toInsert);
 

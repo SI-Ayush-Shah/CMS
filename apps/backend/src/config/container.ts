@@ -28,10 +28,11 @@ function autodiscoverAndRegister(container: any) {
   const srcPath = path.resolve(__dirname, '..')
 
   // Scan for all factory files (exclude db directory - manually registered)
+  // Support both dev (ts) and prod (compiled js) discovery
   const patterns = [
-    'repositories/**/*.ts',
-    'services/**/*.ts', 
-    'controllers/**/*.ts'
+    'repositories/**/*.{ts,js}',
+    'services/**/*.{ts,js}', 
+    'controllers/**/*.{ts,js}'
   ]
 
   for (const pattern of patterns) {
