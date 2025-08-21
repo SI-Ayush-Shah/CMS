@@ -10,15 +10,30 @@ import Loader from "../components/Loader";
 // Using MagicBento for cards
 
 const BlogPage = () => {
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
   // Function to handle summarize button click
-  const handleSummarize = (item) => {
-    // Navigate to content editor page with RSS item data in state
-    navigate("/editor/new", {
-      state: {
-        rssFeedItem: item,
-        mode: "summarize",
-      },
-    });
+  const handleSummarize = async (item) => {
+    try {
+      setIsSummarizing(true);
+      const response = await contentApi.summarizeContent(
+        item,
+        item?.imageUrl
+      );
+      const blogId = response?.data?.blogId;
+      if (blogId) {
+        const target = `${window.location.origin}/editor/${blogId}`;
+        window.location.href = target;
+        return;
+      }
+      console.error("Summarize did not return a blogId", response);
+      window.alert("Failed to create summarized post. Please try again.");
+    } catch (err) {
+      console.error("Error summarizing content", err);
+      window.alert(err?.message || "Failed to summarize content.");
+    } finally {
+      setIsSummarizing(false);
+    }
   };
   const formatDate = (input) => {
     if (!input) return "";
@@ -102,7 +117,7 @@ const BlogPage = () => {
         rel="stylesheet"
       />
 
-      <div className="min-h-screen">
+      <div className="min-h-screen relative">
         {/* Page Title + Tabs */}
         <section className="px-6 pt-10 pb-6">
           <div className="max-w-7xl mx-auto">
@@ -287,6 +302,12 @@ const BlogPage = () => {
             )}
           </div>
         </section>
+
+        {isSummarizing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-core-neu-1000/70 backdrop-blur-sm">
+            <Loader text="Summarizing content..." />
+          </div>
+        )}
       </div>
     </>
   );
