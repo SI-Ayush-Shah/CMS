@@ -118,7 +118,7 @@ export function Leftpanel() {
         {navigationItems.map((item) => (
           <NavLink
             key={item.id}
-            href={item.path}
+            to={item.path}
             onClick={() => setActiveItemId(item.id)}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
               activeItemId === item.id
