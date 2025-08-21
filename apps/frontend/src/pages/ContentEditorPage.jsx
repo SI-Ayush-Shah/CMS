@@ -8,7 +8,7 @@ import React, {
 import { SlCloudUpload } from "react-icons/sl";
 
 import { useParams, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { contentApi } from "../services/contentApi";
@@ -38,6 +38,7 @@ export default function ContentEditorPage() {
   const location = useLocation();
   const rssFeedItem = location.state?.rssFeedItem;
   const isSummarizeMode = location.state?.mode === "summarize";
+  const queryClient = useQueryClient();
 
   // State for summarization loading
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -299,7 +300,7 @@ export default function ContentEditorPage() {
         };
         const res = await contentApi.patchContent(id, payload);
         showMessage("Draft updated successfully.");
-        return res; 
+        return res;
       } else {
         // Fallback save for new/unsaved content
         const res = await contentApi.saveContent({
@@ -343,9 +344,12 @@ export default function ContentEditorPage() {
           tags: tags.length ? tags : undefined,
           bannerUrl: bannerUrl || undefined,
           body: editorBody || currentBody,
+          status: "published",
         };
         const res = await contentApi.patchContent(id, payload);
         showMessage("Content updated.");
+        // Ensure latest status and fields are reflected
+        await queryClient.invalidateQueries({ queryKey: ["article", id] });
         return res;
       } else {
         // Fallback publish for new/unsaved content
@@ -376,6 +380,7 @@ export default function ContentEditorPage() {
     currentTitle,
     currentBody,
     bannerUrl,
+    queryClient,
   ]);
 
   const handleRefinementApplied = useCallback(
@@ -465,23 +470,23 @@ export default function ContentEditorPage() {
                   </span>
                 )}
                 <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  isLoading={isSavingDraft}
-                  className="min-w-32"
-                >
-                  Save draft
-                </Button>
-                <Button
-                  variant="solid"
-                  onClick={handlePublish}
-                  isLoading={isPublishing}
-                  className="min-w-24"
-                >
-                  Publish
-                </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleSaveDraft}
+                    isLoading={isSavingDraft}
+                    className="min-w-32"
+                  >
+                    Save draft
+                  </Button>
+                  <Button
+                    variant="solid"
+                    onClick={handlePublish}
+                    isLoading={isPublishing}
+                    className="min-w-24"
+                  >
+                    Publish
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

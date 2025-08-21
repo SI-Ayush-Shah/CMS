@@ -97,6 +97,9 @@ export const PatchGeneratedContentSchema = Type.Object({
   bannerUrl: Type.Optional(Type.String({ format: "uri" })),
   images: Type.Optional(Type.Array(Type.String({ format: "uri" }))),
   body: Type.Optional(EditorJsSchema),
+  status: Type.Optional(
+    Type.Union([Type.Literal("draft"), Type.Literal("published")])
+  ),
 });
 
 export type GenerateContentRequestDto = Static<
