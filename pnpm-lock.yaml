@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      twitter-api-v2:
+        specifier: ^1.25.0
+        version: 1.25.0
     devDependencies:
       prettier:
         specifier: ^3.6.2
