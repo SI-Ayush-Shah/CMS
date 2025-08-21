@@ -166,6 +166,8 @@ export const router = createBrowserRouter([
       </LazyPageWrapper>
     ),
   },
-]);
+], {
+  basename: "/hackathon-2025-content-studio",
+});
 
 export default router;

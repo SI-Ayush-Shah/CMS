@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/hackathon-2025-content-studio/",
   plugins: [react(), tailwindcss()],
   server: {
     historyApiFallback: true,

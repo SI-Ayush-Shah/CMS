@@ -16,7 +16,7 @@ const SignInForm = () => {
   // Redirect to intended page or wizard page after successful login
   useEffect(() => {
     if (isAuthenticated) {
-      const intendedPath = location.state?.from || '/wizard';
+      const intendedPath = location.state?.from || '/hackathon-2025-content-studio/wizard';
       navigate(intendedPath, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);

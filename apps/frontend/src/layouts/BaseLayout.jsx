@@ -9,11 +9,11 @@ const BaseLayout = () => {
   const isLoading = navigation.state === "loading";
 
   // Hide left panel for login page
-  const shouldShowLeftPanel = location.pathname !== "/login";
+  const shouldShowLeftPanel = location.pathname !== "/hackathon-2025-content-studio/login";
 
   return (
-    <div className="min-h-screen  flex isolate relative">
-      <div className="fixed inset-0 z-0">
+    <div className="min-h-screen  flex isolate relative bg-black">
+      <div className="fixed inset-0 z-0 ">
         <Aurora
           colorStops={["#3c1264", "#280c43", "#140621"]}
           blend={1}

@@ -25,14 +25,14 @@ export function Leftpanel() {
         id: "creative-wizard",
         label: "Creative Wizard",
         icon: <PiMagicWand />,
-        path: "/wizard",
+        path: "/hackathon-2025-content-studio/wizard",
         matchPaths: ["/wizard", "/creative-wizard"],
       },
       {
         id: "content-hub",
         label: "Content Hub",
         icon: <GoStack />,
-        path: "/content-hub",
+        path: "/hackathon-2025-content-studio/content-hub",
         matchPaths: ["/content-hub", "/blog"],
       },
 
@@ -40,19 +40,19 @@ export function Leftpanel() {
         id: "social-media",
         label: "Social Media",
         icon: <IoShareSocialOutline />,
-        path: "/social-media",
+        path: "/hackathon-2025-content-studio/social-media",
       },
       {
         id: "feed-manager",
         label: "RSS Feed",
         icon: <ImFeed />,
-        path: "/feed-manager",
+        path: "/hackathon-2025-content-studio/feed-manager",
       },
       {
         id: "analytics",
         label: "Analytics",
         icon: <PiChartLineUp />,
-        path: "/analytics",
+        path: "/hackathon-2025-content-studio/analytics",
         matchPaths: ["/analytics", "/components"],
       },
     ],
@@ -64,8 +64,8 @@ export function Leftpanel() {
   };
 
   const handleLogout = () => {
+    window.location.href = "/hackathon-2025-content-studio/login";
     logout();
-    window.location.href = "/login";
   };
 
   // Highlight active item based on current route (supports aliases)
@@ -157,7 +157,7 @@ export function Leftpanel() {
           {/* Logout Button */}
           {isExpanded && (
             <a
-              href="/login"
+              href="/hackathon-2025-content-studio/login"
               onClick={(e) => {
                 e.preventDefault();
                 handleLogout();
