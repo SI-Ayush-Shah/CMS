@@ -300,7 +300,7 @@ export default function ContentEditorPage() {
         };
         const res = await contentApi.patchContent(id, payload);
         showMessage("Draft updated successfully.");
-        return res; 
+        return res;
       } else {
         // Fallback save for new/unsaved content
         const res = await contentApi.saveContent({
@@ -470,23 +470,23 @@ export default function ContentEditorPage() {
                   </span>
                 )}
                 <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  isLoading={isSavingDraft}
-                  className="min-w-32"
-                >
-                  Save draft
-                </Button>
-                <Button
-                  variant="solid"
-                  onClick={handlePublish}
-                  isLoading={isPublishing}
-                  className="min-w-24"
-                >
-                  Publish
-                </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleSaveDraft}
+                    isLoading={isSavingDraft}
+                    className="min-w-32"
+                  >
+                    Save draft
+                  </Button>
+                  <Button
+                    variant="solid"
+                    onClick={handlePublish}
+                    isLoading={isPublishing}
+                    className="min-w-24"
+                  >
+                    Publish
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
