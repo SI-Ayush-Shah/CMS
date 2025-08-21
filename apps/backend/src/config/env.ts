@@ -41,6 +41,9 @@ const schema = Type.Object({
   // Instagram Graph API credentials for publishing
   IG_BUSINESS_ACCOUNT_ID: Type.Optional(Type.String()),
   IG_ACCESS_TOKEN: Type.Optional(Type.String()),
+  // Self-ping configuration
+  SELF_PING_URL: Type.Optional(Type.String()),
+  SELF_PING_INTERVAL_MS: Type.Optional(Type.Number({ default: 30000 })),
 });
 
 export const env = envSchema<Static<typeof schema>>({
