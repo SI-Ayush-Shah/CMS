@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FaHeart, FaComment, FaShare } from "react-icons/fa";
-import { HiOutlineSparkles } from "react-icons/hi";
 import { Button } from "./Button";
 
 const InstagramCard = ({
@@ -93,14 +92,12 @@ const InstagramCard = ({
 
       <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4">
         <Button
-          variant="solid"
+          variant="outline"
           size="sm"
-          onClick={() => onPublished && onPublished(id)}
-          className="!rounded-lg py-1"
-          disabled={status === "published"}
+          className="!rounded-lg py-1 cursor-not-allowed"
+          disabled
         >
-          <HiOutlineSparkles className="text-lg" />
-          {status === "published" ? "Published" : "Publish"}
+          Publishing disabled
         </Button>
       </div>
     </div>
