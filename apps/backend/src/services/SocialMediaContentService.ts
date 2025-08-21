@@ -47,6 +47,7 @@ export function createSocialMediaContentService(): SocialMediaContentService {
       an eye-catching, social media friendly image. The prompt should be detailed, descriptive,
       and visually compelling. Focus on the main theme and emotional tone of the article.
       
+      give more context about the image like colors, style, view etc
       Return ONLY the prompt text, with no explanations or additional commentary.
     `;
 
@@ -190,6 +191,7 @@ export function createSocialMediaContentService(): SocialMediaContentService {
               .toLowerCase()}`,
             mimeType: "image/png",
           });
+          console.log("Uploaded image to Cloudinary:", imageUrl);
 
           // Generate caption and hashtags
           const { caption, hashtags } = await generateCaptionAndHashtags(
