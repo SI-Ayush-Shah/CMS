@@ -11,6 +11,13 @@ const schema = Type.Object({
   NODE_ENV: Type.Enum(NodeEnv, { default: NodeEnv.development }),
   PORT: Type.Number({ default: 3000 }),
   GOOGLE_API_KEY: Type.String({ default: "development_key" }),
+  // OpenAI API key for image/text generation when using OpenAI provider
+  OPENAI_API_KEY: Type.Optional(Type.String()),
+  // Provider selection and model names (defaults: Gemini for text, OpenAI for image)
+  TEXT_MODEL_PROVIDER: Type.Optional(Type.String({ default: "gemini" })),
+  TEXT_MODEL_NAME: Type.Optional(Type.String({ default: "gemini-1.5-flash" })),
+  IMAGE_MODEL_PROVIDER: Type.Optional(Type.String({ default: "openai" })),
+  IMAGE_MODEL_NAME: Type.Optional(Type.String({ default: "gpt-image-1" })),
   // Optional database URL - can be undefined if not using database features
   DATABASE_URL: Type.Optional(Type.String()),
   // Redis configuration (either REDIS_URL or discrete host/port/credentials)
