@@ -12,8 +12,14 @@ export const redisConnection = {
 }
 
 
+let cachedClient: AppRedisClient | null = null
+
 export async function createRedisClient(): Promise<AppRedisClient | null> {
   try {
+    // Return existing connected client (singleton)
+    if (cachedClient && (cachedClient as any).isOpen) {
+      return cachedClient
+    }
     const hasDiscreteConfig = !!env.REDIS_HOST || !!env.REDIS_PORT || !!env.REDIS_USERNAME || !!env.REDIS_PASSWORD
 
     const client = hasDiscreteConfig
@@ -35,8 +41,8 @@ export async function createRedisClient(): Promise<AppRedisClient | null> {
 
     await client.connect()
     console.log('✅ Redis connected')
-
-    return client
+    cachedClient = client
+    return cachedClient
   } catch (error) {
     console.error('❌ Failed to connect to Redis:', error)
     return null

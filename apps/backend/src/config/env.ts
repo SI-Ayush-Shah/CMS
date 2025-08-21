@@ -44,6 +44,8 @@ const schema = Type.Object({
   // Self-ping configuration
   SELF_PING_URL: Type.Optional(Type.String()),
   SELF_PING_INTERVAL_MS: Type.Optional(Type.Number({ default: 30000 })),
+  // Workers
+  ENABLE_WORKERS: Type.Optional(Type.Boolean({ default: true })),
 });
 
 export const env = envSchema<Static<typeof schema>>({
