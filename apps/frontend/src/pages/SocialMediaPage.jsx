@@ -8,7 +8,7 @@ import { FaTwitter } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
 
 import { MdRefresh } from "react-icons/md";
-  import { Button } from "../components/Button";
+import { Button } from "../components/Button";
 import { listSocialPosts, publishSocialPost } from "../services";
 
 // Custom CSS for masonry layout
@@ -167,7 +167,7 @@ const SocialMediaPage = () => {
             </h1>
             <div className="flex items-center gap-3">
               <Tabs active={activeTab} onChange={setActiveTab} />
-             
+
               <button
                 className="px-3 py-[6px] h-full inline-flex items-center justify-center rounded-md text-xs font-medium bg-border-main-default/30 text-invert-high"
                 onClick={handleRefresh}
@@ -229,7 +229,6 @@ const SocialMediaPage = () => {
                           likes={0}
                           comments={0}
                           status={post.status}
-                          onPublished={handlePublish}
                         />
                       </BentoCard>
                     ))}
