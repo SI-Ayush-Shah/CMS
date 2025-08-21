@@ -299,7 +299,7 @@ export default function ContentEditorPage() {
         };
         const res = await contentApi.patchContent(id, payload);
         showMessage("Draft updated successfully.");
-        return res;
+        return res; 
       } else {
         // Fallback save for new/unsaved content
         const res = await contentApi.saveContent({
@@ -452,7 +452,7 @@ export default function ContentEditorPage() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-3 mt-2 md:mt-0">
+              <div className="flex flex-col items-end gap-3 mt-2 md:mt-0">
                 {article?.status && (
                   <span
                     className={`text-md px-2 py-0.5 rounded-full border ${
@@ -464,6 +464,7 @@ export default function ContentEditorPage() {
                     {article.status}
                   </span>
                 )}
+                <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   onClick={handleSaveDraft}
@@ -480,6 +481,7 @@ export default function ContentEditorPage() {
                 >
                   Publish
                 </Button>
+                  </div>
               </div>
             </div>
           </div>
