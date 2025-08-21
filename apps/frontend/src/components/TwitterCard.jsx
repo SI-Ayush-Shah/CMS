@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaRetweet, FaRegComment, FaHeart, FaShare } from "react-icons/fa";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { Button } from "./Button";
+import rajasthanroyals from "../assets/rr.jpg";
 
 const TwitterCard = ({
   id,
@@ -28,8 +29,9 @@ const TwitterCard = ({
     <div className="bg-[#0E0A14] rounded-lg overflow-hidden w-full">
       {/* User info */}
       <div className="flex p-4">
-        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white overflow-hidden">
-          {username.charAt(0).toUpperCase()}
+        <div className="w-10 h-10 rounded-full  flex items-center justify-center text-white overflow-hidden">
+          {/* {username.charAt(0).toUpperCase()} */}
+          <img className="object-cover rounded-full" src={rajasthanroyals} alt={username} />
         </div>
         <div className="ml-3 flex-1">
           <div className="flex justify-between">
