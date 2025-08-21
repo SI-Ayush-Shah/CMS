@@ -22,7 +22,7 @@ const imagesRoutes: FastifyPluginAsync = async (fastify) => {
     method: "POST",
     url: "/upload",
     schema: {
-      consumes: ["multipart/form-data"],
+      // Fastify v5 does not support 'consumes' on schema. We rely on @fastify/multipart.
       response: {
         200: UploadImageResponseSchema,
         400: UploadImageResponseSchema,
@@ -54,7 +54,7 @@ const imagesRoutes: FastifyPluginAsync = async (fastify) => {
             for await (const chunk of part.file) chunks.push(chunk as Buffer);
             const buffer = Buffer.concat(chunks);
 
-            const { cloudinaryService } = fastify.diContainer.cradle;
+            const { cloudinaryService } = (fastify as any).diContainer.cradle;
             const url = await cloudinaryService.uploadBuffer({
               buffer,
               filename: part.filename,
