@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
@@ -116,7 +116,7 @@ export function Leftpanel() {
       {/* Navigation Menu */}
       <nav className="flex-1 p-3 space-y-1">
         {navigationItems.map((item) => (
-          <a
+          <NavLink
             key={item.id}
             href={item.path}
             onClick={() => setActiveItemId(item.id)}
@@ -134,7 +134,7 @@ export function Leftpanel() {
             {isExpanded && (
               <span className="truncate text-inherit">{item.label}</span>
             )}
-          </a>
+          </NavLink>
         ))}
       </nav>
 
