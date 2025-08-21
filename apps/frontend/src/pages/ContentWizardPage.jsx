@@ -613,7 +613,7 @@ export default function ContentWizardPage() {
                     validationOptions={{
                       text: {
                         required: true,
-                        maxLength: 2000,
+                        maxLength: 5000,
                       },
                       images: {
                         maxImages: 10,

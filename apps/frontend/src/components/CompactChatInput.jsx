@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useTextInput } from '../hooks/useTextInput';
-import { useImageUpload } from '../hooks/useImageUpload';
-import { useValidation } from '../hooks/useValidation';
-import { useAccessibility } from '../hooks/useAccessibility';
-import StarBorder from './StarBorder';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useTextInput } from "../hooks/useTextInput";
+import { useImageUpload } from "../hooks/useImageUpload";
+import { useValidation } from "../hooks/useValidation";
+import { useAccessibility } from "../hooks/useAccessibility";
+import StarBorder from "./StarBorder";
 
-const CompactChatInput = ({ 
+const CompactChatInput = ({
   placeholder = "Your blog crafting experience starts here...",
-  maxLength = 2000,
+  maxLength = 5000,
   maxImages = 10,
   validationOptions = {},
   onSubmit = () => {},
   className = "",
-  disabled = false
+  disabled = false,
 }) => {
   // Refs
   const textareaRef = useRef(null);
@@ -69,7 +69,7 @@ const CompactChatInput = ({
   // Auto-resize functionality
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
       const newHeight = Math.min(scrollHeight, 200); // Max height of 200px
       textareaRef.current.style.height = `${newHeight}px`;
@@ -187,89 +187,92 @@ const CompactChatInput = ({
   /**
    * Handles form submission
    */
-  const handleSubmit = useCallback(async (e) => {
-    if (e) e.preventDefault();
-    if (isSubmitting) return;
-    if (disabled) return;
+  const handleSubmit = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+      if (isSubmitting) return;
+      if (disabled) return;
 
-    // Guard to prevent duplicate calls from rapid keypress/click
-    setIsSubmitting(true);
+      // Guard to prevent duplicate calls from rapid keypress/click
+      setIsSubmitting(true);
 
-    try {
-      // Validate the form
-      const validation = await validateForm(
-        { text, images },
-        {
-          textOptions: {
-            required: true,
-            maxLength,
-            ...validationOptions.text,
-          },
-          imageOptions: {
-            maxImages,
-            ...validationOptions.images,
-          },
-        }
-      );
+      try {
+        // Validate the form
+        const validation = await validateForm(
+          { text, images },
+          {
+            textOptions: {
+              required: true,
+              maxLength,
+              ...validationOptions.text,
+            },
+            imageOptions: {
+              maxImages,
+              ...validationOptions.images,
+            },
+          }
+        );
 
-      if (!validation.isValid) {
-        // Validation errors are already handled by the validation hook
-        return;
-      }
-
-      // Call the onSubmit callback if provided
-      if (onSubmit) {
-        await onSubmit({
-          text: text.trim(),
-          images,
-          metadata: {
-            characterCount,
-            imageCount,
-            timestamp: new Date().toISOString(),
-          },
-        });
-
-        // Clear form on successful submission
-        clearText();
-        clearAllImages();
-        clearErrors("all");
-        clearWarnings("all");
-
-        // Reset textarea height
-        if (textareaRef.current) {
-          textareaRef.current.style.height = '44px';
+        if (!validation.isValid) {
+          // Validation errors are already handled by the validation hook
+          return;
         }
 
-        // Announce successful submission
-        announce("Content submitted successfully");
+        // Call the onSubmit callback if provided
+        if (onSubmit) {
+          await onSubmit({
+            text: text.trim(),
+            images,
+            metadata: {
+              characterCount,
+              imageCount,
+              timestamp: new Date().toISOString(),
+            },
+          });
+
+          // Clear form on successful submission
+          clearText();
+          clearAllImages();
+          clearErrors("all");
+          clearWarnings("all");
+
+          // Reset textarea height
+          if (textareaRef.current) {
+            textareaRef.current.style.height = "44px";
+          }
+
+          // Announce successful submission
+          announce("Content submitted successfully");
+        }
+      } catch (error) {
+        handleSubmissionError(error, "form submission");
+        // Announce submission error
+        announce(`Submission failed: ${error.message}`, "assertive");
+      } finally {
+        // Always release lock
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      handleSubmissionError(error, "form submission");
-      // Announce submission error
-      announce(`Submission failed: ${error.message}`, "assertive");
-    } finally {
-      // Always release lock
-      setIsSubmitting(false);
-    }
-  }, [
-    disabled,
-    isSubmitting,
-    validateForm,
-    text,
-    images,
-    maxLength,
-    maxImages,
-    validationOptions,
-    onSubmit,
-    characterCount,
-    imageCount,
-    clearText,
-    clearAllImages,
-    clearErrors,
-    clearWarnings,
-    handleSubmissionError,
-    announce,
-  ]);
+    },
+    [
+      disabled,
+      isSubmitting,
+      validateForm,
+      text,
+      images,
+      maxLength,
+      maxImages,
+      validationOptions,
+      onSubmit,
+      characterCount,
+      imageCount,
+      clearText,
+      clearAllImages,
+      clearErrors,
+      clearWarnings,
+      handleSubmissionError,
+      announce,
+    ]
+  );
 
   /**
    * Handles key press events using accessibility hook
@@ -313,7 +316,9 @@ const CompactChatInput = ({
       speed="6s"
       thickness={0}
     >
-      <div className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-3 h-full transition-all duration-200 ${className}`}>
+      <div
+        className={`rounded-2xl bg-button-filled-main-default border border-core-prim-300/20 p-3 h-full transition-all duration-200 ${className}`}
+      >
         {/* Hidden file input for image uploads */}
         <input
           ref={fileInputRef}
@@ -350,7 +355,7 @@ const CompactChatInput = ({
                 ))}
               </div>
             )}
-            
+
             <textarea
               ref={textareaRef}
               value={text}
@@ -360,10 +365,10 @@ const CompactChatInput = ({
               maxLength={maxLength}
               disabled={disabled || isSubmitting}
               className="w-full bg-transparent text-invert-low placeholder-invert-low resize-none outline-none text-[14px] leading-5"
-              style={{ 
-                height: '44px',
-                minHeight: '44px',
-                maxHeight: '200px'
+              style={{
+                height: "44px",
+                minHeight: "44px",
+                maxHeight: "200px",
               }}
               rows={1}
               aria-label="Content input"
@@ -382,8 +387,18 @@ const CompactChatInput = ({
                 className="flex items-center gap-2 text-invert-low hover:text-invert-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Upload images"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  />
                 </svg>
                 <span className="text-[12px]">Cover Image</span>
                 {imageCount > 0 && (
@@ -394,11 +409,15 @@ const CompactChatInput = ({
               </button>
 
               {/* Character count */}
-              <span className={`text-[11px] ${
-                isAtLimit ? 'text-error-500' : 
-                isAtWarning ? 'text-warning-500' : 
-                'text-invert-low'
-              }`}>
+              <span
+                className={`text-[11px] ${
+                  isAtLimit
+                    ? "text-error-500"
+                    : isAtWarning
+                      ? "text-warning-500"
+                      : "text-invert-low"
+                }`}
+              >
                 {characterCount}/{maxLength}
               </span>
             </div>
@@ -408,13 +427,13 @@ const CompactChatInput = ({
               type="submit"
               disabled={!canSubmit}
               className={`px-4 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 ${
-                canSubmit 
-                  ? 'bg-core-prim-500 text-white hover:bg-core-prim-400 cursor-pointer' 
-                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                canSubmit
+                  ? "bg-core-prim-500 text-white hover:bg-core-prim-400 cursor-pointer"
+                  : "bg-gray-700 text-gray-400 cursor-not-allowed"
               }`}
               aria-label="Submit content"
             >
-              {isSubmitting ? 'Sending...' : 'Send'}
+              {isSubmitting ? "Sending..." : "Send"}
             </button>
           </div>
         </form>
@@ -432,4 +451,4 @@ const CompactChatInput = ({
   );
 };
 
-export default CompactChatInput; 
+export default CompactChatInput;

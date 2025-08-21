@@ -95,7 +95,7 @@ export const useContentSubmission = (options = {}) => {
         });
       }
 
-      if (text && text.length > 2000) {
+      if (text && text.length > 5000) {
         errors.push({
           type: "max-length",
           field: "text",
