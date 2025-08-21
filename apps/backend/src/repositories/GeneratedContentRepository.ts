@@ -56,6 +56,9 @@ export function createGeneratedContentRepository({ db }: Dependencies): Generate
         whereClauses.push(sql`${generatedContents.tags} @> ${JSON.stringify(tags)}::jsonb`)
       }
 
+      // Always exclude records with falsy bannerUrl (NULL or empty string)
+      whereClauses.push(sql`${generatedContents.bannerUrl} IS NOT NULL AND ${generatedContents.bannerUrl} <> ''`)
+
       const whereExpr = whereClauses.length ? and(...whereClauses) : undefined
 
       const [{ total }] = await db
