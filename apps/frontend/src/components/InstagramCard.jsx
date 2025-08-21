@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaHeart, FaComment, FaShare } from "react-icons/fa";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { Button } from "./Button";
+import rajasthanroyals from "../assets/rr.jpg";
 
 const InstagramCard = ({
   id,
@@ -25,9 +26,9 @@ const InstagramCard = ({
     <div className="bg-[#0E0A14] rounded-lg overflow-hidden w-full">
       {/* User info */}
       <div className="flex items-center p-3">
-        <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white overflow-hidden">
-          {username.charAt(0).toUpperCase()}
-        </div>
+        <img className="w-8 h-8 object-cover rounded-full" src={rajasthanroyals} alt={title} />
+        {/* {username.charAt(0).toUpperCase()} */}
+        {/* <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center overflow-hidden"> */}
         <div className="ml-2">
           <p className="text-gray-200 font-medium text-sm">{username}</p>
           <p className="text-gray-400 text-xs">{date}</p>
@@ -72,11 +73,11 @@ const InstagramCard = ({
           <span className="text-gray-200 text-sm font-medium mr-2">
             {username}
           </span>
-          <span className="text-gray-300 text-sm">{title}</span>
+          <span className="text-gray-300 text-sm line-clamp-3">{title}</span>
         </div>
 
         {/* Hashtags */}
-        <div className="flex flex-wrap gap-1 mb-2">
+        <div className="flex flex-wrap gap-1 mb-2 line-clamp-3">
           {hashtags.map((tag, index) => (
             <span
               key={index}
@@ -86,9 +87,7 @@ const InstagramCard = ({
             </span>
           ))}
         </div>
-
-        {/* Comments count */}
-        <p className="text-gray-400 text-xs">Read more ...</p>
+        
       </div>
 
       <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4">

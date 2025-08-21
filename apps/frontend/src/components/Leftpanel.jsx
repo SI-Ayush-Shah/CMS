@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Button } from "./Button";
 import { BsReverseLayoutSidebarReverse } from "react-icons/bs";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
@@ -12,10 +12,10 @@ import useAuthStore from "../store/authStore";
 import { GoStack } from "react-icons/go";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { ImFeed } from "react-icons/im";
+import logo from "../assets/logo.png";
 export function Leftpanel() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeItemId, setActiveItemId] = useState("creative-wizard");
-  const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
 
@@ -62,14 +62,9 @@ export function Leftpanel() {
     setIsExpanded(!isExpanded);
   };
 
-  const handleNavItemClick = (itemId, path) => {
-    setActiveItemId(itemId);
-    if (path) navigate(path);
-  };
-
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    window.location.href = "/login";
   };
 
   // Highlight active item based on current route (supports aliases)
@@ -102,7 +97,7 @@ export function Leftpanel() {
                 : "cursor-default"
             }`}
           >
-            <img src="/logo.png" alt="logo" className="w-full h-full" />
+            <img src={logo} alt="logo" className="w-full h-full" />
           </button>
         </div>
 
@@ -120,9 +115,10 @@ export function Leftpanel() {
       {/* Navigation Menu */}
       <nav className="flex-1 p-3 space-y-1">
         {navigationItems.map((item) => (
-          <button
+          <a
             key={item.id}
-            onClick={() => handleNavItemClick(item.id, item.path)}
+            href={item.path}
+            onClick={() => setActiveItemId(item.id)}
             className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg text-[14px] font-normal group ${
               activeItemId === item.id
                 ? "bg-core-prim-500/20 text-invert-high border border-border-main-default/50"
@@ -135,9 +131,9 @@ export function Leftpanel() {
               {item.icon}
             </span>
             {isExpanded && (
-              <span className="truncate">{item.label}</span>
+              <span className="truncate text-inherit">{item.label}</span>
             )}
-          </button>
+          </a>
         ))}
       </nav>
 
@@ -159,12 +155,16 @@ export function Leftpanel() {
         <div>
           {/* Logout Button */}
           {isExpanded && (
-            <button
-              onClick={handleLogout}
+            <a
+              href="/login"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogout();
+              }}
               className="w-full  text-[14px] font-normal text-core-prim-300 hover:text-invert-high cursor-pointer"
             >
               <PiSignOutLight className="text-[20px]" />
-            </button>
+            </a>
           )}
         </div>
       </div>

@@ -216,7 +216,7 @@ const SocialMediaPage = () => {
                         <InstagramCard
                           id={post.id}
                           image={post.imageUrl}
-                          username={"CMS Bot"}
+                          username={"rajasthanroyals"}
                           date={new Date(post.createdAt).toLocaleDateString()}
                           title={post.text}
                           hashtags={

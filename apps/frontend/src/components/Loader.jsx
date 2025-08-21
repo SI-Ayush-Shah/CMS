@@ -454,7 +454,7 @@ export default function Loader({
 
       {text && (
         <div
-          className="mt-2 text-xl text-core-neu-00"
+          className="-mt-10 text-xl text-core-neu-00"
           aria-live="polite"
           role="status"
         >
