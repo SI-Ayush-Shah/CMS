@@ -29,6 +29,8 @@ import { IoImagesOutline } from "react-icons/io5";
  * @param {number} props.maxImages - Maximum number of images
  * @param {boolean} props.disabled - Whether the input is disabled
  * @param {Object} props.validationOptions - Options for validation
+ * @param {Function} props.onImagesChange - Callback when images change
+ * @param {boolean} props.showKeyboardShortcuts - Whether to show keyboard shortcuts help (default: true)
  */
 export const EnhancedAiChatInput = ({
   onSubmit,
@@ -38,6 +40,7 @@ export const EnhancedAiChatInput = ({
   disabled = false,
   validationOptions = {},
   onImagesChange,
+  showKeyboardShortcuts = true,
 }) => {
   // Refs
   const textareaRef = useRef(null);
@@ -623,14 +626,16 @@ export const EnhancedAiChatInput = ({
         </div>
 
         {/* Keyboard shortcuts help */}
-        <div
-          id="keyboard-shortcuts"
-          className="sr-only"
-          aria-label="Keyboard shortcuts"
-        >
-          Press Enter to submit content. Press Shift+Enter for a new line. Press
-          Alt+I to add photos.
-        </div>
+        {showKeyboardShortcuts && (
+          <div
+            id="keyboard-shortcuts"
+            className="sr-only"
+            aria-label="Keyboard shortcuts"
+          >
+            Press Enter to submit content. Press Shift+Enter for a new line. Press
+            Alt+I to add photos.
+          </div>
+        )}
 
         {/* Help text for buttons */}
         <div id="image-upload-help" className="sr-only">
@@ -648,7 +653,7 @@ export const EnhancedAiChatInput = ({
         </div>
 
         {/* Visual keyboard shortcut hint */}
-        {text.length > 0 && !isSubmitting && (
+        {showKeyboardShortcuts && text.length > 0 && !isSubmitting && (
           <div
             className="text-xs text-invert-low/60 text-center mt-2"
             aria-hidden="true"
