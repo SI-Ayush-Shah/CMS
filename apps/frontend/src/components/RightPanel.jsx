@@ -67,14 +67,13 @@ const RightPanel = ({ blogId, body, onRefinement }) => {
             placeholder="Refine this blog via AI..."
             maxLength={2000}
             maxImages={0}
+            showKeyboardShortcuts={false}
+            
             validationOptions={{
               text: { required: true, maxLength: 2000 },
               images: { required: false, maxImages: 0 },
             }}
             onSubmit={async ({ text }) => {
-              // Always store user's message
-              addUserMessage(text);
-
               try {
                 startRefinement(text);
                 const normalized = normalizeEditorJsBody(body);
