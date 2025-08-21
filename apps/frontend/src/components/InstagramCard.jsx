@@ -1,9 +1,19 @@
-import { useState } from 'react';
-import { FaHeart, FaComment, FaShare } from 'react-icons/fa';
-import { HiOutlineSparkles } from 'react-icons/hi';
-import {Button} from './Button';
+import { useState } from "react";
+import { FaHeart, FaComment, FaShare } from "react-icons/fa";
+import { HiOutlineSparkles } from "react-icons/hi";
+import { Button } from "./Button";
 
-const InstagramCard = ({ image, username, date, title, hashtags, likes, comments }) => {
+const InstagramCard = ({
+  id,
+  image,
+  username,
+  date,
+  title,
+  hashtags,
+  likes,
+  comments,
+  onPublished,
+}) => {
   const [isLiked, setIsLiked] = useState(false);
 
   const toggleLike = () => {
@@ -25,65 +35,72 @@ const InstagramCard = ({ image, username, date, title, hashtags, likes, comments
 
       {/* Image - 1:1 aspect ratio */}
       <div className="aspect-square w-full overflow-hidden">
-        <img 
-          src={image} 
-          alt={title} 
-          className="w-full h-full object-cover"
-        />
+        <img src={image} alt={title} className="w-full h-full object-cover" />
       </div>
 
       {/* Content */}
       <div className="p-3">
         {/* Action buttons */}
         <div className="flex items-center mb-2">
-          <button 
+          <button
             onClick={toggleLike}
-            className={`mr-4 transition-colors ${isLiked ? 'text-red-500' : 'text-gray-300 hover:text-red-500'}`}
+            className={`mr-4 transition-colors ${isLiked ? "text-red-500" : "text-gray-300 hover:text-red-500"}`}
             aria-label="Like"
           >
             <FaHeart />
           </button>
-          <button className="mr-4 text-gray-300 hover:text-gray-100" aria-label="Comment">
+          <button
+            className="mr-4 text-gray-300 hover:text-gray-100"
+            aria-label="Comment"
+          >
             <FaComment />
           </button>
-          <button className="text-gray-300 hover:text-gray-100" aria-label="Share">
+          <button
+            className="text-gray-300 hover:text-gray-100"
+            aria-label="Share"
+          >
             <FaShare />
           </button>
         </div>
 
         {/* Likes */}
         {/* <p className="text-gray-200 text-sm font-medium mb-1">{likes} likes</p> */}
-        
+
         {/* Caption */}
         <div className="mb-2">
-          <span className="text-gray-200 text-sm font-medium mr-2">{username}</span>
+          <span className="text-gray-200 text-sm font-medium mr-2">
+            {username}
+          </span>
           <span className="text-gray-300 text-sm">{title}</span>
         </div>
-        
+
         {/* Hashtags */}
         <div className="flex flex-wrap gap-1 mb-2">
           {hashtags.map((tag, index) => (
-            <span key={index} className="text-purple-400 text-xs hover:underline cursor-pointer">
+            <span
+              key={index}
+              className="text-purple-400 text-xs hover:underline cursor-pointer"
+            >
               #{tag}
             </span>
           ))}
         </div>
-        
+
         {/* Comments count */}
         <p className="text-gray-400 text-xs">Read more ...</p>
       </div>
 
       <div className="flex gap-2 items-center justify-start w-full max-w-max mt-4">
-          <Button 
-          variant="solid" 
-          size="sm" 
-          onClick={() => {}} 
+        <Button
+          variant="solid"
+          size="sm"
+          onClick={() => onPublished && onPublished(id)}
           className="!rounded-lg py-1"
         >
           <HiOutlineSparkles className="text-lg" />
           Publish
         </Button>
-        </div>
+      </div>
     </div>
   );
 };

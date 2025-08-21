@@ -6,7 +6,7 @@ import Loader from "../components/Loader";
 import Masonry from "react-masonry-css";
 import { FaTwitter } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
-import { listSocialPosts } from "../services";
+import { listSocialPosts, publishSocialPost } from "../services";
 
 // Custom CSS for masonry layout
 const masonryStyles = `
@@ -112,11 +112,31 @@ const SocialMediaPage = () => {
       fetchPosts("twitter", nextPage, twitterData.pageSize, true);
     }
   };
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (activeTab === "instagram")
       fetchPosts("instagram", 1, instagramData.pageSize, false);
     else fetchPosts("twitter", 1, twitterData.pageSize, false);
-  };
+  }, [activeTab, fetchPosts, instagramData.pageSize, twitterData.pageSize]);
+
+  const handlePublish = useCallback(
+    async (id) => {
+      try {
+        const res = await publishSocialPost(id);
+        if (res?.success) {
+          handleRefresh();
+        } else {
+          const msg = res?.error || "Failed to publish post";
+          alert(msg);
+        }
+      } catch (e) {
+        if (import.meta.env.VITE_NODE_ENV === "development") {
+          console.error("Failed to publish social post", e);
+        }
+        alert(e?.message || "Failed to publish post");
+      }
+    },
+    [handleRefresh]
+  );
 
   return (
     <>
@@ -194,6 +214,7 @@ const SocialMediaPage = () => {
                         className="w-full rounded-[15px]"
                       >
                         <InstagramCard
+                          id={post.id}
                           image={post.imageUrl}
                           username={"CMS Bot"}
                           date={new Date(post.createdAt).toLocaleDateString()}
@@ -203,6 +224,7 @@ const SocialMediaPage = () => {
                           }
                           likes={0}
                           comments={0}
+                          onPublished={handlePublish}
                         />
                       </BentoCard>
                     ))}
@@ -231,6 +253,7 @@ const SocialMediaPage = () => {
                             className="w-full rounded-[15px]"
                           >
                             <TwitterCard
+                              id={post.id}
                               username={"CMS Bot"}
                               handle={"cmsbot"}
                               date={new Date(
@@ -241,6 +264,7 @@ const SocialMediaPage = () => {
                               likes={0}
                               retweets={0}
                               comments={0}
+                              onPublished={handlePublish}
                             />
                           </BentoCard>
                         </div>
