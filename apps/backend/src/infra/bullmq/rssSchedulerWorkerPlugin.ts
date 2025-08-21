@@ -2,8 +2,14 @@ import fp from 'fastify-plugin'
 import type { FastifyInstance } from 'fastify'
 import path from 'path'
 import { globSync } from 'glob'
+import { env, isDevelopment } from '../../config/env'
 
 async function rssSchedulerWorkerPlugin(fastify: FastifyInstance): Promise<void> {
+  // Optionally disable workers to reduce Redis connections
+  if (!env.ENABLE_WORKERS) {
+    fastify.log.info('Workers disabled by ENABLE_WORKERS=false')
+    return
+  }
   const startedWorkers: Array<{ close: () => Promise<void> }> = []
 
   const workersGlob = path.join(__dirname, '../../background-processes/**/workers/index.{ts,js}')

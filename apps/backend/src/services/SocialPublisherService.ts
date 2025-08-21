@@ -79,17 +79,29 @@ export function createSocialPublisherService(): SocialPublisherService {
     }
   }
 
+  function sanitizeAccessToken(raw?: string): string | undefined {
+    if (!raw) return raw;
+    let token = raw.trim();
+    token = token.replace(/^Bearer\s+/i, "");
+    token = token.replace(/^access_token=/i, "");
+    token = token.replace(/^['"]|['"]$/g, "");
+    return token;
+  }
+
   async function publishToInstagram(
     post: SocialMediaPost
   ): Promise<PublishResult> {
     const igUserId = env.IG_BUSINESS_ACCOUNT_ID;
-    const igAccessToken = env.IG_ACCESS_TOKEN;
+    const igAccessToken = sanitizeAccessToken(env.IG_ACCESS_TOKEN);
     if (!igUserId || !igAccessToken) {
       console.warn("[Instagram] Missing credentials", {
         hasUserId: !!igUserId,
         hasAccessToken: !!igAccessToken,
       });
       throw makeStatusError("Instagram credentials are not configured", 401);
+    }
+    if (!/^\d+$/.test(String(igUserId))) {
+      throw makeStatusError("IG_BUSINESS_ACCOUNT_ID must be a numeric ID", 400);
     }
     if (!post.imageUrl) {
       throw makeStatusError("Instagram publishing requires an imageUrl", 400);
@@ -104,8 +116,11 @@ export function createSocialPublisherService(): SocialPublisherService {
 
     // 1) Create media container
     try {
+      console.log("-----------igAccessToken", igAccessToken);
+      console.log("post.imageUrl", post.imageUrl);
+      console.log("caption", caption);
       const creation = await axios.post(
-        `https://graph.facebook.com/v19.0/${encodeURIComponent(igUserId)}/media`,
+        `https://graph.facebook.com/v21.0/${encodeURIComponent(igUserId)}/media`,
         null,
         {
           params: {
@@ -131,12 +146,34 @@ export function createSocialPublisherService(): SocialPublisherService {
         }
       );
       const mediaId: string | undefined = publish?.data?.id;
-      return { platform: "instagram", platformPostId: mediaId };
+      let url: string | undefined = undefined;
+      if (mediaId) {
+        try {
+          console.log("mediaId", mediaId);
+          const permalinkRes = await axios.get(
+            `https://graph.facebook.com/v21.0/${encodeURIComponent(mediaId)}`,
+            {
+              params: {
+                fields: "permalink",
+                access_token: igAccessToken,
+              },
+            }
+          );
+          url = permalinkRes?.data?.permalink;
+        } catch (e) {
+          // Non-fatal: permalink fetch failed; proceed without URL
+          console.warn(
+            "[Instagram] Failed to fetch permalink for media",
+            mediaId
+          );
+        }
+      }
+      return { platform: "instagram", platformPostId: mediaId, url };
     } catch (err: any) {
       const status = err?.response?.status;
       const data = err?.response?.data;
       const message = data?.error?.message || data?.message || err?.message;
-      console.error("[Instagram] publish error", {
+      console.error("[Instagram] publish error (container or publish)", {
         status,
         data: data || null,
       });
