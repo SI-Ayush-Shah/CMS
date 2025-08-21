@@ -18,11 +18,11 @@ function DetailsPage() {
   const navigate = useNavigate();
 
   // Fetch blog content using the API
-  const { 
-    data: blogPost, 
-    isLoading, 
-    isError, 
-    error 
+  const {
+    data: blogPost,
+    isLoading,
+    isError,
+    error,
   } = useQuery({
     queryKey: ["blogContent", id],
     queryFn: () => contentApi.getBlogContent(id),
@@ -54,8 +54,10 @@ function DetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">Failed to load post</div>
-          <div className="text-gray-600 mb-4">{error?.message || "Something went wrong"}</div>
-          <button 
+          <div className="text-gray-600 mb-4">
+            {error?.message || "Something went wrong"}
+          </div>
+          <button
             onClick={() => navigate("/")}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -72,7 +74,7 @@ function DetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-gray-600 text-xl mb-4">Post not found</div>
-          <button 
+          <button
             onClick={() => navigate("/")}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -87,13 +89,17 @@ function DetailsPage() {
   const currentNews = blogPost;
 
   // Debug: Log the API response to see the data structure
-  console.log('📄 Blog post data from API:', blogPost);
-  
+  console.log("📄 Blog post data from API:", blogPost);
+
   // Debug: Log content structure if body exists
   if (blogPost?.body?.blocks) {
-    console.log('🔍 Content blocks found:', blogPost.body.blocks.length);
+    console.log("🔍 Content blocks found:", blogPost.body.blocks.length);
     blogPost.body.blocks.forEach((block, index) => {
-      console.log(`📝 Block ${index}:`, { type: block.type, id: block.id, data: block.data });
+      console.log(`📝 Block ${index}:`, {
+        type: block.type,
+        id: block.id,
+        data: block.data,
+      });
     });
   }
 
@@ -143,7 +149,11 @@ function DetailsPage() {
               {/* Hero Image */}
               <div className="relative h-64 md:h-80 overflow-hidden">
                 <img
-                  src={currentNews.coverImageUrl || currentNews.image || "https://imgs.search.brave.com/5qtRzpLD_tho5javBzbwjW8wHDrS_s1SrUDvfE2RwhA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJhY2Nlc3Mu/Y29tL2Z1bGwvOTE3/NjY5Mi5qcGc"}
+                  src={
+                    currentNews.bannerUrl ||
+                    currentNews.image ||
+                    "https://imgs.search.brave.com/5qtRzpLD_tho5javBzbwjW8wHDrS_s1SrUDvfE2RwhA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJhY2Nlc3Mu/Y29tL2Z1bGwvOTE3/NjY5Mi5qcGc"
+                  }
                   alt="Cricket News"
                   className="w-full h-full object-cover"
                 />
@@ -216,25 +226,31 @@ function DetailsPage() {
                     currentNews.body.blocks ? (
                       currentNews.body.blocks.map((block, index) => {
                         const { id, type, data } = block;
-                        
+
                         switch (type) {
-                          case 'paragraph':
+                          case "paragraph":
                             return (
-                              <p key={id || index} className="text-gray-700 leading-relaxed mb-4 text-left">
+                              <p
+                                key={id || index}
+                                className="text-gray-700 leading-relaxed mb-4 text-left"
+                              >
                                 {data?.text || ""}
                               </p>
                             );
-                          
-                          case 'header': {
-                            const level = Math.min(Math.max(data?.level || 2, 1), 6);
+
+                          case "header": {
+                            const level = Math.min(
+                              Math.max(data?.level || 2, 1),
+                              6
+                            );
                             const Tag = `h${level}`;
                             const headerClasses = {
                               1: "text-3xl font-bold",
-                              2: "text-2xl font-bold", 
+                              2: "text-2xl font-bold",
                               3: "text-xl font-bold",
                               4: "text-lg font-bold",
                               5: "text-base font-bold",
-                              6: "text-sm font-bold"
+                              6: "text-sm font-bold",
                             };
                             return (
                               <Tag
@@ -245,14 +261,22 @@ function DetailsPage() {
                               </Tag>
                             );
                           }
-                          
-                          case 'list': {
-                            const items = Array.isArray(data?.items) ? data.items : [];
+
+                          case "list": {
+                            const items = Array.isArray(data?.items)
+                              ? data.items
+                              : [];
                             if (data?.style === "ordered") {
                               return (
-                                <ol key={id || index} className="list-decimal pl-5 space-y-1.5 mb-4">
+                                <ol
+                                  key={id || index}
+                                  className="list-decimal pl-5 space-y-1.5 mb-4"
+                                >
                                   {items.map((item, idx) => (
-                                    <li key={`${id || index}-${idx}`} className="text-gray-700">
+                                    <li
+                                      key={`${id || index}-${idx}`}
+                                      className="text-gray-700"
+                                    >
                                       {item}
                                     </li>
                                   ))}
@@ -260,20 +284,27 @@ function DetailsPage() {
                               );
                             }
                             return (
-                              <ul key={id || index} className="list-disc pl-5 space-y-1.5 mb-4">
+                              <ul
+                                key={id || index}
+                                className="list-disc pl-5 space-y-1.5 mb-4"
+                              >
                                 {items.map((item, idx) => (
-                                  <li key={`${id || index}-${idx}`} className="text-gray-700">
+                                  <li
+                                    key={`${id || index}-${idx}`}
+                                    className="text-gray-700"
+                                  >
                                     {item}
                                   </li>
                                 ))}
                               </ul>
                             );
                           }
-                          
-                          case 'table': {
+
+                          case "table": {
                             const content = data?.content;
-                            if (!content || !Array.isArray(content)) return null;
-                            
+                            if (!content || !Array.isArray(content))
+                              return null;
+
                             // Handle different table content structures
                             let tableData = content;
                             if (Array.isArray(content[0])) {
@@ -281,15 +312,21 @@ function DetailsPage() {
                             } else {
                               tableData = [content];
                             }
-                            
+
                             return (
-                              <div key={id || index} className="overflow-x-auto my-4">
+                              <div
+                                key={id || index}
+                                className="overflow-x-auto my-4"
+                              >
                                 <table className="min-w-full border border-gray-300">
                                   <tbody>
                                     {tableData.map((row, rowIndex) => (
                                       <tr key={rowIndex}>
                                         {row.map((cell, cellIndex) => (
-                                          <td key={cellIndex} className="border border-gray-300 px-3 py-2 text-gray-700">
+                                          <td
+                                            key={cellIndex}
+                                            className="border border-gray-300 px-3 py-2 text-gray-700"
+                                          >
                                             {cell}
                                           </td>
                                         ))}
@@ -300,18 +337,20 @@ function DetailsPage() {
                               </div>
                             );
                           }
-                          
-                          case 'code':
+
+                          case "code":
                             return (
                               <pre
                                 key={id || index}
                                 className="bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm overflow-auto mb-4"
                               >
-                                <code className="text-gray-800">{data?.code || ""}</code>
+                                <code className="text-gray-800">
+                                  {data?.code || ""}
+                                </code>
                               </pre>
                             );
-                          
-                          case 'quote':
+
+                          case "quote":
                             return (
                               <figure
                                 key={id || index}
@@ -327,16 +366,27 @@ function DetailsPage() {
                                 )}
                               </figure>
                             );
-                          
-                          case 'checklist': {
-                            const rawItems = Array.isArray(data?.items) ? data.items : [];
+
+                          case "checklist": {
+                            const rawItems = Array.isArray(data?.items)
+                              ? data.items
+                              : [];
                             return (
                               <ul key={id || index} className="space-y-2 mb-4">
                                 {rawItems.map((item, idx) => {
-                                  const text = typeof item === "string" ? item : item?.text;
-                                  const checked = typeof item === "object" ? !!item?.checked : false;
+                                  const text =
+                                    typeof item === "string"
+                                      ? item
+                                      : item?.text;
+                                  const checked =
+                                    typeof item === "object"
+                                      ? !!item?.checked
+                                      : false;
                                   return (
-                                    <li key={`${id || index}-${idx}`} className="flex items-start gap-3">
+                                    <li
+                                      key={`${id || index}-${idx}`}
+                                      className="flex items-start gap-3"
+                                    >
                                       <span
                                         className={`mt-1 inline-flex items-center justify-center w-4 h-4 rounded-full border ${
                                           checked
@@ -355,24 +405,29 @@ function DetailsPage() {
                               </ul>
                             );
                           }
-                          
-                          case 'warning':
+
+                          case "warning":
                             return (
                               <div
                                 key={id || index}
                                 className="rounded-lg bg-yellow-100 border border-yellow-300 p-3 my-3"
                               >
                                 {data?.title && (
-                                  <div className="font-medium mb-1 text-yellow-800">{data.title}</div>
+                                  <div className="font-medium mb-1 text-yellow-800">
+                                    {data.title}
+                                  </div>
                                 )}
-                                <div className="text-sm text-yellow-700">{data?.message}</div>
+                                <div className="text-sm text-yellow-700">
+                                  {data?.message}
+                                </div>
                               </div>
                             );
-                          
-                          case 'image': {
-                            const url = typeof data?.file === "string" 
-                              ? data.file 
-                              : data?.file?.url || data?.url;
+
+                          case "image": {
+                            const url =
+                              typeof data?.file === "string"
+                                ? data.file
+                                : data?.file?.url || data?.url;
                             const caption = data?.caption;
                             if (!url) return null;
                             return (
@@ -390,8 +445,8 @@ function DetailsPage() {
                               </figure>
                             );
                           }
-                          
-                          case 'embed': {
+
+                          case "embed": {
                             const embed = data?.embed || data?.source;
                             if (!embed) return null;
                             return (
@@ -406,8 +461,8 @@ function DetailsPage() {
                               </div>
                             );
                           }
-                          
-                          case 'linkTool': {
+
+                          case "linkTool": {
                             const link = data?.link || data?.url;
                             if (!link) return null;
                             return (
@@ -422,16 +477,25 @@ function DetailsPage() {
                               </a>
                             );
                           }
-                          
-                          case 'delimiter':
-                            return <hr key={id || index} className="my-6 border-gray-300" />;
-                          
+
+                          case "delimiter":
+                            return (
+                              <hr
+                                key={id || index}
+                                className="my-6 border-gray-300"
+                              />
+                            );
+
                           default:
                             // Fallback for unknown block types
-                            console.log('Unknown block type:', type, data);
+                            console.log("Unknown block type:", type, data);
                             return (
-                              <div key={id || index} className="text-gray-500 text-sm mb-4 p-2 bg-gray-100 rounded">
-                                <strong>Unsupported content type:</strong> {type}
+                              <div
+                                key={id || index}
+                                className="text-gray-500 text-sm mb-4 p-2 bg-gray-100 rounded"
+                              >
+                                <strong>Unsupported content type:</strong>{" "}
+                                {type}
                                 <pre className="mt-2 text-xs overflow-auto">
                                   {JSON.stringify(data, null, 2)}
                                 </pre>
@@ -445,10 +509,11 @@ function DetailsPage() {
                         {currentNews.body}
                       </p>
                     )
-                  ) : (
-                    // Fallback to content field if body doesn't exist
-                    currentNews.content ? (
-                      currentNews.content.split("\n\n").map((paragraph, index) => (
+                  ) : // Fallback to content field if body doesn't exist
+                  currentNews.content ? (
+                    currentNews.content
+                      .split("\n\n")
+                      .map((paragraph, index) => (
                         <p
                           key={index}
                           className="text-gray-700 leading-relaxed mb-4 text-left"
@@ -469,11 +534,10 @@ function DetailsPage() {
                             : paragraph}
                         </p>
                       ))
-                    ) : (
-                      <p className="text-gray-700 leading-relaxed mb-4 text-left">
-                        Content not available
-                      </p>
-                    )
+                  ) : (
+                    <p className="text-gray-700 leading-relaxed mb-4 text-left">
+                      Content not available
+                    </p>
                   )}
                 </div>
 
@@ -489,7 +553,9 @@ function DetailsPage() {
             <h3 className="text-lg font-bold text-white mb-4">Related News</h3>
             <div className="text-center text-gray-400 py-8">
               <p>Related posts feature coming soon!</p>
-              <p className="text-sm mt-2">You can browse more posts from the main news page.</p>
+              <p className="text-sm mt-2">
+                You can browse more posts from the main news page.
+              </p>
             </div>
           </div>
         </div>
