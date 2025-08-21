@@ -70,7 +70,9 @@ export function createSummarizeContentService({
       const isObjectInput =
         input && typeof input === "object" && !Array.isArray(input);
 
-      const bannerUrl = payload?.bannerUrl as string | undefined;
+      // Prefer explicit bannerUrl on payload; fallback to feed item's image field when summarizing feeds
+      const bannerUrl = (payload?.bannerUrl as string | undefined)
+        ?? (isObjectInput ? (input?.image_url || input?.imageUrl) : undefined);
       const bannerDirective = bannerUrl
         ? `(Banner image URL provided separately: ${bannerUrl}; do not include as a body image block)`
         : "(No banner image URL provided)";
@@ -194,6 +196,7 @@ ${fieldMappingGuidance}
         category: result.category,
         tags: result.tags,
         body: normalizedBody,
+        ...(bannerUrl ? { bannerUrl } : {}),
       };
       const saved = await generatedContentRepository.create(toInsert);
 
