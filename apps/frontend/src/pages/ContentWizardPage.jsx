@@ -48,7 +48,13 @@ export default function ContentWizardPage() {
         } catch {
           // intentionally ignored – overlay is non-critical
         }
-        navigate(`/editor/${blogId}`, { replace: true });
+        // Pass social job ids to editor for polling (if any)
+        const twitterJobId = result?.jobs?.twitterJobId;
+        const instagramJobId = result?.jobs?.instagramJobId;
+        navigate(`/editor/${blogId}`, {
+          replace: true,
+          state: { socialJobs: { twitterJobId, instagramJobId } },
+        });
         return;
       } else {
         // Fallback to current behavior if no blog ID

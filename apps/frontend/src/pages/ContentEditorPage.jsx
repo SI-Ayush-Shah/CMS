@@ -20,6 +20,8 @@ import ProcessingView from "../components/ProcessingView";
 import { normalizeEditorJsBody } from "../utils";
 import { useAutoResize } from "../hooks/useAutoResize";
 import { imageUploadApi } from "../services/imageUploadApi";
+import { useProgress } from "../contexts/ProgressContext";
+import { getSocialJobStatus } from "../services/socialApi";
 
 /**
  * Content Editor Page
@@ -59,11 +61,7 @@ export default function ContentEditorPage() {
   // Read-only dummy content for the editor preview (LHS)
   const dummyTitle = "Virat Kohli: A Career Unforgettable—and Unfulfilled";
   const dummyBody = `Virat Kohli's retirement from Tests has left Indian cricket beleaguered and the sporting world gasping in surprise.\n\nComing on the heels of captain Rohit Sharma quitting a few days earlier, it adds up to a double whammy for India who embark on a tough tour of England for a five-Test series come June without their two most experienced batters.\n\nLike Sharma, Kohli took to Instagram, where he commands more than 270 million followers, to make his retirement public. "As I step away from this format, it's not easy – but it feels right..." he explained to his disconsolate fans.\n\nTributes for Kohli have come in a deluge since: from fellow cricketers, past and present, old and young, and also legends from other disciplines like tennis ace Novak Djokovic and football star Harry Kane, which highlights the sweep and heft of Kohli's global appeal.\n\nLeading India to victory in the Under-19 World Cup in 2008, Kohli was fast tracked into international cricket by the then-chairman of selectors, former India captain Dilip Vengsarkar, against the judgement of others in the cricket establishment.`;
-  const dummyImageUrl = useMemo(
-    () =>
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1600&auto=format&fit=crop",
-    []
-  );
+  // Fallback image URL not needed currently
 
   const showMessage = useCallback((text, type = "success") => {
     setMessage(text);
@@ -83,8 +81,7 @@ export default function ContentEditorPage() {
     bannerUrl ||
     article?.bannerUrl ||
     location.state?.generatedContent?.bannerUrl ||
-    rssFeedItem?.imageUrl ||
-    dummyImageUrl;
+    rssFeedItem?.imageUrl;
   const currentBody = article?.body;
   const [editorBody, setEditorBody] = useState(currentBody || null);
   const [editorMountKey, setEditorMountKey] = useState(0);
@@ -102,6 +99,10 @@ export default function ContentEditorPage() {
   const bannerInputRef = useRef(null);
   const [isBannerDragOver, setIsBannerDragOver] = useState(false);
   const [bannerDragCounter, setBannerDragCounter] = useState(0);
+  const socialJobsStartedRef = useRef(false);
+  const pollingTimersRef = useRef({});
+  const jobProgressRef = useRef({});
+  const { addTask, updateProgress, removeTask, setCustomTitle } = useProgress();
 
   const handleBannerFile = useCallback(
     async (file) => {
@@ -128,6 +129,80 @@ export default function ContentEditorPage() {
     },
     [id, showMessage]
   );
+
+  // Helper to start polling for social generation jobs and show ProgressToast
+  const startSocialJobsPolling = useCallback(
+    (jobs) => {
+      if (!jobs || socialJobsStartedRef.current) return;
+      const { twitterJobId, instagramJobId } = jobs || {};
+      if (!twitterJobId && !instagramJobId) return;
+      socialJobsStartedRef.current = true;
+      try {
+        setCustomTitle && setCustomTitle("Generating social media posts...");
+      } catch {
+        // no-op
+      }
+
+      const startJob = (jobId, label) => {
+        if (!jobId) return;
+        const taskId = addTask(label, () => {
+          // Cancel polling and remove task
+          const t = pollingTimersRef.current[jobId];
+          if (t) clearTimeout(t);
+          removeTask(taskId);
+        });
+        jobProgressRef.current[jobId] = 5;
+        updateProgress(taskId, 5);
+
+        const tick = async () => {
+          try {
+            const res = await getSocialJobStatus(jobId, 60000);
+            const state = res?.data?.state;
+            if (state === "completed") {
+              updateProgress(taskId, 100);
+              return; // stop polling; toast will auto-hide
+            }
+            if (state === "failed") {
+              // Mark as complete to clear UI, or keep at 99% to indicate near-done
+              updateProgress(taskId, 100);
+              return;
+            }
+            // No numeric progress from server; animate up to 95%
+            const current = jobProgressRef.current[jobId] ?? 5;
+            const next = Math.min(
+              95,
+              current + Math.max(1, Math.round(Math.random() * 8))
+            );
+            jobProgressRef.current[jobId] = next;
+            updateProgress(taskId, next);
+          } catch {
+            // Backoff a bit on error, keep progress steady
+          } finally {
+            pollingTimersRef.current[jobId] = setTimeout(tick, 2000);
+          }
+        };
+        tick();
+      };
+
+      startJob(twitterJobId, "Twitter post generation");
+      startJob(instagramJobId, "Instagram post generation");
+    },
+    [addTask, removeTask, setCustomTitle, updateProgress]
+  );
+
+  // Start polling if job IDs were passed via navigation state
+  useEffect(() => {
+    const sj = location.state?.socialJobs;
+    if (sj && (sj.twitterJobId || sj.instagramJobId)) {
+      startSocialJobsPolling(sj);
+    }
+    return () => {
+      Object.values(pollingTimersRef.current || {}).forEach((t) =>
+        clearTimeout(t)
+      );
+      pollingTimersRef.current = {};
+    };
+  }, [location.state, startSocialJobsPolling]);
   // SEO meta description guidance
   const SEO_META_MIN = 50;
   const SEO_META_MAX = 760;
@@ -175,6 +250,14 @@ export default function ContentEditorPage() {
           if (response && response.success && response.data) {
             showMessage("Content summarized successfully!", "success");
 
+            // If social generation jobs were enqueued, start polling to show top-right progress
+            if (
+              response.jobs &&
+              (response.jobs.twitterJobId || response.jobs.instagramJobId)
+            ) {
+              startSocialJobsPolling(response.jobs);
+            }
+
             // Extract generatedContent from the response
             const { generatedContent } = response.data;
 
@@ -211,7 +294,7 @@ export default function ContentEditorPage() {
     };
 
     processSummarization();
-  }, [rssFeedItem, isSummarizeMode, showMessage]);
+  }, [rssFeedItem, isSummarizeMode, showMessage, startSocialJobsPolling]);
 
   // Effect to handle article data changes
   useEffect(() => {

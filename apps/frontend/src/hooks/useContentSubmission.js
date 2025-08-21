@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { contentApi } from "../services/contentApi";
-import { imageUploadApi } from "../services/imageUploadApi";
+// import { imageUploadApi } from "../services/imageUploadApi";
 import { enhanceError, ErrorRecoveryManager } from "../utils/errorHandling";
 import { useLoadingState, LoadingType } from "./useLoadingState";
 import { useProcessingStore } from "../store/processingStore";
@@ -23,7 +23,6 @@ export const useContentSubmission = (options = {}) => {
   const {
     onSuccess = null,
     onError = null,
-    autoReset = true,
     uploadImagesFirst = false,
   } = options;
 
@@ -146,95 +145,7 @@ export const useContentSubmission = (options = {}) => {
     [uploadImagesFirst]
   );
 
-  /**
-   * Uploads images that haven't been uploaded yet
-   * @param {Array} images - Array of image objects
-   * @returns {Promise<Array>} Array of upload results
-   */
-  const uploadPendingImages = useCallback(async (images) => {
-    if (!images || images.length === 0) {
-      return [];
-    }
-
-    const pendingImages = images.filter(
-      (img) => img.uploadStatus === "pending" || img.uploadStatus === "error"
-    );
-
-    if (pendingImages.length === 0) {
-      // Return already uploaded images
-      return images
-        .filter((img) => img.uploadStatus === "completed")
-        .map((img) => ({
-          id: img.id,
-          url: img.uploadUrl || img.preview,
-          originalName: img.file.name,
-        }));
-    }
-
-    setIsUploading(true);
-    const results = [];
-
-    try {
-      // Upload images one by one with progress tracking
-      for (let i = 0; i < pendingImages.length; i++) {
-        const image = pendingImages[i];
-
-        if (!isMountedRef.current) {
-          throw new Error("Component unmounted during upload");
-        }
-
-        try {
-          const uploadResult = await imageUploadApi.uploadImage(
-            image.file,
-            (progress) => {
-              if (isMountedRef.current) {
-                setUploadProgress((prev) => ({
-                  ...prev,
-                  [image.id]: progress,
-                }));
-              }
-            }
-          );
-
-          results.push({
-            id: image.id,
-            url: uploadResult.url,
-            originalName: uploadResult.originalName,
-            uploadSuccess: true,
-          });
-
-          // Update progress to 100% for completed upload
-          if (isMountedRef.current) {
-            setUploadProgress((prev) => ({
-              ...prev,
-              [image.id]: 100,
-            }));
-          }
-        } catch (uploadError) {
-          results.push({
-            id: image.id,
-            error: uploadError.message,
-            uploadSuccess: false,
-            file: image.file,
-          });
-        }
-      }
-
-      // Add already uploaded images to results
-      const alreadyUploaded = images
-        .filter((img) => img.uploadStatus === "completed")
-        .map((img) => ({
-          id: img.id,
-          url: img.uploadUrl || img.preview,
-          originalName: img.file.name,
-          uploadSuccess: true,
-        }));
-
-      return [...alreadyUploaded, ...results];
-    } finally {
-      setIsUploading(false);
-    }
-  }, []);
+  // Image upload helper removed (handled by dedicated image upload APIs when needed)
 
   /**
    * Submits content for generation and processing with enhanced error handling
@@ -323,9 +234,7 @@ export const useContentSubmission = (options = {}) => {
           }
 
           // Explicitly mark main submission as failed and clear loading
-          try {
-            mainOperation.fail(enhancedError);
-          } catch {}
+          mainOperation.fail(enhancedError);
 
           return { success: false, error: enhancedError };
         }
@@ -369,6 +278,8 @@ export const useContentSubmission = (options = {}) => {
           uploadedImages: Array.isArray(images) ? images : [],
           savedContent: saveResult,
           timestamp: new Date().toISOString(),
+          // Surface social generation jobs (if backend provided them)
+          jobs: generationResult?.jobs || undefined,
         };
 
         setSubmissionResult(result);
@@ -400,14 +311,7 @@ export const useContentSubmission = (options = {}) => {
         return { success: false, error: enhancedError };
       }
     },
-    [
-      loadingState,
-      validateSubmissionData,
-      uploadPendingImages,
-      uploadImagesFirst,
-      onSuccess,
-      onError,
-    ]
+    [loadingState, validateSubmissionData, onSuccess, onError, processingStore]
   );
 
   /**

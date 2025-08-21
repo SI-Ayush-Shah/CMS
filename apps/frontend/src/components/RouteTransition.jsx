@@ -24,10 +24,8 @@ const RouteTransition = ({ children }) => {
   }, [transitionStage, location]);
 
   const transitionClasses = {
-    fadeIn:
-      "opacity-100 transform translate-y-0 transition-all duration-300 ease-out h-full",
-    fadeOut:
-      "opacity-0 transform translate-y-2 transition-all duration-300 ease-in h-full",
+    fadeIn: "opacity-100  transition-all duration-300 ease-out h-full",
+    fadeOut: "opacity-0  transition-all duration-300 ease-in h-full",
   };
 
   return <div className={transitionClasses[transitionStage]}>{children}</div>;

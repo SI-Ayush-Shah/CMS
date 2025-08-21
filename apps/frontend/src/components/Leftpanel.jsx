@@ -35,25 +35,26 @@ export function Leftpanel() {
         path: "/content-hub",
         matchPaths: ["/content-hub", "/blog"],
       },
-      {
-        id: "feed-manager",
-        label: "Feed Manager",
-        icon: <ImFeed />,
-        path: "/feed-manager",
-      },
+
       {
         id: "social-media",
         label: "Social Media",
         icon: <IoShareSocialOutline />,
         path: "/social-media",
       },
-      // {
-      //   id: "analytics",
-      //   label: "Analytics",
-      //   icon: <PiChartLineUp />,
-      //   path: "/analytics",
-      //   matchPaths: ["/analytics", "/components"],
-      // },
+      {
+        id: "feed-manager",
+        label: "RSS Feed",
+        icon: <ImFeed />,
+        path: "/feed-manager",
+      },
+      {
+        id: "analytics",
+        label: "Analytics",
+        icon: <PiChartLineUp />,
+        path: "/analytics",
+        matchPaths: ["/analytics", "/components"],
+      },
     ],
     []
   );
