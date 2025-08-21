@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Redirect to login page, but save the intended destination
-      navigate('/hackathon-2025-content-studio/login', { 
+      navigate('/login', { 
         replace: true,
         state: { from: location.pathname }
       });

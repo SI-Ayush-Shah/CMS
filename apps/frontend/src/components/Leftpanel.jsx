@@ -25,14 +25,14 @@ export function Leftpanel() {
         id: "creative-wizard",
         label: "Creative Wizard",
         icon: <PiMagicWand />,
-        path: "/hackathon-2025-content-studio/wizard",
+        path: "/wizard",
         matchPaths: ["/wizard", "/creative-wizard"],
       },
       {
         id: "content-hub",
         label: "Content Hub",
         icon: <GoStack />,
-        path: "/hackathon-2025-content-studio/content-hub",
+        path: "/content-hub",
         matchPaths: ["/content-hub", "/blog"],
       },
 
@@ -40,19 +40,19 @@ export function Leftpanel() {
         id: "social-media",
         label: "Social Media",
         icon: <IoShareSocialOutline />,
-        path: "/hackathon-2025-content-studio/social-media",
+        path: "/social-media",
       },
       {
         id: "feed-manager",
         label: "RSS Feed",
         icon: <ImFeed />,
-        path: "/hackathon-2025-content-studio/feed-manager",
+        path: "/feed-manager",
       },
       {
         id: "analytics",
         label: "Analytics",
         icon: <PiChartLineUp />,
-        path: "/hackathon-2025-content-studio/analytics",
+        path: "/analytics",
         matchPaths: ["/analytics", "/components"],
       },
     ],
@@ -157,7 +157,7 @@ export function Leftpanel() {
           {/* Logout Button */}
           {isExpanded && (
             <a
-              href="/hackathon-2025-content-studio/login"
+              href="/login"
               onClick={(e) => {
                 e.preventDefault();
                 handleLogout();
