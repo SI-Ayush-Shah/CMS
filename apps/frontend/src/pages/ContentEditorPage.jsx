@@ -321,6 +321,46 @@ export default function ContentEditorPage() {
     rssFeedItem,
   ]);
 
+  // Update document title and meta tags when title changes
+  useEffect(() => {
+    if (title && title.trim()) {
+      // Update document title
+      document.title = `${title} - Content Editor`;
+      
+      // Update meta description if summary exists
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.name = 'description';
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.content = summary || `Editing content: ${title}`;
+      
+      // Update Open Graph title
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.content = title;
+      
+      // Update Open Graph description
+      let ogDescription = document.querySelector('meta[property="og:description"]');
+      if (!ogDescription) {
+        ogDescription = document.createElement('meta');
+        ogDescription.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDescription);
+      }
+      ogDescription.content = summary || `Editing content: ${title}`;
+      
+      console.log("Updated document title and meta tags for:", title);
+    } else {
+      // Reset to default when no title
+      document.title = 'Content Editor - CMS';
+    }
+  }, [title, summary]);
+
   const initialEditorData = useMemo(() => {
     if (editorBody) return editorBody;
     if (currentBody) return currentBody;
