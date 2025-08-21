@@ -99,6 +99,7 @@ export default function ContentEditorPage() {
   const bannerInputRef = useRef(null);
   const [isBannerDragOver, setIsBannerDragOver] = useState(false);
   const [bannerDragCounter, setBannerDragCounter] = useState(0);
+  const [imageError, setImageError] = useState(false);
   const socialJobsStartedRef = useRef(false);
   const pollingTimersRef = useRef({});
   const jobProgressRef = useRef({});
@@ -129,6 +130,16 @@ export default function ContentEditorPage() {
     },
     [id, showMessage]
   );
+
+  // Reset image error whenever the banner source changes
+  useEffect(() => {
+    setImageError(false);
+  }, [
+    bannerUrl,
+    article?.bannerUrl,
+    location.state?.generatedContent?.bannerUrl,
+    rssFeedItem?.imageUrl,
+  ]);
 
   // Helper to start polling for social generation jobs and show ProgressToast
   const startSocialJobsPolling = useCallback(
@@ -608,11 +619,50 @@ export default function ContentEditorPage() {
                   if (file) handleBannerFile(file);
                 }}
               >
-                <img
-                  src={currentBanner}
-                  alt="Cover preview"
-                  className="w-full aspect-[16/10] object-cover"
-                />
+                {currentBanner && !imageError ? (
+                  <img
+                    src={currentBanner}
+                    alt="Cover preview"
+                    className="w-full aspect-[16/10] object-cover"
+                    loading="lazy"
+                    decoding="async"
+                    onLoad={() => setImageError(false)}
+                    onError={() => {
+                      setImageError(true);
+                      showMessage(
+                        "Banner image failed to load. You can upload a new one.",
+                        "info"
+                      );
+                    }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="w-full aspect-[16/10] flex flex-col items-center justify-center gap-2 bg-core-neu-1000/40 hover:bg-core-neu-1000/60 transition-colors"
+                    aria-label="Upload banner image"
+                  >
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-core-prim-500/15">
+                      <SlCloudUpload className="text-core-prim-500 text-xl" />
+                    </div>
+                    <div className="text-center px-4">
+                      <p className="text-invert-high text-sm font-medium">
+                        Drag & drop an image here
+                      </p>
+                      <p className="text-invert-low text-xs">
+                        or click to browse • Recommended 16:10
+                      </p>
+                    </div>
+                  </button>
+                )}
+
+                {isUploadingBanner && (
+                  <div className="absolute inset-0 bg-core-neu-1000/60 backdrop-blur-sm flex items-center justify-center z-10 pointer-events-none">
+                    <div className="text-[12px] px-3 py-1.5 bg-core-neu-1000/80 rounded-full border border-core-prim-300/30 text-invert-high animate-pulse">
+                      Uploading...
+                    </div>
+                  </div>
+                )}
                 <div className="absolute top-2 right-2 flex gap-2">
                   <input
                     ref={bannerInputRef}
