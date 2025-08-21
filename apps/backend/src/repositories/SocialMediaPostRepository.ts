@@ -20,15 +20,17 @@ interface Dependencies {
 export function createSocialMediaPostRepository({
   db,
 }: Dependencies): SocialMediaPostRepository {
-  if (!db) throw new Error("db is required for socialMediaPostRepository");
+  // Allow boot without DB; defer failure to method calls
 
   return {
     async create(data: NewSocialMediaPost): Promise<SocialMediaPost> {
+      if (!db) throw new Error("Database is not configured");
       const [row] = await db.insert(socialMediaPosts).values(data).returning();
       if (!row) throw new Error("Failed to create social media post");
       return row;
     },
     async listByFeedItem(feedItemId: string): Promise<SocialMediaPost[]> {
+      if (!db) throw new Error("Database is not configured");
       if (!feedItemId) return [];
       const rows = await db
         .select()
@@ -37,6 +39,7 @@ export function createSocialMediaPostRepository({
       return rows;
     },
     async findById(id: string): Promise<SocialMediaPost | null> {
+      if (!db) throw new Error("Database is not configured");
       if (!id) return null;
       const [row] = await db
         .select()
@@ -45,6 +48,7 @@ export function createSocialMediaPostRepository({
       return row || null;
     },
     async markPublished(id: string): Promise<void> {
+      if (!db) throw new Error("Database is not configured");
       if (!id) return;
       await db
         .update(socialMediaPosts)
