@@ -9,7 +9,7 @@ export default defineConfig({
     historyApiFallback: true,
     proxy: {
       "/content-studio/api": {
-        target: "http://localhost:3001",
+        target: process.env.VITE_DEV_PROXY_TARGET || "http://localhost:3001",
         changeOrigin: true,
         secure: false,
       },
