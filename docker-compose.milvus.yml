@@ -1,0 +1,20 @@
+version: '3.5'
+services:
+  milvus:
+    image: milvusdb/milvus:v2.4.10
+    container_name: milvus-standalone
+    environment:
+      - ETCD_USE_EMBED=true
+      - MINIO_USE_EMBED=true
+      - MYSQL_USE_EMBED=true
+    ports:
+      - "19530:19530"  # gRPC
+      - "9091:9091"    # HTTP
+    command: ["milvus", "run", "standalone"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "http://localhost:9091/healthz", "-O", "-"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+

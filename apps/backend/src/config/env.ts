@@ -46,6 +46,12 @@ const schema = Type.Object({
   SELF_PING_INTERVAL_MS: Type.Optional(Type.Number({ default: 30000 })),
   // Workers
   ENABLE_WORKERS: Type.Optional(Type.Boolean({ default: true })),
+  // Milvus
+  MILVUS_ADDRESS: Type.Optional(Type.String()),
+  MILVUS_USERNAME: Type.Optional(Type.String()),
+  MILVUS_PASSWORD: Type.Optional(Type.String()),
+  MILVUS_DB: Type.Optional(Type.String({ default: 'default' })),
+  MILVUS_TLS: Type.Optional(Type.Boolean({ default: false })),
 });
 
 export const env = envSchema<Static<typeof schema>>({

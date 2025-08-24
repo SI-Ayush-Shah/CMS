@@ -14,6 +14,7 @@
     "setup-db": "tsx src/scripts/setup-database.ts",
     "db:migrate-run": "tsx --env-file=.env src/db/migrate.ts",
     "db:ensure-social-status": "tsx --env-file=.env src/scripts/ensure-social-status.ts"
+    ,"milvus:init": "tsx --env-file=.env src/scripts/init-milvus.ts"
   },
   "keywords": [],
   "author": "",
@@ -30,7 +31,9 @@
     "@langchain/google-genai": "^0.2.16",
     "@langchain/openai": "^0.6.9",
     "@neondatabase/serverless": "^1.0.1",
+    "@pinecone-database/pinecone": "^6.1.2",
     "@sinclair/typebox": "^0.34.40",
+    "@zilliz/milvus2-sdk-node": "^2.6.0",
     "awilix": "^10.0.2",
     "axios": "^1.11.0",
     "bullmq": "^5.34.0",
